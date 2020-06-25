@@ -92,6 +92,16 @@ object App {
           }
         },
         get {
+          pathPrefix("summary") {
+            val lagFuture = (
+              statusChecker ? Summary
+            ).mapTo[Seq[GroupStatusSummary]]
+            onComplete(lagFuture) { lag =>
+              complete(lag.map(o => jsonPrinter.print(o.asJson)))
+            }
+          }
+        },
+        get {
           path("missing") {
             val missingFuture = (
               statusChecker ? GetMissing

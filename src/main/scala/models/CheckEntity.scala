@@ -18,27 +18,6 @@ object CheckFrequency {
     Configuration.default.copy(transformConstructorNames = _.toLowerCase)
 
   implicit val modeCodec: Codec[CheckFrequency] = deriveEnumerationCodec[CheckFrequency]
-  // implicit val encodeCheckFrequency: Encoder[CheckFrequency] = new Encoder[CheckFrequency] {
-  //   final def apply(cf: CheckFrequency): Json = Json.obj(
-  //     ("check-frequency", Json.fromString(cf.toString))
-  //   )
-  // }
-  //
-  // implicit val decodeCheckFrequency: Decoder[CheckFrequency] = new Decoder[CheckFrequency] {
-  //   final def apply(c: HCursor): Decoder.Result[CheckFrequency] =
-  //     for {
-  //       freqResult <- c.downField("check-frequency").as[String]
-  //       freq       <- freqResult
-  //       if Seq("Hourly", "Daily", "Monthly", "Yearly").contains(freqResult)
-  //     } yield {
-  //       freq match {
-  //         case "Hourly" => Hourly
-  //         case "Daily" => Daily
-  //         case "Monthly" => Monthly
-  //         case "Yearly" => Yearly
-  //       }
-  //     }
-  // }
 }
 
 case object Hourly extends CheckFrequency {
@@ -115,7 +94,7 @@ object CheckEntry {
 
 case class CheckGroup (
   groupId: Int,
-  groupName: String,
+  name: String,
   entries: Seq[CheckEntry],
 )
 object CheckGroup {
