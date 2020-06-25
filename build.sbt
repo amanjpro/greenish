@@ -13,5 +13,6 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-generic-extras" % circeVersion,
+  "com.typesafe" % "config" % "1.4.0",
 )
 

@@ -13,14 +13,52 @@ import scala.concurrent.duration._
 import scala.io.StdIn
 import java.time.ZonedDateTime
 import checker._
-import models.{CheckEntry, CheckGroup, AlertLevels}
+import models._
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
 import java.time.ZoneId
 import io.circe.syntax._
 import io.circe.Printer
+import com.typesafe.config.{Config, ConfigFactory}
+import scala.jdk.CollectionConverters._
 
 object App {
+  def readEntries(): Seq[CheckGroup] = {
+    val config = ConfigFactory.load().getObject("check-groups").toConfig
+    config.getConfigList("groups").asScala.zipWithIndex.map { case (groupConfig, index) =>
+      val name = groupConfig.getString("group-name")
+      val checkEntries = groupConfig.getConfigList("job-entries")
+        .asScala.zipWithIndex.map { case (jobConfig, index) =>
+          val name = jobConfig.getString("job-name")
+          val cmd = jobConfig.getString("check-command")
+          val timePattern = jobConfig.getString("period-pattern")
+          val timezone = ZoneId.of(jobConfig.getString("timezone"))
+          val lookbackHours = jobConfig.getInt("lookback-hours")
+          val greatAt = jobConfig.getInt("great-at")
+          val normalAt = jobConfig.getInt("normal-at")
+          val warnAt = jobConfig.getInt("warn-at")
+          val errorAt = jobConfig.getInt("error-at")
+
+          val frequency = jobConfig.getString("job-run-frequency") match {
+            case "hourly" => Hourly
+            case "daily" => Daily
+            case "monthly" => Monthly
+            case "yearly" => Yearly
+          }
+          CheckEntry(
+            index,
+            name,
+            cmd,
+            timePattern,
+            frequency,
+            timezone,
+            lookbackHours,
+            AlertLevels(greatAt, normalAt, warnAt, errorAt))
+        }.toSeq
+      CheckGroup(index, name, checkEntries)
+    }.toSeq
+  }
+
   def main(args: Array[String]): Unit = {
 
     implicit val system = ActorSystem("greenish-system")
@@ -30,37 +68,7 @@ object App {
     implicit val schedulerActor = system.actorOf(Props.empty)
     implicit val timeout = Timeout(Duration.fromNanos(5000000000L))
 
-    val checkEntities = List (
-      CheckGroup(1, "Trader Delivery",
-        Seq(
-          CheckEntry (
-            1,
-            "Delivery Raw",
-            "/usr/local/Homebrew/Library/Taps/dflemstr/homebrew-tools/check-delivery-raw",
-            "yyyy-MM-dd-HH",
-            models.Hourly,
-            ZoneId.of("UTC"),
-            24,
-            AlertLevels(0, 1, 2, 3),
-          ),
-        )
-      ),
-      CheckGroup(2, "Trader Gateway",
-        Seq(
-          CheckEntry (
-            1,
-            "Gateway Raw",
-            "/usr/local/Homebrew/Library/Taps/dflemstr/homebrew-tools/check-delivery-raw",
-            "yyyy-MM-dd-HH",
-            models.Hourly,
-            ZoneId.systemDefault,
-            3,
-            AlertLevels(0, 1, 2, 3),
-          )
-        )
-      )
-    )
-
+    val checkEntities = readEntries()
     val statusChecker = system.actorOf(
       Props(new StatusChecker(checkEntities, ZonedDateTime.now().minusHours(2))))
 

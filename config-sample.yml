@@ -1,0 +1,38 @@
+check-groups: {
+  groups: [
+    {
+      group-name: "Trader Delivery",
+      job-entries: [
+        {
+          job-name: "Delivery Raw"
+          check-command: "/home/amanj.sherwany/Documents/AdGear/programming/s3-metadata-service/scripts/lifecycle/check-delivery trader delivery raw",
+          period-pattern: "yyyy-MM-dd-HH"
+          job-run-frequency: "hourly"
+          timezone: "UTC"
+          lookback-hours: 24
+          great-at: 0
+          normal-at: 1
+          warn-at: 2
+          error-at: 3
+        }
+      ]
+    },
+    {
+      group-name: "Trader Gateway",
+      job-entries: [
+        {
+          job-name: "Gateway Raw"
+          check-command: "/home/amanj.sherwany/Documents/AdGear/programming/s3-metadata-service/scripts/lifecycle/check-delivery trader gateway raw",
+          period-pattern: "yyyy-MM-dd-HH"
+          job-run-frequency: "hourly"
+          timezone: "UTC"
+          lookback-hours: 3
+          great-at: 0
+          normal-at: 1
+          warn-at: 2
+          error-at: 3
+        }
+      ]
+    }
+  ]
+}
