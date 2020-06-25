@@ -4,9 +4,41 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
+import io.circe._
+import io.circe.generic.semiauto._
+import io.circe.generic.extras.Configuration
+import io.circe.generic.extras.semiauto.deriveEnumerationCodec
 
-trait CheckFrequency {
+
+sealed trait CheckFrequency {
   def jump(date: ZonedDateTime): ZonedDateTime
+}
+object CheckFrequency {
+  private implicit val config: Configuration =
+    Configuration.default.copy(transformConstructorNames = _.toLowerCase)
+
+  implicit val modeCodec: Codec[CheckFrequency] = deriveEnumerationCodec[CheckFrequency]
+  // implicit val encodeCheckFrequency: Encoder[CheckFrequency] = new Encoder[CheckFrequency] {
+  //   final def apply(cf: CheckFrequency): Json = Json.obj(
+  //     ("check-frequency", Json.fromString(cf.toString))
+  //   )
+  // }
+  //
+  // implicit val decodeCheckFrequency: Decoder[CheckFrequency] = new Decoder[CheckFrequency] {
+  //   final def apply(c: HCursor): Decoder.Result[CheckFrequency] =
+  //     for {
+  //       freqResult <- c.downField("check-frequency").as[String]
+  //       freq       <- freqResult
+  //       if Seq("Hourly", "Daily", "Monthly", "Yearly").contains(freqResult)
+  //     } yield {
+  //       freq match {
+  //         case "Hourly" => Hourly
+  //         case "Daily" => Daily
+  //         case "Monthly" => Monthly
+  //         case "Yearly" => Yearly
+  //       }
+  //     }
+  // }
 }
 
 case object Hourly extends CheckFrequency {
@@ -39,27 +71,56 @@ case object Yearly extends CheckFrequency {
       .plusYears(1L)
 }
 
-case class CheckGroup (
-  groupId: Int,
-  groupName: String,
-  )
-
 case class AlertLevels(
   great: Int,
   normal: Int,
   warn: Int,
   critical: Int,
   )
+object AlertLevels {
+  implicit val alertLevelsDecoder: Decoder[AlertLevels] = deriveDecoder
+  implicit val alertLevelsEncoder: Encoder[AlertLevels] = deriveEncoder
+}
 
 case class CheckEntry(
   jobId: Int,
-  group: CheckGroup,
   name: String,
   cmd: String,
-  timeFormat: DateTimeFormatter,
+  timePattern: String,
   frequency: CheckFrequency,
   timezone: ZoneId,
   lookbackHours: Int,
   alertLevels: AlertLevels,
+) {
+  val timeFormat = DateTimeFormatter.ofPattern(timePattern)
+}
+
+object CheckEntry {
+  implicit val zoneIdEncoder: Encoder[ZoneId] =
+    new Encoder[ZoneId] {
+      final def apply(zid: ZoneId): Json = Json.obj(
+        ("zone-id", Json.fromString(zid.getId))
+      )
+    }
+  implicit val zoneIdDecoer: Decoder[ZoneId] = new Decoder[ZoneId] {
+    final def apply(c: HCursor): Decoder.Result[ZoneId] =
+      for {
+        zoneId <- c.downField("zone-id").as[String]
+      } yield ZoneId.of(zoneId)
+  }
+
+  implicit val checkEntryDecoder: Decoder[CheckEntry] = deriveDecoder
+  implicit val checkEntryEncoder: Encoder[CheckEntry] = deriveEncoder
+}
+
+case class CheckGroup (
+  groupId: Int,
+  groupName: String,
+  entries: Seq[CheckEntry],
 )
+object CheckGroup {
+  implicit val checkGroupDecoder: Decoder[CheckGroup] = deriveDecoder
+  implicit val checkGroupEncoder: Encoder[CheckGroup] = deriveEncoder
+}
+
 

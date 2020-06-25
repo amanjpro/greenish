@@ -13,10 +13,12 @@ import scala.concurrent.duration._
 import scala.io.StdIn
 import java.time.ZonedDateTime
 import checker._
-import models.CheckEntry
+import models.{CheckEntry, CheckGroup, AlertLevels}
 import scala.concurrent.Future
 import scala.util.{Success, Failure}
 import java.time.ZoneId
+import io.circe.syntax._
+import io.circe.Printer
 
 object App {
   def main(args: Array[String]): Unit = {
@@ -29,27 +31,33 @@ object App {
     implicit val timeout = Timeout(Duration.fromNanos(5000000000L))
 
     val checkEntities = List (
-      CheckEntry (
-        1,
-        CheckGroup(1, "Trader Delivery"),
-        "Delivery Raw",
-        "/usr/local/Homebrew/Library/Taps/dflemstr/homebrew-tools/check-delivery-raw",
-        DateTimeFormatter.ofPattern("yyyy-MM-dd-HH"),
-        models.Hourly,
-        ZoneId.of("UTC"),
-        24,
-        AlertLevels(0, 1, 2, 3),
+      CheckGroup(1, "Trader Delivery",
+        Seq(
+          CheckEntry (
+            1,
+            "Delivery Raw",
+            "/usr/local/Homebrew/Library/Taps/dflemstr/homebrew-tools/check-delivery-raw",
+            "yyyy-MM-dd-HH",
+            models.Hourly,
+            ZoneId.of("UTC"),
+            24,
+            AlertLevels(0, 1, 2, 3),
+          ),
+        )
       ),
-      CheckEntry (
-        1,
-        CheckGroup(1, "Trader Gateway"),
-        "Gateway Raw",
-        "/usr/local/Homebrew/Library/Taps/dflemstr/homebrew-tools/check-delivery-raw",
-        DateTimeFormatter.ofPattern("yyyy-MM-dd-HH"),
-        models.Hourly,
-        ZoneId.systemDefault,
-        3,
-        AlertLevels(0, 1, 2, 3),
+      CheckGroup(2, "Trader Gateway",
+        Seq(
+          CheckEntry (
+            1,
+            "Gateway Raw",
+            "/usr/local/Homebrew/Library/Taps/dflemstr/homebrew-tools/check-delivery-raw",
+            "yyyy-MM-dd-HH",
+            models.Hourly,
+            ZoneId.systemDefault,
+            3,
+            AlertLevels(0, 1, 2, 3),
+          )
+        )
       )
     )
 
@@ -59,6 +67,10 @@ object App {
     system.scheduler.scheduleWithFixedDelay(30 seconds, 30 seconds,
       statusChecker, Refresh(() => ZonedDateTime.now()))
 
+    val jsonPrinter = Printer (
+      dropNullValues = true,
+      indent=""
+    )
     val route =
       concat(
         get {
@@ -67,7 +79,7 @@ object App {
               statusChecker ? MaxLag
             ).mapTo[Int]
             onComplete(lagFuture) { lag =>
-              complete(lag.toString)
+              complete(lag.map(o => jsonPrinter.print(o.asJson)))
             }
           }
         },
@@ -75,9 +87,9 @@ object App {
           path("missing") {
             val missingFuture = (
               statusChecker ? GetMissing
-            ).mapTo[Seq[EntryStatus]]
+            ).mapTo[Seq[GroupStatus]]
             onComplete(missingFuture) { missing =>
-              complete(missing.toString)
+              complete(missing.map(o => jsonPrinter.print(o.asJson)))
             }
           }
         },
@@ -85,44 +97,11 @@ object App {
           path("dashboard") {
             val allFuture = (
               statusChecker ? AllEntries
-            ).mapTo[Seq[EntryReport]]
-            onComplete(allFuture) {
-              case Success(allRuns) =>
-                val body =
-                  allRuns
-                    .map(_.entryRuns)
-                    .flatten
-                    .map( run =>
-                      s"""|
-                          |<tr bgcolor="${if(run.ok) "green" else "red"}">
-                          |  <td>${run.entry.name}</td>
-                          |  <td>${run.period}</td>
-                          |</tr>
-                          |""".stripMargin
-                  ).mkString("\n")
-                val dashboard =
-                  s"""|<!DOCTYPE html>
-                      |<html>
-                      |  <head>
-                      |     <title>Greenish Dashboard</title>
-                      |     <meta http-equiv="refresh" content="30">
-                      |  </head>
-                      |  <body>
-                      |     <table>
-                      |        <tr>
-                      |          <th>Job Name</th>
-                      |          <th>Period</th>
-                      |        </tr>
-                      |        $body
-                      |     </table>
-                      |  </body>
-                      |</html>
-                      |""".stripMargin
-                def httpEntity = HttpEntity(ContentTypes.`text/html(UTF-8)`, dashboard)
-                complete(HttpResponse(entity = httpEntity))
-
-              case Failure(error) =>
-                complete(error.toString)
+            ).mapTo[Seq[GroupStatus]]
+            onComplete(allFuture) { completed =>
+              complete(completed.map(o => jsonPrinter.print(o.asJson)))
+                // groups.map(g => jsonPrinter.print(g.asJson)).mkString("[", ",", "]")
+              // })
             }
           }
         }
