@@ -4,12 +4,15 @@ import me.amanj.greenish.models._
 import java.time.ZonedDateTime
 import akka.actor.{Actor, ActorLogging}
 import scala.sys.process.Process
+import scala.concurrent.Future
+import akka.pattern.pipe
 
 class StatusChecker(groups: Seq[Group],
     env: Seq[(String, String)] = Seq.empty,
     now: ZonedDateTime = ZonedDateTime.now()) extends Actor {
-  private[this] var state = Seq.empty[GroupStatus]
-  refresh(now)
+  private[this] var state = refresh(now)
+
+  import context.dispatcher
 
   def getMissing(): Seq[GroupStatus] = {
     state
@@ -44,9 +47,9 @@ class StatusChecker(groups: Seq[Group],
       GroupStatusSummary(group.group.name, status)
     }
 
-  private[this] def refresh(now: ZonedDateTime): Unit = {
+  private[this] def refresh(now: ZonedDateTime): Seq[GroupStatus] = {
 
-    state = groups.map { group =>
+    groups.map { group =>
       val jobStatusList = group.entries.map { entry =>
         var periods = Vector.empty[String]
         var nextStep = entry.frequency.jump(
@@ -70,7 +73,12 @@ class StatusChecker(groups: Seq[Group],
 
 
   override def receive: Receive = {
-    case Refresh(now) => refresh(now())
+    case Refresh(now) =>
+      val refreshFuture = Future {
+        UpdateState(refresh(now()))
+      }
+      refreshFuture.pipeTo(self)
+    case UpdateState(updated) => state = updated
     case GetMissing => context.sender ! getMissing()
     case MaxLag => context.sender ! maxLag()
     case AllEntries => context.sender ! allEntries()
