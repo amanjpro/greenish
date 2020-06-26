@@ -5,7 +5,6 @@ import akka.http.scaladsl.Http
 import scala.language.postfixOps
 import akka.stream.ActorMaterializer
 import scala.concurrent.duration._
-import scala.io.StdIn
 import java.time.ZonedDateTime
 import checker.{StatusChecker, Refresh}
 import endpoints.Routes
