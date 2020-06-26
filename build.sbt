@@ -1,3 +1,7 @@
+enablePlugins(JavaAppPackaging)
+enablePlugins(DockerPlugin)
+enablePlugins(AshScriptPlugin)
+
 organization := "me.amanj"
 name := "greenish"
 version := "0.0.1-SNAPSHOT"
@@ -16,3 +20,6 @@ libraryDependencies ++= Seq(
   "com.typesafe" % "config" % "1.4.0",
 )
 
+dockerBaseImage := "openjdk:jre-alpine"
+
+bashScriptExtraDefines += """addJava "-Dconfig.file=/app/config.yml""""

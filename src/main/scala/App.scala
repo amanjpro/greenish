@@ -31,7 +31,7 @@ object App {
       statusChecker, Refresh(() => ZonedDateTime.now()))
 
     val bindingFuture = Http().bindAndHandle(new Routes(statusChecker).routes,
-      "localhost", appConfig.port)
+      "0.0.0.0", appConfig.port)
 
     println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
     StdIn.readLine() // let it run until user presses return
