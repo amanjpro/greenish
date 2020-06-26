@@ -1,4 +1,6 @@
 check-groups: {
+  refresh-in-seconds: 30
+  port: 8080
   groups: [
     {
       group-name: "Trader Delivery",

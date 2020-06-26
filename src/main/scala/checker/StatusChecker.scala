@@ -1,85 +1,11 @@
 package me.amanj.greenish.checker
 
-import me.amanj.greenish.models.{CheckGroup, CheckEntry}
+import me.amanj.greenish.models._
 import java.time.ZonedDateTime
 import akka.actor.{Actor, ActorLogging}
-import io.circe._
-import io.circe.generic.semiauto._
-import io.circe.generic.extras.Configuration
-import io.circe.generic.extras.semiauto.deriveEnumerationCodec
 import scala.sys.process._
 
-
-
-
-case class PeriodHealth (
-  period: String,
-  ok: Boolean,
-)
-object PeriodHealth {
-  implicit val periodHealthDecoder: Decoder[PeriodHealth] = deriveDecoder
-  implicit val periodHealthEncoder: Encoder[PeriodHealth] = deriveEncoder
-}
-
-case class JobStatus (
-  entry: CheckEntry,
-  periodHealth: Seq[PeriodHealth],
-) {
-  def countMissing = periodHealth.count(!_.ok)
-}
-object JobStatus {
-  implicit val jobStatusDecoder: Decoder[JobStatus] = deriveDecoder
-  implicit val jobStatusEncoder: Encoder[JobStatus] = deriveEncoder
-}
-
-case class GroupStatus(
-  group: CheckGroup,
-  status: Seq[JobStatus],
-) {
-  def countMissing = status.map(_.countMissing).sum
-}
-object GroupStatus {
-  implicit val groupStatusDecoder: Decoder[GroupStatus] = deriveDecoder
-  implicit val groupStatusEncoder: Encoder[GroupStatus] = deriveEncoder
-}
-
-sealed trait AlertLevel
-object AlertLevel {
-  private implicit val config: Configuration =
-    Configuration.default.copy(transformConstructorNames = _.toLowerCase)
-
-  implicit val modeCodec: Codec[AlertLevel] = deriveEnumerationCodec[AlertLevel]
-}
-case object Critical extends AlertLevel
-case object Warn extends AlertLevel
-case object Normal extends AlertLevel
-case object Great extends AlertLevel
-
-case class JobStatusSummary(
-  name: String,
-  missing: Int,
-  alertLevel: AlertLevel,
-)
-object JobStatusSummary {
-  implicit val jobStatusSummaryDecoder: Decoder[JobStatusSummary] = deriveDecoder
-  implicit val jobStatusSummaryEncoder: Encoder[JobStatusSummary] = deriveEncoder
-}
-case class GroupStatusSummary(
-  name: String,
-  status: Seq[JobStatusSummary],
-)
-object GroupStatusSummary {
-  implicit val groupStatusSummaryDecoder: Decoder[GroupStatusSummary] = deriveDecoder
-  implicit val groupStatusSummaryEncoder: Encoder[GroupStatusSummary] = deriveEncoder
-}
-
-case class Refresh(now: () => ZonedDateTime)
-case object MaxLag
-case object AllEntries
-case object GetMissing
-case object Summary
-
-class StatusChecker(groups: Seq[CheckGroup],
+class StatusChecker(groups: Seq[Group],
     now: ZonedDateTime = ZonedDateTime.now()) extends Actor {
   private[this] var state = Seq.empty[GroupStatus]
   refresh(now)
