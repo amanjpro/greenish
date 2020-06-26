@@ -2,17 +2,35 @@ package me.amanj.greenish.checker
 
 import me.amanj.greenish.models._
 import java.time.ZonedDateTime
-import akka.actor.{Actor, ActorLogging}
+import akka.util.Timeout
+import scala.concurrent.duration._
+import akka.actor.{Actor, Props, ActorLogging}
 import scala.sys.process.Process
-import scala.concurrent.Future
-import akka.pattern.pipe
+import scala.concurrent.{Future, Await}
+import akka.routing.{ActorRefRoutee, RoundRobinRoutingLogic, Router}
+import akka.pattern.{pipe, ask}
+import scala.language.postfixOps
 
 class StatusChecker(groups: Seq[Group],
     env: Seq[(String, String)] = Seq.empty,
-    now: ZonedDateTime = ZonedDateTime.now()) extends Actor {
-  private[this] var state = refresh(now)
+    now: ZonedDateTime = ZonedDateTime.now()) extends Actor with ActorLogging {
+  private[this] var state = Seq.empty[GroupStatus]
+  private[this] implicit val timeout = Timeout(2 minutes)
 
   import context.dispatcher
+
+  private[this] val parallelism: Int = groups.map(_.entries.map(_.lookbackHours).sum).sum
+
+  private[this] val router = {
+    val routees = (0 until parallelism) map { _ =>
+      val runner = context.actorOf(
+        Props(new CommandRunner()).withDispatcher("akka.refresh-dispatcher"))
+      context watch runner
+      ActorRefRoutee(runner)
+    }
+
+    Router(RoundRobinRoutingLogic(), routees)
+  }
 
   def getMissing(): Seq[GroupStatus] = {
     state
@@ -49,8 +67,8 @@ class StatusChecker(groups: Seq[Group],
 
   private[this] def refresh(now: ZonedDateTime): Seq[GroupStatus] = {
 
-    groups.map { group =>
-      val jobStatusList = group.entries.map { entry =>
+    val futureUpdate = groups.map { group =>
+      val jobStatusListFutures = group.entries.map { entry =>
         var periods = Vector.empty[String]
         var nextStep = entry.frequency.jump(
           now.withZoneSameInstant(entry.timezone)
@@ -61,14 +79,27 @@ class StatusChecker(groups: Seq[Group],
           nextStep = entry.frequency.jump(nextStep)
         }
 
-        val periodHealthList = periods.map { period =>
-          val process = Process(s"${entry.cmd} $period", None, env:_*)
-          PeriodHealth(period, process.! == 0)
+        val periodHealthFutures = periods.map { period =>
+          val cmd = s"${entry.cmd} $period"
+          (period, self ? Run(cmd, env))
+        }
+        (entry, periodHealthFutures)
+      }
+      (group, jobStatusListFutures)
+    }
+
+    log.info("Refreshing the state")
+    val r = futureUpdate.map { case (group, jobStatusListFutures) =>
+      val jobStatusList = jobStatusListFutures.map { case (entry, periodHealthFutures) =>
+        val periodHealthList = periodHealthFutures.map { case (period, futureHealth) =>
+          PeriodHealth(period, Await.result(futureHealth.mapTo[Boolean], 2 minutes))
         }
         JobStatus(entry, periodHealthList)
       }
       GroupStatus(group, jobStatusList)
     }
+    log.info("Refreshing done")
+    r
   }
 
 
@@ -83,6 +114,8 @@ class StatusChecker(groups: Seq[Group],
     case MaxLag => context.sender ! maxLag()
     case AllEntries => context.sender ! allEntries()
     case Summary => context.sender ! summary()
+    case run: Run =>
+      router.route(run, context.sender)
   }
 }
 

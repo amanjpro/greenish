@@ -10,4 +10,4 @@ case object AllEntries extends Message
 case object GetMissing extends Message
 case object Summary extends Message
 case class UpdateState(updated: Seq[GroupStatus]) extends Message
-
+case class Run(cmd: String, env: Seq[(String, String)]) extends Message

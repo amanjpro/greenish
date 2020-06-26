@@ -42,3 +42,14 @@ check-groups: {
     }
   ]
 }
+akka {
+  refresh-dispatcher {
+    type = Dispatcher
+    executor = "thread-pool-executor"
+    thread-pool-executor {
+      fixed-pool-size = 100
+    }
+    throughput = 10
+    mailbox-capacity = -1
+  }
+}

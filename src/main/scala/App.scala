@@ -25,7 +25,7 @@ object App {
         ZonedDateTime.now().minusHours(2))))
 
     system.scheduler.scheduleWithFixedDelay(
-      appConfig.refreshInSeconds seconds,
+      0 seconds,
       appConfig.refreshInSeconds seconds,
       statusChecker, Refresh(() => ZonedDateTime.now()))
 
