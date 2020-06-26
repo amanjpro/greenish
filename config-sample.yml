@@ -1,13 +1,17 @@
 check-groups: {
   refresh-in-seconds: 30
   port: 8080
+  env: {
+    VAR1: "foo"
+    VAR2: "bar"
+  }
   groups: [
     {
       group-name: "Trader Delivery",
       job-entries: [
         {
           job-name: "Delivery Raw"
-          check-command: "/home/amanj.sherwany/Documents/AdGear/programming/s3-metadata-service/scripts/lifecycle/check-delivery trader delivery raw",
+          check-command: "ls /tmp/delivery",
           period-pattern: "yyyy-MM-dd-HH"
           job-run-frequency: "hourly"
           timezone: "UTC"
@@ -24,7 +28,7 @@ check-groups: {
       job-entries: [
         {
           job-name: "Gateway Raw"
-          check-command: "/home/amanj.sherwany/Documents/AdGear/programming/s3-metadata-service/scripts/lifecycle/check-delivery trader gateway raw",
+          check-command: "ls /tmp/delivery",
           period-pattern: "yyyy-MM-dd-HH"
           job-run-frequency: "hourly"
           timezone: "UTC"

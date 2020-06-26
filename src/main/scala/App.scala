@@ -22,7 +22,8 @@ object App {
 
     val appConfig = AppConfig()
     val statusChecker = system.actorOf(
-      Props(new StatusChecker(appConfig.groups, ZonedDateTime.now().minusHours(2))))
+      Props(new StatusChecker(appConfig.groups, appConfig.env,
+        ZonedDateTime.now().minusHours(2))))
 
     system.scheduler.scheduleWithFixedDelay(
       appConfig.refreshInSeconds seconds,

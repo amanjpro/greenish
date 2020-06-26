@@ -3,9 +3,10 @@ package me.amanj.greenish.checker
 import me.amanj.greenish.models._
 import java.time.ZonedDateTime
 import akka.actor.{Actor, ActorLogging}
-import scala.sys.process._
+import scala.sys.process.Process
 
 class StatusChecker(groups: Seq[Group],
+    env: Seq[(String, String)] = Seq.empty,
     now: ZonedDateTime = ZonedDateTime.now()) extends Actor {
   private[this] var state = Seq.empty[GroupStatus]
   refresh(now)
@@ -58,7 +59,8 @@ class StatusChecker(groups: Seq[Group],
         }
 
         val periodHealthList = periods.map { period =>
-          PeriodHealth(period, s"${entry.cmd} $period".! == 0)
+          val process = Process(s"${entry.cmd} $period", None, env:_*)
+          PeriodHealth(period, process.! == 0)
         }
         JobStatus(entry, periodHealthList)
       }
