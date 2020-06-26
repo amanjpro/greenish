@@ -3,6 +3,7 @@ package me.amanj.greenish.endpoints
 import akka.actor.ActorRef
 import akka.util.Timeout
 import akka.pattern.ask
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import scala.concurrent.duration.Duration
 import io.circe.syntax._
@@ -50,8 +51,8 @@ class Routes(statusChecker: ActorRef) {
     }
   }
 
-  private[this] val dashboard = get {
-    path("dashboard") {
+  private[this] val state = get {
+    path("state") {
       val allFuture = (
         statusChecker ? AllEntries
       ).mapTo[Seq[GroupStatus]]
@@ -61,7 +62,17 @@ class Routes(statusChecker: ActorRef) {
     }
   }
 
+  private[this] val dashboard =
+      (get & pathPrefix("dashboard")) {
+        (pathEndOrSingleSlash &
+          redirectToTrailingSlashIfMissing(StatusCodes.TemporaryRedirect)) {
+            getFromResource("dashboard/index.html")
+        } ~ {
+          getFromResourceDirectory("dashboard")
+        }
+      }
+
   val routes = concat (
-    maxlag, summary, missing, dashboard
+    maxlag, summary, missing, state, dashboard
   )
 }
