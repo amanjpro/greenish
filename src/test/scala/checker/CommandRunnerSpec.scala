@@ -17,7 +17,7 @@ class CommandRunnerSpec()
     TestKit.shutdownActorSystem(system)
   }
 
-  "CommandRunnerSpec Actor" must {
+  "Run command" must {
 
     "send back false, when command does not exit with 0" in {
       val echo = system.actorOf(Props(new CommandRunner()))
