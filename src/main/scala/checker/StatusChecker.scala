@@ -10,29 +10,12 @@ import scala.concurrent.{Future, Await}
 import akka.routing.{ActorRefRoutee, RoundRobinRoutingLogic, Router}
 import akka.pattern.{pipe, ask}
 import scala.language.postfixOps
+import scala.annotation.tailrec
 
-class StatusChecker(groups: Seq[Group],
-    env: Seq[(String, String)] = Seq.empty,
-    now: ZonedDateTime = ZonedDateTime.now()) extends Actor with ActorLogging {
-  private[this] var state = Seq.empty[GroupStatus]
-  private[this] implicit val timeout = Timeout(2 minutes)
+trait StatusCheckerApi {
+  protected[this] var state: Seq[GroupStatus]
 
-  import context.dispatcher
-
-  private[this] val parallelism: Int = groups.map(_.entries.map(_.lookbackHours).sum).sum
-
-  private[this] val router = {
-    val routees = (0 until parallelism) map { _ =>
-      val runner = context.actorOf(
-        Props(new CommandRunner()).withDispatcher("akka.refresh-dispatcher"))
-      context watch runner
-      ActorRefRoutee(runner)
-    }
-
-    Router(RoundRobinRoutingLogic(), routees)
-  }
-
-  def getMissing(): Seq[GroupStatus] = {
+  protected[checker] def getMissing(): Seq[GroupStatus] = {
     state
       .map { group =>
         val newJobs: Seq[JobStatus] = group.status.map { job =>
@@ -43,15 +26,17 @@ class StatusChecker(groups: Seq[Group],
       }.filterNot(_.status.isEmpty)
   }
 
-  def maxLag(): Int = {
-    state.map { group =>
+  protected[checker] def maxLag(): Int = {
+    if(state.isEmpty) 0
+    else
+      state.map { group =>
         group.status.map(_.countMissing).max
       }.max
   }
 
-  def allEntries(): Seq[GroupStatus] = state
+  protected[checker] def allEntries(): Seq[GroupStatus] = state
 
-  def summary(): Seq[GroupStatusSummary] =
+  protected[checker] def summary(): Seq[GroupStatusSummary] =
     state.map { group =>
       val status = group.status.map { status =>
         val missing = status.countMissing
@@ -64,6 +49,28 @@ class StatusChecker(groups: Seq[Group],
       }
       GroupStatusSummary(group.group.name, status)
     }
+}
+
+class StatusChecker(groups: Seq[Group],
+    env: Seq[(String, String)] = Seq.empty)
+      extends Actor with ActorLogging with StatusCheckerApi {
+  override protected[this] var state = Seq.empty[GroupStatus]
+  private[this] implicit val timeout = Timeout(2 minutes)
+
+  import context.dispatcher
+
+  private[this] val parallelism: Int = groups.map(_.entries.map(_.lookback).sum).sum
+
+  private[this] val router = {
+    val routees = (0 until parallelism) map { _ =>
+      val runner = context.actorOf(
+        Props(new CommandRunner()).withDispatcher("akka.refresh-dispatcher"))
+      context watch runner
+      ActorRefRoutee(runner)
+    }
+
+    Router(RoundRobinRoutingLogic(), routees)
+  }
 
   private[this] def refresh(now: ZonedDateTime): Seq[GroupStatus] = {
 
