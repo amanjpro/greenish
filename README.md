@@ -1,5 +1,8 @@
 # Greenish
 
+[![Build Status](https://travis-ci.org/amanjpro/greenish.svg?branch=master)](https://travis-ci.org/amanjpro/greenish)
+[![codecov](https://codecov.io/gh/amanjpro/greenish/branch/master/graph/badge.svg)](https://codecov.io/gh/amanjpro/greenish)
+
 Data monitoring tool. Do not monitor the runs, monitor the results.
 
 ## Building
