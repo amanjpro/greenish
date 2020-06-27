@@ -29,7 +29,7 @@ object AppConfig {
           val cmd = jobConfig.getString("check-command")
           val timePattern = jobConfig.getString("period-pattern")
           val timezone = ZoneId.of(jobConfig.getString("timezone"))
-          val lookbackHours = jobConfig.getInt("lookback-hours")
+          val lookback = jobConfig.getInt("lookback")
           val greatAt = jobConfig.getInt("great-at")
           val normalAt = jobConfig.getInt("normal-at")
           val warnAt = jobConfig.getInt("warn-at")
@@ -48,7 +48,7 @@ object AppConfig {
             timePattern,
             frequency,
             timezone,
-            lookbackHours,
+            lookback,
             AlertLevels(greatAt, normalAt, warnAt, errorAt))
         }.toSeq
       Group(index, name, checkEntries)

@@ -14,7 +14,7 @@ case class Job(
   timePattern: String,
   frequency: CheckFrequency,
   timezone: ZoneId,
-  lookbackHours: Int,
+  lookback: Int,
   alertLevels: AlertLevels,
 ) {
   val timeFormat = DateTimeFormatter.ofPattern(timePattern)

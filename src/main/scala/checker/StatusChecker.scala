@@ -69,15 +69,7 @@ class StatusChecker(groups: Seq[Group],
 
     val futureUpdate = groups.map { group =>
       val jobStatusListFutures = group.entries.map { entry =>
-        var periods = Vector.empty[String]
-        var nextStep = entry.frequency.jump(
-          now.withZoneSameInstant(entry.timezone)
-            .minusHours(entry.lookbackHours))
-
-        while(! nextStep.isAfter(now)) {
-          periods = periods :+ nextStep.format(entry.timeFormat)
-          nextStep = entry.frequency.jump(nextStep)
-        }
+        val periods = StatusChecker.periods(entry, now)
 
         val periodHealthFutures = periods.map { period =>
           val cmd = s"${entry.cmd} $period"
@@ -102,7 +94,6 @@ class StatusChecker(groups: Seq[Group],
     r
   }
 
-
   override def receive: Receive = {
     case Refresh(now) =>
       val refreshFuture = Future {
@@ -119,4 +110,16 @@ class StatusChecker(groups: Seq[Group],
   }
 }
 
+object StatusChecker {
+  private[checker] def periods(entry: Job, now: ZonedDateTime): Seq[String]= {
+    @tailrec def loop(time: ZonedDateTime, count: Int, acc: Seq[String]): Seq[String] = {
+      if(count == 0) acc.reverse
+      else
+        loop(entry.frequency.prev(time), count - 1,
+          acc :+ time.format(entry.timeFormat))
+    }
 
+    loop(now.withZoneSameInstant(entry.timezone),
+      entry.lookback, Vector.empty[String])
+  }
+}
