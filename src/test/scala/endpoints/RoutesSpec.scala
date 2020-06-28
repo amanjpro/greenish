@@ -1,7 +1,7 @@
 package me.amanj.greenish.endpoints
 
 import akka.actor.{ActorRef, Props}
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{StatusCodes, ContentTypes}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
@@ -101,6 +101,27 @@ class RoutesSpec()
             ))))
           actual shouldBe expected
         }
+      }
+    }
+
+    "properly handle GET/dashboard request" in {
+      Get("/dashboard") ~> routes.routes ~> check {
+        status shouldBe StatusCodes.TemporaryRedirect
+        contentType shouldBe ContentTypes.`text/html(UTF-8)`
+      }
+    }
+
+    "properly handle GET/dashboard/ request" in {
+      Get("/dashboard/") ~> routes.routes ~> check {
+        status shouldBe StatusCodes.OK
+        contentType shouldBe ContentTypes.`text/html(UTF-8)`
+      }
+    }
+
+    "properly handle GET/dashboard/index.html request" in {
+      Get("/dashboard/index.html") ~> routes.routes ~> check {
+        status shouldBe StatusCodes.OK
+        contentType shouldBe ContentTypes.`text/html(UTF-8)`
       }
     }
   }
