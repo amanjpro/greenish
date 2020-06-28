@@ -9,5 +9,4 @@ script:
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport assembly
 
 after_success:
-  - export CODECOV_TOKEN="7be2b676-5fb0-43ee-90f1-71a2024ba585"
   - bash <(curl -s https://codecov.io/bash)
