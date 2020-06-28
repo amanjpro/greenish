@@ -40,6 +40,10 @@ object AppConfig {
             case "daily" => Daily
             case "monthly" => Monthly
             case "annually" => Annually
+            case _         =>
+              throw new Exception(
+                """|Unsupported frequency, supported frequenices are:
+                   |hourly, daily, monthly and annually""".stripMargin)
           }
           Job(
             index,
