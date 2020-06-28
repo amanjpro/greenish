@@ -3,10 +3,19 @@ language: scala
 jdk: openjdk8
 
 scala:
-   - 2.13.2
+  - 2.13.2
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport assembly
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+deploy:
+  provider: releases
+  file_glob: true
+  file: target/scala-2.13/greenish-assembly-*-SNAPSHOT.jar
+  skip_cleanup: true
+  api_key:
+    secure: $GITHUB_RELEASES_TOKEN
+  on:
+    tags: true
