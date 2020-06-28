@@ -18,17 +18,22 @@ scalacOptions ++= Seq(
 
 val circeVersion = "0.13.0"
 val akkaVersion = "2.6.6"
+val akkaHttpVersion = "10.1.12"
+val typesafeConfigVersion = "1.4.0"
+val scalaTestVersion = "3.2.0"
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-http"   % "10.1.12",
+  "com.typesafe.akka" %% "akka-http"   % akkaHttpVersion,
   "com.typesafe.akka" %% "akka-stream" % akkaVersion,
-  "io.circe" %% "circe-parser" % "0.13.0",
+  "io.circe" %% "circe-parser" % circeVersion,
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-generic-extras" % circeVersion,
-  "com.typesafe" % "config" % "1.4.0",
+  "com.typesafe" % "config" % typesafeConfigVersion,
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
-  "org.scalatest" %% "scalatest" % "3.2.0" % Test,
+  "org.scalatest" %% "scalatest" % scalaTestVersion % Test,
+  "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % Test,
+  "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
 )
 
 dockerBaseImage := "openjdk:jre-alpine"
