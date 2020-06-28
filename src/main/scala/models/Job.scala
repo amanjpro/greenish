@@ -24,13 +24,13 @@ object Job {
   implicit val zoneIdEncoder: Encoder[ZoneId] =
     new Encoder[ZoneId] {
       final def apply(zid: ZoneId): Json = Json.obj(
-        ("zone-id", Json.fromString(zid.getId))
+        ("zoneId", Json.fromString(zid.getId))
       )
     }
   implicit val zoneIdDecoer: Decoder[ZoneId] = new Decoder[ZoneId] {
     final def apply(c: HCursor): Decoder.Result[ZoneId] =
       for {
-        zoneId <- c.downField("zone-id").as[String]
+        zoneId <- c.downField("zoneId").as[String]
       } yield ZoneId.of(zoneId)
   }
 
