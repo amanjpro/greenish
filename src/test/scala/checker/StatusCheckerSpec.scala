@@ -102,15 +102,15 @@ class StatusCheckerSpec()
   "maxLag" must {
 
     "work when state is empty" in {
-      emptyChecker.maxLag shouldBe 0
+      emptyChecker.maxLag shouldBe Lag(0)
     }
 
     "work when state is not empty" in {
-      singletonChecker.maxLag shouldBe 1
+      singletonChecker.maxLag shouldBe Lag(1)
     }
 
     "work when state is deeply nested" in {
-      nestedChecker.maxLag shouldBe 3
+      nestedChecker.maxLag shouldBe Lag(3)
     }
   }
 

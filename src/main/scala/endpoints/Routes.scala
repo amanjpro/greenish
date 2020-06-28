@@ -22,7 +22,7 @@ class Routes(statusChecker: ActorRef) {
     pathPrefix("maxlag") {
       val lagFuture = (
         statusChecker ? MaxLag
-      ).mapTo[Int]
+      ).mapTo[Lag]
       onComplete(lagFuture) { lag =>
         complete(lag.map(o => jsonPrinter.print(o.asJson)))
       }
@@ -72,7 +72,5 @@ class Routes(statusChecker: ActorRef) {
         }
       }
 
-  val routes = concat (
-    maxlag, summary, missing, state, dashboard
-  )
+  val routes = maxlag ~ summary ~ missing ~ state ~ dashboard
 }

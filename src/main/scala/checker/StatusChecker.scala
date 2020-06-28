@@ -26,12 +26,14 @@ trait StatusCheckerApi {
       }.filterNot(_.status.isEmpty)
   }
 
-  protected[checker] def maxLag(): Int = {
-    if(state.isEmpty) 0
-    else
-      state.map { group =>
+  protected[checker] def maxLag(): Lag = {
+    if(state.isEmpty) Lag(0)
+    else {
+      val lag = state.map { group =>
         group.status.map(_.countMissing).max
       }.max
+      Lag(lag)
+    }
   }
 
   protected[checker] def allEntries(): Seq[GroupStatus] = state
