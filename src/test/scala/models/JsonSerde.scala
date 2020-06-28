@@ -18,10 +18,10 @@ class JsonSerde() extends Matchers
     }
 
     "correctly parse JSON string" in {
-      parse(""""great"""").flatMap(_.as[AlertLevel]).getOrElse(???) shouldBe Great
-      parse(""""normal"""").flatMap(_.as[AlertLevel]).getOrElse(???) shouldBe Normal
-      parse(""""warn"""").flatMap(_.as[AlertLevel]).getOrElse(???) shouldBe Warn
-      parse(""""critical"""").flatMap(_.as[AlertLevel]).getOrElse(???) shouldBe Critical
+      parse(""""great"""").flatMap(_.as[AlertLevel]).right.get shouldBe Great
+      parse(""""normal"""").flatMap(_.as[AlertLevel]).right.get shouldBe Normal
+      parse(""""warn"""").flatMap(_.as[AlertLevel]).right.get shouldBe Warn
+      parse(""""critical"""").flatMap(_.as[AlertLevel]).right.get shouldBe Critical
     }
   }
 
@@ -36,6 +36,13 @@ class JsonSerde() extends Matchers
       val actual = AlertLevels(1, 2, 3, 4).asJson
       actual shouldBe expected
     }
+
+    "correctly parse JSON" in {
+      val expected = AlertLevels(1, 2, 3, 4)
+      val actual = expected.asJson.as[AlertLevels].right.get
+
+      actual shouldBe expected
+    }
   }
 
   "CheckFrequency" must {
@@ -45,13 +52,22 @@ class JsonSerde() extends Matchers
       (Monthly: CheckFrequency).asJson shouldBe "monthly".asJson
       (Annually: CheckFrequency).asJson shouldBe "annually".asJson
     }
+
+    "correctly parse JSON string" in {
+      parse(""""hourly"""").flatMap(_.as[CheckFrequency]).right.get shouldBe Hourly
+      parse(""""daily"""").flatMap(_.as[CheckFrequency]).right.get shouldBe Daily
+      parse(""""monthly"""").flatMap(_.as[CheckFrequency]).right.get shouldBe Monthly
+      parse(""""annually"""").flatMap(_.as[CheckFrequency]).right.get shouldBe Annually
+    }
   }
 
   "Group" must {
+    val job = Job(1, "j", "c", "yyyy-MM-dd",
+      Hourly, ZoneId.of("UTC"), 2, AlertLevels(3, 4, 5, 6))
+    val group = Group(0, "g", Seq(job))
+
     "produce correct JSON" in {
-      val job = Job(1, "j", "c", "yyyy-MM-dd",
-        Hourly, ZoneId.of("UTC"), 2, AlertLevels(3, 4, 5, 6))
-      val actual = Group(0, "g", Seq(job)).asJson
+      val actual = group.asJson
 
       val expected = Json.obj(
         "groupId" -> 0.asJson,
@@ -61,44 +77,71 @@ class JsonSerde() extends Matchers
 
       actual shouldBe expected
     }
+
+    "correctly parse JSON" in {
+      val expected = group
+      val actual = expected.asJson.as[Group].right.get
+
+      actual shouldBe expected
+    }
   }
 
   "GroupStatus" must {
+    val job = Job(1, "j", "c", "yyyy-MM-dd",
+      Hourly, ZoneId.of("UTC"), 2, AlertLevels(3, 4, 5, 6))
+    val group = Group(0, "g", Seq(job))
+    val periods = Seq(PeriodHealth("1", true), PeriodHealth("2", false))
+    val jobStatus = JobStatus(job, periods)
+    val groupStatus = GroupStatus(group, Seq(jobStatus))
+
     "produce correct JSON" in {
-      val job = Job(1, "j", "c", "yyyy-MM-dd",
-        Hourly, ZoneId.of("UTC"), 2, AlertLevels(3, 4, 5, 6))
-      val group = Group(0, "g", Seq(job))
-      val periods = Seq(PeriodHealth("1", true), PeriodHealth("2", false))
-      val jobStatus = JobStatus(job, periods)
-      val expected = Json.obj(
+            val expected = Json.obj(
         "group" -> group.asJson,
         "status" -> Seq(jobStatus).asJson,
       )
 
-      val actual = GroupStatus(group, Seq(jobStatus)).asJson
+      val actual = groupStatus.asJson
+      actual shouldBe expected
+    }
+
+    "correctly parse JSON" in {
+      val expected = groupStatus
+      val actual = expected.asJson.as[GroupStatus].right.get
+
       actual shouldBe expected
     }
   }
 
   "GroupStatusSummary" must {
+    val jobStatus = Seq(JobStatusSummary("j", 1, Critical))
+    val groupStatusSummary = GroupStatusSummary("g", jobStatus)
     "produce correct JSON" in {
-      val jobStatus = Seq(JobStatusSummary("j", 1, Critical))
 
       val expected = Json.obj(
         "name" -> "g".asJson,
         "status" -> jobStatus.asJson,
       )
 
-      val actual = GroupStatusSummary("g", jobStatus).asJson
+      val actual = groupStatusSummary.asJson
+      actual shouldBe expected
+    }
+
+    "correctly parse JSON" in {
+      val expected = groupStatusSummary
+      val actual = expected.asJson.as[GroupStatusSummary].right.get
+
       actual shouldBe expected
     }
   }
 
   "Job" must {
+    val alertLevels = AlertLevels(3, 4, 5, 6)
+    val job = Job(1, "j", "c", "yyyy-MM-dd",
+      Hourly, ZoneId.of("UTC"), 2, alertLevels)
+
     "produce correct JSON" in {
       val alertLevels = AlertLevels(3, 4, 5, 6)
-      val actual = Job(1, "j", "c", "yyyy-MM-dd",
-        Hourly, ZoneId.of("UTC"), 2, alertLevels).asJson
+      val actual = job.asJson
 
       val expected = Json.obj(
         "jobId" -> 1.asJson,
@@ -113,24 +156,41 @@ class JsonSerde() extends Matchers
 
       actual shouldBe expected
     }
+
+    "correctly parse JSON" in {
+      val expected = job
+      val actual = expected.asJson.as[Job].right.get
+
+      actual shouldBe expected
+    }
   }
 
   "JobStatus" must {
+    val job = Job(1, "j", "c", "yyyy-MM-dd",
+      Hourly, ZoneId.of("UTC"), 2, AlertLevels(3, 4, 5, 6))
+    val periods = Seq(PeriodHealth("1", true), PeriodHealth("2", false))
+    val jobStatus = JobStatus(job, periods)
+
     "produce correct JSON" in {
-      val job = Job(1, "j", "c", "yyyy-MM-dd",
-        Hourly, ZoneId.of("UTC"), 2, AlertLevels(3, 4, 5, 6))
-      val periods = Seq(PeriodHealth("1", true), PeriodHealth("2", false))
       val expected = Json.obj(
         "job" -> job.asJson,
         "periodHealth" -> periods.asJson,
       )
 
-      val actual = JobStatus(job, periods).asJson
+      val actual = jobStatus.asJson
+      actual shouldBe expected
+    }
+
+    "correctly parse JSON" in {
+      val expected = jobStatus
+      val actual = expected.asJson.as[JobStatus].right.get
+
       actual shouldBe expected
     }
   }
 
   "JobStatusSummary" must {
+    val jobStatusSummary = JobStatusSummary("j", 1, Critical)
     "produce correct JSON" in {
       val expected = Json.obj(
         "name" -> "j".asJson,
@@ -138,7 +198,14 @@ class JsonSerde() extends Matchers
         "alertLevel" -> "critical".asJson,
       )
 
-      val actual = JobStatusSummary("j", 1, Critical).asJson
+      val actual = jobStatusSummary.asJson
+      actual shouldBe expected
+    }
+
+    "correctly parse JSON" in {
+      val expected = jobStatusSummary
+      val actual = expected.asJson.as[JobStatusSummary].right.get
+
       actual shouldBe expected
     }
   }
@@ -152,6 +219,13 @@ class JsonSerde() extends Matchers
       val actual = Lag(4).asJson
       actual shouldBe expected
     }
+
+    "correctly parse JSON" in {
+      val expected = Lag(5)
+      val actual = expected.asJson.as[Lag].right.get
+
+      actual shouldBe expected
+    }
   }
 
   "PeriodHealth" must {
@@ -162,6 +236,13 @@ class JsonSerde() extends Matchers
       )
 
       val actual = PeriodHealth("2020-06-25-18", false).asJson
+      actual shouldBe expected
+    }
+
+    "correctly parse JSON" in {
+      val expected = PeriodHealth("2020-06-25-18", false)
+      val actual = expected.asJson.as[PeriodHealth].right.get
+
       actual shouldBe expected
     }
   }
