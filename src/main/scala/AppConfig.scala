@@ -35,7 +35,7 @@ object AppConfig {
           val warnAt = jobConfig.getInt("warn-at")
           val errorAt = jobConfig.getInt("error-at")
 
-          val frequency = jobConfig.getString("job-run-frequency") match {
+          val frequency = jobConfig.getString("job-run-frequency").toLowerCase match {
             case "hourly" => Hourly
             case "daily" => Daily
             case "monthly" => Monthly
