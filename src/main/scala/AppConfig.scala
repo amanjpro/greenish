@@ -39,7 +39,7 @@ object AppConfig {
             case "hourly" => Hourly
             case "daily" => Daily
             case "monthly" => Monthly
-            case "yearly" => Yearly
+            case "annually" => Annually
           }
           Job(
             index,

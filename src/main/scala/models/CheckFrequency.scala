@@ -34,7 +34,7 @@ case object Monthly extends CheckFrequency {
       .minusMonths(1L)
 }
 
-case object Yearly extends CheckFrequency {
+case object Annually extends CheckFrequency {
   def prev(date: ZonedDateTime): ZonedDateTime =
     date
       .minusYears(1L)

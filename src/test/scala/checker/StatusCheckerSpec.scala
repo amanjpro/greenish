@@ -251,7 +251,7 @@ class StatusCheckerSpec()
 
     "work for yearly frequency" in {
       val job = Job(1, null, null,
-        "yyyy-01-01", Yearly, ZoneId.of("UTC"),
+        "yyyy-01-01", Annually, ZoneId.of("UTC"),
         3, null,
       )
 
