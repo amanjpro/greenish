@@ -43,11 +43,11 @@ trait StatusCheckerApi {
       val status = group.status.map { status =>
         val missing = status.countMissing
         val alertLevel: AlertLevel =
-          if(missing <= status.entry.alertLevels.great) Great
-          else if(missing <= status.entry.alertLevels.normal) Normal
-          else if(missing <= status.entry.alertLevels.warn) Warn
+          if(missing <= status.job.alertLevels.great) Great
+          else if(missing <= status.job.alertLevels.normal) Normal
+          else if(missing <= status.job.alertLevels.warn) Warn
           else Critical
-        JobStatusSummary(status.entry.name, missing, alertLevel)
+        JobStatusSummary(status.job.name, missing, alertLevel)
       }
       GroupStatusSummary(group.group.name, status)
     }

@@ -4,7 +4,7 @@ import io.circe.{Encoder, Decoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 case class JobStatus (
-  entry: Job,
+  job: Job,
   periodHealth: Seq[PeriodHealth],
 ) {
   def countMissing = periodHealth.count(!_.ok)
