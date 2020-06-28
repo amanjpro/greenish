@@ -18,10 +18,10 @@ class JsonSerde() extends Matchers
     }
 
     "correctly parse JSON string" in {
-      parse(""""great"""").flatMap(_.as[AlertLevel]).right.get shouldBe Great
-      parse(""""normal"""").flatMap(_.as[AlertLevel]).right.get shouldBe Normal
-      parse(""""warn"""").flatMap(_.as[AlertLevel]).right.get shouldBe Warn
-      parse(""""critical"""").flatMap(_.as[AlertLevel]).right.get shouldBe Critical
+      parse(""""great"""").flatMap(_.as[AlertLevel]).getOrElse(???) shouldBe Great
+      parse(""""normal"""").flatMap(_.as[AlertLevel]).getOrElse(???) shouldBe Normal
+      parse(""""warn"""").flatMap(_.as[AlertLevel]).getOrElse(???) shouldBe Warn
+      parse(""""critical"""").flatMap(_.as[AlertLevel]).getOrElse(???) shouldBe Critical
     }
   }
 
@@ -39,7 +39,7 @@ class JsonSerde() extends Matchers
 
     "correctly parse JSON" in {
       val expected = AlertLevels(1, 2, 3, 4)
-      val actual = expected.asJson.as[AlertLevels].right.get
+      val actual = expected.asJson.as[AlertLevels].getOrElse(???)
 
       actual shouldBe expected
     }
@@ -54,10 +54,10 @@ class JsonSerde() extends Matchers
     }
 
     "correctly parse JSON string" in {
-      parse(""""hourly"""").flatMap(_.as[CheckFrequency]).right.get shouldBe Hourly
-      parse(""""daily"""").flatMap(_.as[CheckFrequency]).right.get shouldBe Daily
-      parse(""""monthly"""").flatMap(_.as[CheckFrequency]).right.get shouldBe Monthly
-      parse(""""annually"""").flatMap(_.as[CheckFrequency]).right.get shouldBe Annually
+      parse(""""hourly"""").flatMap(_.as[CheckFrequency]).getOrElse(???) shouldBe Hourly
+      parse(""""daily"""").flatMap(_.as[CheckFrequency]).getOrElse(???) shouldBe Daily
+      parse(""""monthly"""").flatMap(_.as[CheckFrequency]).getOrElse(???) shouldBe Monthly
+      parse(""""annually"""").flatMap(_.as[CheckFrequency]).getOrElse(???) shouldBe Annually
     }
   }
 
@@ -80,7 +80,7 @@ class JsonSerde() extends Matchers
 
     "correctly parse JSON" in {
       val expected = group
-      val actual = expected.asJson.as[Group].right.get
+      val actual = expected.asJson.as[Group].getOrElse(???)
 
       actual shouldBe expected
     }
@@ -106,7 +106,7 @@ class JsonSerde() extends Matchers
 
     "correctly parse JSON" in {
       val expected = groupStatus
-      val actual = expected.asJson.as[GroupStatus].right.get
+      val actual = expected.asJson.as[GroupStatus].getOrElse(???)
 
       actual shouldBe expected
     }
@@ -128,7 +128,7 @@ class JsonSerde() extends Matchers
 
     "correctly parse JSON" in {
       val expected = groupStatusSummary
-      val actual = expected.asJson.as[GroupStatusSummary].right.get
+      val actual = expected.asJson.as[GroupStatusSummary].getOrElse(???)
 
       actual shouldBe expected
     }
@@ -159,7 +159,7 @@ class JsonSerde() extends Matchers
 
     "correctly parse JSON" in {
       val expected = job
-      val actual = expected.asJson.as[Job].right.get
+      val actual = expected.asJson.as[Job].getOrElse(???)
 
       actual shouldBe expected
     }
@@ -183,7 +183,7 @@ class JsonSerde() extends Matchers
 
     "correctly parse JSON" in {
       val expected = jobStatus
-      val actual = expected.asJson.as[JobStatus].right.get
+      val actual = expected.asJson.as[JobStatus].getOrElse(???)
 
       actual shouldBe expected
     }
@@ -204,7 +204,7 @@ class JsonSerde() extends Matchers
 
     "correctly parse JSON" in {
       val expected = jobStatusSummary
-      val actual = expected.asJson.as[JobStatusSummary].right.get
+      val actual = expected.asJson.as[JobStatusSummary].getOrElse(???)
 
       actual shouldBe expected
     }
@@ -222,7 +222,7 @@ class JsonSerde() extends Matchers
 
     "correctly parse JSON" in {
       val expected = Lag(5)
-      val actual = expected.asJson.as[Lag].right.get
+      val actual = expected.asJson.as[Lag].getOrElse(???)
 
       actual shouldBe expected
     }
@@ -241,7 +241,7 @@ class JsonSerde() extends Matchers
 
     "correctly parse JSON" in {
       val expected = PeriodHealth("2020-06-25-18", false)
-      val actual = expected.asJson.as[PeriodHealth].right.get
+      val actual = expected.asJson.as[PeriodHealth].getOrElse(???)
 
       actual shouldBe expected
     }

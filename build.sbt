@@ -8,6 +8,14 @@ version := "0.0.1-SNAPSHOT"
 
 scalaVersion := "2.13.2"
 
+scalacOptions ++= Seq(
+  "-encoding", "utf8",
+  "-Xfatal-warnings",
+  "-deprecation",
+  "-unchecked",
+  "-feature",
+)
+
 val circeVersion = "0.13.0"
 val akkaVersion = "2.6.6"
 
