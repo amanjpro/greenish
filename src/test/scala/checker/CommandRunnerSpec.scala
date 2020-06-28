@@ -20,24 +20,24 @@ class CommandRunnerSpec()
   "Run command" must {
 
     "send back false, when command does not exit with 0" in {
-      val echo = system.actorOf(Props(new CommandRunner()))
-      echo ! Run("false", Seq.empty)
+      val actor = system.actorOf(Props(new CommandRunner()))
+      actor ! Run("false", Seq.empty)
       expectMsg(false)
     }
 
     "send back true, when command does exit with 0" in {
-      val echo = system.actorOf(Props(new CommandRunner()))
-      echo ! Run("true", Seq.empty)
+      val actor = system.actorOf(Props(new CommandRunner()))
+      actor ! Run("true", Seq.empty)
       expectMsg(true)
     }
 
     "use provided environment variables" in {
       val scriptPath = getClass.getResource("/test-env").getFile
-      val echo = system.actorOf(Props(new CommandRunner()))
-      echo ! Run(scriptPath, Seq.empty)
+      val actor = system.actorOf(Props(new CommandRunner()))
+      actor ! Run(scriptPath, Seq.empty)
       expectMsg(false)
 
-      echo ! Run(scriptPath, Seq("GREENISH_VALUE_FOR_TEST" -> "."))
+      actor ! Run(scriptPath, Seq("GREENISH_VALUE_FOR_TEST" -> "."))
       expectMsg(true)
     }
   }
