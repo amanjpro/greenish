@@ -72,7 +72,7 @@ class JsonSerde() extends Matchers
       val expected = Json.obj(
         "group_id" -> 0.asJson,
         "name" -> "g".asJson,
-        "entries" -> Seq(job).asJson
+        "jobs" -> Seq(job).asJson
       )
 
       actual shouldBe expected

@@ -98,7 +98,7 @@ $ curl --silent http://0.0.0.0:8080/missing | jq .
     "group": {
       "group_id": 0,
       "name": "Group1",
-      "entries": [
+      "jobs": [
         {
           "job_id": 0,
           "name": "Job1",
@@ -157,7 +157,7 @@ $ curl --silent http://0.0.0.0:8080/state | jq .
     "group": {
       "group_id": 0,
       "name": "Group1",
-      "entries": [
+      "jobs": [
         {
           "job_id": 0,
           "name": "Job1",

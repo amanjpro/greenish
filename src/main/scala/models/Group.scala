@@ -6,7 +6,7 @@ import io.circe.generic.extras.semiauto.{deriveConfiguredDecoder, deriveConfigur
 case class Group (
   groupId: Int,
   name: String,
-  entries: Seq[Job],
+  jobs: Seq[Job],
 )
 object Group {
   implicit val checkGroupDecoder: Decoder[Group] = deriveConfiguredDecoder

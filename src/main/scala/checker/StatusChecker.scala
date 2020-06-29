@@ -61,7 +61,7 @@ class StatusChecker(groups: Seq[Group],
 
   import context.dispatcher
 
-  private[this] val parallelism: Int = groups.map(_.entries.map(_.lookback).sum).sum
+  private[this] val parallelism: Int = groups.map(_.jobs.map(_.lookback).sum).sum
 
   private[this] val router = {
     val routees = (0 until parallelism) map { _ =>
@@ -77,7 +77,7 @@ class StatusChecker(groups: Seq[Group],
   private[this] def refresh(now: ZonedDateTime): Seq[GroupStatus] = {
 
     val futureUpdate = groups.map { group =>
-      val jobStatusListFutures = group.entries.map { entry =>
+      val jobStatusListFutures = group.jobs.map { entry =>
         val periods = StatusChecker.periods(entry, now)
 
         val periodHealthFutures = periods.map { period =>
