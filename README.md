@@ -62,12 +62,12 @@ $ curl --silent http://0.0.0.0:8080/summary | jq .
       {
         "name": "Job1",
         "missing": 4,
-        "alertLevel": "warn"
+        "alert_level": "warn"
       },
       {
         "name": "Job2",
         "missing": 2,
-        "alertLevel": "normal"
+        "alert_level": "normal"
       }
     ]
   },
@@ -77,12 +77,12 @@ $ curl --silent http://0.0.0.0:8080/summary | jq .
       {
         "name": "Job3",
         "missing": 6,
-        "alertLevel": "critical"
+        "alert_level": "critical"
       },
       {
         "name": "Job4",
         "missing": 0,
-        "alertLevel": "great"
+        "alert_level": "great"
       }
     ]
   }
@@ -96,20 +96,20 @@ $ curl --silent http://0.0.0.0:8080/missing | jq .
 [
   {
     "group": {
-      "groupId": 0,
+      "group_id": 0,
       "name": "Group1",
-      "entries": [
+      "jobs": [
         {
-          "jobId": 0,
+          "job_id": 0,
           "name": "Job1",
           "cmd": "/tmp/first_script",
-          "timePattern": "yyyy-MM-dd-HH",
+          "time_pattern": "yyyy-MM-dd-HH",
           "frequency": "hourly",
           "timezone": {
-            "zoneId": "UTC"
+            "zone_id": "UTC"
           },
           "lookback": 24,
-          "alertLevels": {
+          "alert_levels": {
             "great": 0,
             "normal": 1,
             "warn": 2,
@@ -121,23 +121,23 @@ $ curl --silent http://0.0.0.0:8080/missing | jq .
     "status": [
       {
         "job": {
-          "jobId": 0,
+          "job_id": 0,
           "name": "Job1",
           "cmd": "/tmp/first_script",
-          "timePattern": "yyyy-MM-dd-HH",
+          "time_pattern": "yyyy-MM-dd-HH",
           "frequency": "hourly",
           "timezone": {
-            "zoneId": "UTC"
+            "zone_id": "UTC"
           },
           "lookback": 24,
-          "alertLevels": {
+          "alert_levels": {
             "great": 0,
             "normal": 1,
             "warn": 2,
             "critical": 3
           }
         },
-        "periodHealth": [
+        "period_health": [
           {
             "period": "2020-06-27-20",
             "ok": false
@@ -155,20 +155,20 @@ $ curl --silent http://0.0.0.0:8080/state | jq .
 [
   {
     "group": {
-      "groupId": 0,
+      "group_id": 0,
       "name": "Group1",
-      "entries": [
+      "jobs": [
         {
-          "jobId": 0,
+          "job_id": 0,
           "name": "Job1",
           "cmd": "/tmp/first_script",
-          "timePattern": "yyyy-MM-dd-HH",
+          "time_pattern": "yyyy-MM-dd-HH",
           "frequency": "hourly",
           "timezone": {
-            "zoneId": "UTC"
+            "zone_id": "UTC"
           },
           "lookback": 24,
-          "alertLevels": {
+          "alert_levels": {
             "great": 0,
             "normal": 1,
             "warn": 2,
@@ -180,23 +180,23 @@ $ curl --silent http://0.0.0.0:8080/state | jq .
     "status": [
       {
         "job": {
-          "jobId": 0,
+          "job_id": 0,
           "name": "Job1",
           "cmd": "/tmp/first_script",
-          "timePattern": "yyyy-MM-dd-HH",
+          "time_pattern": "yyyy-MM-dd-HH",
           "frequency": "hourly",
           "timezone": {
-            "zoneId": "UTC"
+            "zone_id": "UTC"
           },
           "lookback": 24,
-          "alertLevels": {
+          "alert_levels": {
             "great": 0,
             "normal": 1,
             "warn": 2,
             "critical": 3
           }
         },
-        "periodHealth": [
+        "period_health": [
           {
             "period": "2020-06-27-20",
             "ok": true

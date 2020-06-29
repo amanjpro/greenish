@@ -1,7 +1,7 @@
 package me.amanj.greenish.models
 
 import io.circe.{Encoder, Decoder}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.generic.extras.semiauto.{deriveConfiguredDecoder, deriveConfiguredEncoder}
 
 case class AlertLevels(
   great: Int,
@@ -10,6 +10,6 @@ case class AlertLevels(
   critical: Int,
   )
 object AlertLevels {
-  implicit val alertLevelsDecoder: Decoder[AlertLevels] = deriveDecoder
-  implicit val alertLevelsEncoder: Encoder[AlertLevels] = deriveEncoder
+  implicit val alertLevelsDecoder: Decoder[AlertLevels] = deriveConfiguredDecoder
+  implicit val alertLevelsEncoder: Encoder[AlertLevels] = deriveConfiguredEncoder
 }

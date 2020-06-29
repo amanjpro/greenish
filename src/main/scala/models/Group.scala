@@ -1,14 +1,14 @@
 package me.amanj.greenish.models
 
 import io.circe.{Encoder, Decoder}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.generic.extras.semiauto.{deriveConfiguredDecoder, deriveConfiguredEncoder}
 
 case class Group (
   groupId: Int,
   name: String,
-  entries: Seq[Job],
+  jobs: Seq[Job],
 )
 object Group {
-  implicit val checkGroupDecoder: Decoder[Group] = deriveDecoder
-  implicit val checkGroupEncoder: Encoder[Group] = deriveEncoder
+  implicit val checkGroupDecoder: Decoder[Group] = deriveConfiguredDecoder
+  implicit val checkGroupEncoder: Encoder[Group] = deriveConfiguredEncoder
 }
