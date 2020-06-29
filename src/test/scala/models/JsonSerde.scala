@@ -70,7 +70,7 @@ class JsonSerde() extends Matchers
       val actual = group.asJson
 
       val expected = Json.obj(
-        "groupId" -> 0.asJson,
+        "group_id" -> 0.asJson,
         "name" -> "g".asJson,
         "entries" -> Seq(job).asJson
       )
@@ -144,14 +144,14 @@ class JsonSerde() extends Matchers
       val actual = job.asJson
 
       val expected = Json.obj(
-        "jobId" -> 1.asJson,
+        "job_id" -> 1.asJson,
         "name" -> "j".asJson,
         "cmd" -> "c".asJson,
-        "timePattern" -> "yyyy-MM-dd".asJson,
+        "time_pattern" -> "yyyy-MM-dd".asJson,
         "frequency" -> "hourly".asJson,
-        "timezone" -> Json.obj ("zoneId" -> "UTC".asJson),
+        "timezone" -> Json.obj ("zone_id" -> "UTC".asJson),
         "lookback" -> 2.asJson,
-        "alertLevels" -> alertLevels.asJson,
+        "alert_levels" -> alertLevels.asJson,
       )
 
       actual shouldBe expected
@@ -174,7 +174,7 @@ class JsonSerde() extends Matchers
     "produce correct JSON" in {
       val expected = Json.obj(
         "job" -> job.asJson,
-        "periodHealth" -> periods.asJson,
+        "period_health" -> periods.asJson,
       )
 
       val actual = jobStatus.asJson
@@ -195,7 +195,7 @@ class JsonSerde() extends Matchers
       val expected = Json.obj(
         "name" -> "j".asJson,
         "missing" -> 1.asJson,
-        "alertLevel" -> "critical".asJson,
+        "alert_level" -> "critical".asJson,
       )
 
       val actual = jobStatusSummary.asJson

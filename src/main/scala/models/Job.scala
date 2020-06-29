@@ -4,8 +4,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.ZoneId
 import io.circe.{Encoder, Decoder, HCursor, Json}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-
+import io.circe.generic.extras.semiauto.{deriveConfiguredDecoder, deriveConfiguredEncoder}
 
 case class Job(
   jobId: Int,
@@ -24,16 +23,16 @@ object Job {
   implicit val zoneIdEncoder: Encoder[ZoneId] =
     new Encoder[ZoneId] {
       final def apply(zid: ZoneId): Json = Json.obj(
-        ("zoneId", Json.fromString(zid.getId))
+        ("zone_id", Json.fromString(zid.getId))
       )
     }
   implicit val zoneIdDecoer: Decoder[ZoneId] = new Decoder[ZoneId] {
     final def apply(c: HCursor): Decoder.Result[ZoneId] =
       for {
-        zoneId <- c.downField("zoneId").as[String]
+        zoneId <- c.downField("zone_id").as[String]
       } yield ZoneId.of(zoneId)
   }
 
-  implicit val checkEntryDecoder: Decoder[Job] = deriveDecoder
-  implicit val checkEntryEncoder: Encoder[Job] = deriveEncoder
+  implicit val checkEntryDecoder: Decoder[Job] = deriveConfiguredDecoder
+  implicit val checkEntryEncoder: Encoder[Job] = deriveConfiguredEncoder
 }
