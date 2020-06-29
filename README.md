@@ -252,7 +252,7 @@ $ docker run --volume PATH_TO_CONFIG_FILE:/app/config.yml --rm -p 8080:8080 gree
 
 Contributions are most welcome. Please, fork it, use it, open issues and submit PRs!
 
-## Knwon issues
+## Known issues
 
 As of now, the task that refreshes the monitoring state, waits for all the
 monitoring scripts for all periods to finish their checks. That means, Greenish
