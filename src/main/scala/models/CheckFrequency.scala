@@ -10,9 +10,6 @@ sealed trait CheckFrequency {
 }
 
 object CheckFrequency {
-  private implicit val config: Configuration =
-    Configuration.default.copy(transformConstructorNames = _.toLowerCase)
-
   implicit val modeCodec: Codec[CheckFrequency] = deriveEnumerationCodec[CheckFrequency]
 }
 

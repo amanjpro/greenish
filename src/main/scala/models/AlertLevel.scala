@@ -6,9 +6,6 @@ import io.circe.generic.extras.semiauto.deriveEnumerationCodec
 
 sealed trait AlertLevel
 object AlertLevel {
-  private implicit val config: Configuration =
-    Configuration.default.copy(transformConstructorNames = _.toLowerCase)
-
   implicit val modeCodec: Codec[AlertLevel] = deriveEnumerationCodec[AlertLevel]
 }
 case object Critical extends AlertLevel
