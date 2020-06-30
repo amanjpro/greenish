@@ -214,7 +214,8 @@ An HTML dashboard is expected to land at `/dashboard` in the future releases.
 ## Pre-built package
 
 You can download pre-built packages (both fat(assembly) jar and docker) from
-the [releases page](https://github.com/amanjpro/greenish/releases).
+the [releases page](https://github.com/amanjpro/greenish/releases). The latest
+docker image can be found at the [packages page](https://github.com/amanjpro/greenish/releases).
 
 ## Development
 
