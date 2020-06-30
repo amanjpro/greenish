@@ -6,7 +6,7 @@ scala:
   - 2.13.2
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport assembly
+  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport assembly docker:publishLocal
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
