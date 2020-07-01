@@ -117,6 +117,21 @@ class StatusChecker(groups: Seq[Group],
     case MaxLag => context.sender ! maxLag()
     case AllEntries => context.sender ! allEntries()
     case Summary => context.sender ! summary()
+    case GetGroupStatus(id) =>
+      val res = if(id < state.length && id >= 0)
+        Some(state(id))
+      else
+        None
+      context.sender ! res
+    case GetJobStatus(gid, jid) =>
+      val res = if(gid < state.length && gid >= 0) {
+        val statusList = state(gid).status
+        if(jid < statusList.length && jid >= 0) {
+          Some(statusList(jid))
+        } else None
+      } else None
+      context.sender ! res
+
     case run: Run =>
       router.route(run, context.sender)
   }
