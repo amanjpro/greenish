@@ -6,7 +6,8 @@ import akka.util.Timeout
 import scala.concurrent.duration._
 import akka.actor.{Actor, Props, ActorLogging}
 import scala.sys.process.Process
-import scala.concurrent.{Future, Await}
+import scala.concurrent.{Future}
+import scala.util.{Success, Failure}
 import akka.routing.{ActorRefRoutee, RoundRobinRoutingLogic, Router}
 import akka.pattern.{pipe, ask}
 import scala.language.postfixOps
@@ -76,42 +77,42 @@ class StatusChecker(groups: Seq[Group],
     Router(RoundRobinRoutingLogic(), routees)
   }
 
-  private[this] def refresh(now: ZonedDateTime): Seq[GroupStatus] = {
+  private[this] def refresh(now: ZonedDateTime): Unit = {
 
-    val futureUpdate = groups.map { group =>
-      val jobStatusListFutures = group.jobs.map { entry =>
-        val periods = StatusChecker.periods(entry, now)
+    groups.foreach { group =>
+      group.jobs.foreach { job =>
+        val periods = StatusChecker.periods(job, now)
 
-        val periodHealthFutures = periods.map { period =>
-          val cmd = s"${entry.cmd} $period"
-          (period, self ? Run(cmd, env))
+        val currentClockCounter = clockCounter()
+        val jobStatusUpdateFuture: Seq[Future[PeriodHealth]] = periods.map { period =>
+          val cmd = s"${job.cmd} $period"
+          val future = self ? Run(cmd, env)
+          future.mapTo[Boolean].map(PeriodHealth(period, _))
         }
-        (entry, periodHealthFutures)
+
+        Future.sequence(jobStatusUpdateFuture)
+          .map( periodHealth =>
+              UpdateState(group.groupId,
+                JobStatus(job, currentClockCounter, periodHealth))
+          ).onComplete {
+            case Success(updateMessage) =>
+              self ! updateMessage
+            case Failure(err)          =>
+              log.error(err.getMessage)
+          }
       }
-      (group, jobStatusListFutures)
     }
-
-    log.info("Refreshing the state")
-    val r = futureUpdate.map { case (group, jobStatusListFutures) =>
-      val jobStatusList = jobStatusListFutures.map { case (entry, periodHealthFutures) =>
-        val periodHealthList = periodHealthFutures.map { case (period, futureHealth) =>
-          PeriodHealth(period, Await.result(futureHealth.mapTo[Boolean], 2 minutes))
-        }
-        JobStatus(entry, clockCounter(), periodHealthList)
-      }.toArray
-      GroupStatus(group, jobStatusList)
-    }
-    log.info("Refreshing done")
-    r
   }
 
   override def receive: Receive = {
     case Refresh(now) =>
-      val refreshFuture = Future {
-        UpdateState(refresh(now()))
+      refresh(now())
+    case UpdateState(groupId, jobStatus) =>
+      val jobId = jobStatus.job.jobId
+      val bucket = state(groupId)
+      if(bucket.status(jobId).updatedAt < jobStatus.updatedAt) {
+        bucket.status(jobId) = jobStatus
       }
-      refreshFuture.pipeTo(self)
-    case UpdateState(updated) => state = updated.toIndexedSeq
     case GetMissing => context.sender ! getMissing()
     case MaxLag => context.sender ! maxLag()
     case AllEntries => context.sender ! allEntries()

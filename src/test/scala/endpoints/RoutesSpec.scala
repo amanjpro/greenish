@@ -40,12 +40,12 @@ class RoutesSpec()
   val lsScript = getClass.getResource("/test-ls").getFile
   val lsEnvScript = getClass.getResource("/test-ls-env").getFile
 
-  val job1 = Job(1, "job1", s"$lsScript /tmp",
+  val job1 = Job(0, "job1", s"$lsScript /tmp",
     "yyyy-MM-dd-HH", Hourly, ZoneId.of("UTC"),
     2, AlertLevels(0, 1, 2, 3),
   )
 
-  val group1 = Group(1, "group1", Seq(job1))
+  val group1 = Group(0, "group1", Seq(job1))
 
   var checker: ActorRef = _
   var routes: Routes = _
