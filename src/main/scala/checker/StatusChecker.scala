@@ -53,6 +53,15 @@ trait StatusCheckerApi {
       }.toSeq
       GroupStatusSummary(group.group.name, status)
     }
+
+  protected[checker] def getGroupStatus(groupId: Int): Option[GroupStatus] =
+    state.lift(groupId)
+
+  protected[checker] def getJobStatus(groupId: Int, jobId: Int): Option[JobStatus] =
+    for {
+      group <- state.lift(groupId)
+      job   <- group.status.lift(jobId)
+    } yield job
 }
 
 class StatusChecker(groups: Seq[Group],
@@ -118,20 +127,9 @@ class StatusChecker(groups: Seq[Group],
     case AllEntries => context.sender ! allEntries()
     case Summary => context.sender ! summary()
     case GetGroupStatus(id) =>
-      val res = if(id < state.length && id >= 0)
-        Some(state(id))
-      else
-        None
-      context.sender ! res
+      context.sender ! getGroupStatus(id)
     case GetJobStatus(gid, jid) =>
-      val res = if(gid < state.length && gid >= 0) {
-        val statusList = state(gid).status
-        if(jid < statusList.length && jid >= 0) {
-          Some(statusList(jid))
-        } else None
-      } else None
-      context.sender ! res
-
+      context.sender ! getJobStatus(gid, jid)
     case run: Run =>
       router.route(run, context.sender)
   }
