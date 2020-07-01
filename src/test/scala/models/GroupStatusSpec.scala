@@ -25,34 +25,39 @@ class GroupStatusSpec() extends Matchers
   val gs2 = GroupStatus(group2, Array(JobStatus(job2, -1, Seq.empty)))
 
   "equals" must {
-    "must work if that is null" in {
+    "work if that is null" in {
       val actual = gs1 == null
       actual shouldBe false
     }
 
-    "must work if that is this" in {
+    "work if that is this" in {
       val actual = gs1 == gs1
       actual shouldBe true
     }
 
-    "must work if that is a clone of this" in {
+    "work if that is a clone of this" in {
       val actual = gs1 == gs1Copy
       actual shouldBe true
+    }
+
+    "not be equal to non-GroupStatus objects" in {
+      val actual = gs1 == job1
+      actual shouldBe false
     }
   }
 
   "hashCode" must {
-    "must be predictive" in {
+    "be predictive" in {
       val actual = gs1.## == gs1.##
       actual shouldBe true
     }
 
-    "must produce the same value for equivalent objects" in {
+    "produce the same value for equivalent objects" in {
       val actual = gs1.## == gs1Copy.##
       actual shouldBe true
     }
 
-    "must produce differe values for different objects" in {
+    "produce differe values for different objects" in {
       val actual = gs1.## == gs2.##
       actual shouldBe false
     }
