@@ -13,9 +13,9 @@ import scala.language.postfixOps
 import scala.annotation.tailrec
 
 trait StatusCheckerApi {
-  protected[this] var state: Seq[GroupStatus]
+  protected[this] var state: IndexedSeq[GroupStatus]
 
-  protected[checker] def getMissing(): Seq[GroupStatus] = {
+  protected[checker] def getMissing(): IndexedSeq[GroupStatus] = {
     state
       .map { group =>
         val newJobs: Array[JobStatus] = group.status.map { job =>
@@ -37,7 +37,7 @@ trait StatusCheckerApi {
     }
   }
 
-  protected[checker] def allEntries(): Seq[GroupStatus] = state
+  protected[checker] def allEntries(): IndexedSeq[GroupStatus] = state
 
   protected[checker] def summary(): Seq[GroupStatusSummary] =
     state.map { group =>
@@ -58,7 +58,7 @@ class StatusChecker(groups: Seq[Group],
     env: Seq[(String, String)] = Seq.empty,
     clockCounter: () => Long = () => System.currentTimeMillis())
       extends Actor with ActorLogging with StatusCheckerApi {
-  override protected[this] var state = Seq.empty[GroupStatus]
+  override protected[this] var state = IndexedSeq.empty[GroupStatus]
   private[this] implicit val timeout = Timeout(2 minutes)
 
   import context.dispatcher
@@ -111,7 +111,7 @@ class StatusChecker(groups: Seq[Group],
         UpdateState(refresh(now()))
       }
       refreshFuture.pipeTo(self)
-    case UpdateState(updated) => state = updated
+    case UpdateState(updated) => state = updated.toIndexedSeq
     case GetMissing => context.sender ! getMissing()
     case MaxLag => context.sender ! maxLag()
     case AllEntries => context.sender ! allEntries()

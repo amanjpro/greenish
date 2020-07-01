@@ -73,17 +73,17 @@ class StatusCheckerSpec()
   val groups = Seq(group1, group2)
 
   val emptyChecker = new StatusCheckerApi {
-    override protected[this] var state = Seq.empty[GroupStatus]
+    override protected[this] var state = IndexedSeq.empty[GroupStatus]
   }
 
   val singletonChecker = new StatusCheckerApi {
-    override protected[this] var state = Seq(GroupStatus(
+    override protected[this] var state = IndexedSeq(GroupStatus(
         group1, Array(JobStatus(job1, tstamp, Seq(PeriodHealth("1", false))))
       ))
   }
 
   val nestedChecker = new StatusCheckerApi {
-    override protected[this] var state = Seq(
+    override protected[this] var state = IndexedSeq(
       GroupStatus(
         group1, Array(
           JobStatus(job1, tstamp, Seq(PeriodHealth("1", true), PeriodHealth("1", true))),
