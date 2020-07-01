@@ -58,7 +58,7 @@ class StatusChecker(groups: Seq[Group],
     env: Seq[(String, String)] = Seq.empty,
     clockCounter: () => Long = () => System.currentTimeMillis())
       extends Actor with ActorLogging with StatusCheckerApi {
-  override protected[this] var state = IndexedSeq.empty[GroupStatus]
+  override protected[this] var state = StatusChecker.initState(groups)
   private[this] implicit val timeout = Timeout(2 minutes)
 
   import context.dispatcher
@@ -122,6 +122,15 @@ class StatusChecker(groups: Seq[Group],
 }
 
 object StatusChecker {
+  private[checker] def initState(groups: Seq[Group]): IndexedSeq[GroupStatus] = {
+    groups.map { group =>
+      val jobStatus = group.jobs.map { job =>
+        JobStatus(job, -1, Seq.empty)
+      }
+      GroupStatus(group, jobStatus.toArray)
+    }.toIndexedSeq
+  }
+
   private[checker] def periods(entry: Job, now: ZonedDateTime): Seq[String]= {
     @tailrec def loop(time: ZonedDateTime, count: Int, acc: Seq[String]): Seq[String] = {
       if(count == 0) acc.reverse

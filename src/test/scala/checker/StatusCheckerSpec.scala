@@ -196,6 +196,37 @@ class StatusCheckerSpec()
     }
   }
 
+  "initState" must {
+
+    "work when groups is empty" in {
+      StatusChecker.initState(Seq.empty)shouldBe IndexedSeq.empty
+    }
+
+    "work when groups is not empty" in {
+      val expected = IndexedSeq(
+          GroupStatus(group1, Array(
+            JobStatus(job1, -1, Seq.empty),
+            JobStatus(job2, -1, Seq.empty),
+            ))
+        )
+      StatusChecker.initState(Seq(group1)) shouldBe expected
+    }
+
+    "work when groups is deeply nested" in {
+      val expected = IndexedSeq(
+          GroupStatus(group1, Array(
+            JobStatus(job1, -1, Seq.empty),
+            JobStatus(job2, -1, Seq.empty),
+            )),
+          GroupStatus(group2, Array(
+            JobStatus(job3, -1, Seq.empty),
+            JobStatus(job4, -1, Seq.empty),
+            )),
+        )
+      StatusChecker.initState(groups) shouldBe expected
+    }
+  }
+
   "periods" must {
 
     "work for hourly frequency" in {
