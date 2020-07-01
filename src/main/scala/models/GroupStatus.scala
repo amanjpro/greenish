@@ -29,7 +29,7 @@ case class GroupStatus(
   }
 
   override def toString: String = {
-    s"Group($group, ${status.mkString("Array(", ", ", ")")})"
+    s"GroupStatus($group, ${status.mkString("Array(", ", ", ")")})"
   }
 }
 
