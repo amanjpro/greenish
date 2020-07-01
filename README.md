@@ -211,6 +211,67 @@ $ curl --silent http://0.0.0.0:8080/state | jq .
         ...
 ```
 
+### Get job and group by id
+
+You can query a single group by its id:
+
+```
+$ curl --silent localhost:8080/group/1 | jq .
+{
+  "group": {
+    "group_id": 1,
+    "name": "Group2",
+    "jobs": [
+      {
+        "job_id": 0,
+        "name": "Job3",
+        "cmd": "/tmp/third_script",
+        "time_pattern": "yyyy-MM-dd",
+        "frequency": "monthly",
+        "timezone": {
+    ...
+```
+
+You can also focus on a single job, and query it:
+
+```
+$ curl --silent localhost:8080/group/1/job/0 | jq .
+{
+  "job": {
+    "job_id": 0,
+    "name": "Job3",
+    "cmd": "/tmp/third_script",
+    "time_pattern": "yyyy-MM-dd",
+    "frequency": "monthly",
+    "timezone": {
+      "zone_id": "UTC"
+    },
+    "lookback": 3,
+    "alert_levels": {
+      "great": 0,
+      "normal": 1,
+      "warn": 2,
+      "critical": 3
+    }
+  },
+  "updated_at": 1593585049298,
+  "period_health": [
+    {
+      "period": "2020-05-01",
+      "ok": true
+    },
+    {
+      "period": "2020-06-01",
+      "ok": true
+    },
+    {
+      "period": "2020-07-01",
+      "ok": true
+    }
+  ]
+}
+```
+
 An HTML dashboard is expected to land at `/dashboard` in the future releases.
 
 ## Pre-built package

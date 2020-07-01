@@ -10,6 +10,8 @@ import io.circe.syntax._
 import io.circe.Printer
 import me.amanj.greenish.models._
 import me.amanj.greenish.checker._
+import akka.http.scaladsl.model.HttpResponse
+import scala.util.Success
 
 class Routes(statusChecker: ActorRef) {
   private[this] implicit val timeout = Timeout(Duration.fromNanos(5000000L))
@@ -62,6 +64,38 @@ class Routes(statusChecker: ActorRef) {
     }
   }
 
+  private[this] val getGroup = get {
+    path("group" / IntNumber) { id =>
+      val groupFuture = (
+        statusChecker ? GetGroupStatus(id)
+      ).mapTo[Option[GroupStatus]]
+
+      onComplete(groupFuture) {
+        case Success(Some(group)) =>
+          complete(jsonPrinter.print(group.asJson))
+        case _                  =>
+          complete(HttpResponse(StatusCodes.BadRequest,
+            entity = "Group id does not exist"))
+      }
+    }
+  }
+
+  private[this] val getJob = get {
+    path("group" / IntNumber / "job" / IntNumber) {
+      (gid, jid) =>
+        val jobFuture = (
+          statusChecker ? GetJobStatus(gid, jid)
+        ).mapTo[Option[JobStatus]]
+        onComplete(jobFuture) {
+          case Success(Some(job)) =>
+            complete(jsonPrinter.print(job.asJson))
+          case _                  =>
+            complete(HttpResponse(StatusCodes.BadRequest,
+              entity = "Group id and/or job id does not exist"))
+        }
+    }
+  }
+
   private[this] val dashboard =
       (get & pathPrefix("dashboard")) {
         (pathEndOrSingleSlash &
@@ -72,5 +106,5 @@ class Routes(statusChecker: ActorRef) {
         }
       }
 
-  val routes = maxlag ~ summary ~ missing ~ state ~ dashboard
+  val routes = getJob ~ getGroup ~ maxlag ~ summary ~ missing ~ state ~ dashboard
 }

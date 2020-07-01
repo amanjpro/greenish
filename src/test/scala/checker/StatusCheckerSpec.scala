@@ -196,6 +196,43 @@ class StatusCheckerSpec()
     }
   }
 
+  "getGroupStatus" must {
+
+    "return None when state is empty" in {
+      emptyChecker.getGroupStatus(0) shouldBe None
+    }
+
+    "return Some when state is not empty and groupId exists" in {
+      val expected = Some(GroupStatus(group1, Array(
+        JobStatus(job1, tstamp, Seq(PeriodHealth("1", false))))))
+      singletonChecker.getGroupStatus(0) shouldBe expected
+    }
+
+    "return None when state is not empty and groupId does not exist" in {
+      singletonChecker.getGroupStatus(2) shouldBe None
+    }
+  }
+
+  "getJobStatus" must {
+
+    "return None when state is empty" in {
+      emptyChecker.getJobStatus(0, 0) shouldBe None
+    }
+
+    "return None when state is not empty and groupId does not exist" in {
+      singletonChecker.getJobStatus(2, 0) shouldBe None
+    }
+
+    "return None when state is not empty and groupId exists but jobId does not exist" in {
+      singletonChecker.getJobStatus(0, 2) shouldBe None
+    }
+
+    "return Some when state is not empty and groupId and jobId exist" in {
+      val expected = Some(JobStatus(job1, tstamp, Seq(PeriodHealth("1", false))))
+      singletonChecker.getJobStatus(0, 0) shouldBe expected
+    }
+  }
+
   "initState" must {
 
     "work when groups is empty" in {

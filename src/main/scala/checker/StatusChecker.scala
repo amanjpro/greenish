@@ -53,6 +53,15 @@ trait StatusCheckerApi {
       }.toSeq
       GroupStatusSummary(group.group.name, status)
     }
+
+  protected[checker] def getGroupStatus(groupId: Int): Option[GroupStatus] =
+    state.lift(groupId)
+
+  protected[checker] def getJobStatus(groupId: Int, jobId: Int): Option[JobStatus] =
+    for {
+      group <- state.lift(groupId)
+      job   <- group.status.lift(jobId)
+    } yield job
 }
 
 class StatusChecker(groups: Seq[Group],
@@ -117,6 +126,10 @@ class StatusChecker(groups: Seq[Group],
     case MaxLag => context.sender ! maxLag()
     case AllEntries => context.sender ! allEntries()
     case Summary => context.sender ! summary()
+    case GetGroupStatus(id) =>
+      context.sender ! getGroupStatus(id)
+    case GetJobStatus(gid, jid) =>
+      context.sender ! getJobStatus(gid, jid)
     case run: Run =>
       router.route(run, context.sender)
   }
