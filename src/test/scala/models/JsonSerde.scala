@@ -92,7 +92,7 @@ class JsonSerde() extends Matchers
     val group = Group(0, "g", Seq(job))
     val periods = Seq(PeriodHealth("1", true), PeriodHealth("2", false))
     val jobStatus = JobStatus(job, periods)
-    val groupStatus = GroupStatus(group, Seq(jobStatus))
+    val groupStatus = GroupStatus(group, Array(jobStatus))
 
     "produce correct JSON" in {
             val expected = Json.obj(

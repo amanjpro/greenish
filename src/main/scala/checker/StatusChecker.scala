@@ -18,9 +18,10 @@ trait StatusCheckerApi {
   protected[checker] def getMissing(): Seq[GroupStatus] = {
     state
       .map { group =>
-        val newJobs: Seq[JobStatus] = group.status.map { job =>
+        val newJobs: Array[JobStatus] = group.status.map { job =>
           job.copy(periodHealth = job.periodHealth.filterNot(_.ok))
         }.filterNot(_.periodHealth.isEmpty)
+          .toArray
 
         group.copy(status = newJobs)
       }.filterNot(_.status.isEmpty)
@@ -48,7 +49,7 @@ trait StatusCheckerApi {
           else if(missing <= status.job.alertLevels.warn) Warn
           else Critical
         JobStatusSummary(status.job.name, missing, alertLevel)
-      }
+      }.toSeq
       GroupStatusSummary(group.group.name, status)
     }
 }
@@ -96,7 +97,7 @@ class StatusChecker(groups: Seq[Group],
           PeriodHealth(period, Await.result(futureHealth.mapTo[Boolean], 2 minutes))
         }
         JobStatus(entry, periodHealthList)
-      }
+      }.toArray
       GroupStatus(group, jobStatusList)
     }
     log.info("Refreshing done")

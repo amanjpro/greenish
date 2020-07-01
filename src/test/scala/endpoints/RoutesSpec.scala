@@ -65,7 +65,7 @@ class RoutesSpec()
         Get("/state") ~> routes.routes ~> check {
           val actual = parse(responseAs[String])
             .flatMap(_.as[Seq[GroupStatus]]).getOrElse(null)
-          val expected = Seq(GroupStatus(group1, Seq(JobStatus(
+          val expected = Seq(GroupStatus(group1, Array(JobStatus(
               job1, Seq(
                 PeriodHealth("2020-06-25-14", true),
                 PeriodHealth("2020-06-25-15", false),
@@ -81,7 +81,7 @@ class RoutesSpec()
         Get("/missing") ~> routes.routes ~> check {
           val actual = parse(responseAs[String])
             .flatMap(_.as[Seq[GroupStatus]]).getOrElse(null)
-          val expected = Seq(GroupStatus(group1, Seq(JobStatus(
+          val expected = Seq(GroupStatus(group1, Array(JobStatus(
               job1, Seq(
                 PeriodHealth("2020-06-25-15", false),
                 )

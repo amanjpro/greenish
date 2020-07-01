@@ -77,20 +77,20 @@ class StatusCheckerSpec()
 
   val singletonChecker = new StatusCheckerApi {
     override protected[this] var state = Seq(GroupStatus(
-        group1, Seq(JobStatus(job1, Seq(PeriodHealth("1", false))))
+        group1, Array(JobStatus(job1, Seq(PeriodHealth("1", false))))
       ))
   }
 
   val nestedChecker = new StatusCheckerApi {
     override protected[this] var state = Seq(
       GroupStatus(
-        group1, Seq(
+        group1, Array(
           JobStatus(job1, Seq(PeriodHealth("1", true), PeriodHealth("1", true))),
           JobStatus(job1, Seq(PeriodHealth("2", false), PeriodHealth("3", false))),
         )
       ),
       GroupStatus(
-        group1, Seq(
+        group1, Array(
           JobStatus(job1, Seq(PeriodHealth("1", false), PeriodHealth("1", true))),
           JobStatus(job1, Seq(PeriodHealth("2", false),
             PeriodHealth("3", false), PeriodHealth("4", false))),
@@ -137,7 +137,7 @@ class StatusCheckerSpec()
 
     "work when state is not empty" in {
       val expected = Seq(GroupStatus(
-        group1, Seq(JobStatus(job1, Seq(PeriodHealth("1", false))))
+        group1, Array(JobStatus(job1, Seq(PeriodHealth("1", false))))
       ))
 
       singletonChecker.getMissing shouldBe expected
@@ -146,12 +146,12 @@ class StatusCheckerSpec()
     "work when state is deeply nested" in {
       val expected = Seq(
         GroupStatus(
-          group1, Seq(
+          group1, Array(
             JobStatus(job1, Seq(PeriodHealth("2", false), PeriodHealth("3", false))),
           )
         ),
         GroupStatus(
-          group1, Seq(
+          group1, Array(
             JobStatus(job1, Seq(PeriodHealth("1", false))),
             JobStatus(job1, Seq(PeriodHealth("2", false),
               PeriodHealth("3", false), PeriodHealth("4", false))),
@@ -274,7 +274,7 @@ class StatusCheckerSpec()
       val expected = List(
         GroupStatus(
           group1,
-          List(
+          Array(
             JobStatus(
               job1,
               Vector(
@@ -286,7 +286,7 @@ class StatusCheckerSpec()
                 PeriodHealth("2020-06-25-15", false))))),
         GroupStatus(
           group2,
-          List(
+          Array(
             JobStatus(
               job3,
               Vector(
