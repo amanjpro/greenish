@@ -55,7 +55,8 @@ trait StatusCheckerApi {
 }
 
 class StatusChecker(groups: Seq[Group],
-    env: Seq[(String, String)] = Seq.empty)
+    env: Seq[(String, String)] = Seq.empty,
+    clockCounter: () => Long = () => System.currentTimeMillis())
       extends Actor with ActorLogging with StatusCheckerApi {
   override protected[this] var state = Seq.empty[GroupStatus]
   private[this] implicit val timeout = Timeout(2 minutes)
@@ -96,7 +97,7 @@ class StatusChecker(groups: Seq[Group],
         val periodHealthList = periodHealthFutures.map { case (period, futureHealth) =>
           PeriodHealth(period, Await.result(futureHealth.mapTo[Boolean], 2 minutes))
         }
-        JobStatus(entry, periodHealthList)
+        JobStatus(entry, clockCounter(), periodHealthList)
       }.toArray
       GroupStatus(group, jobStatusList)
     }

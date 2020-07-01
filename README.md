@@ -137,6 +137,7 @@ $ curl --silent http://0.0.0.0:8080/missing | jq .
             "critical": 3
           }
         },
+        "updated_at": 1593567901,
         "period_health": [
           {
             "period": "2020-06-27-20",
@@ -196,6 +197,7 @@ $ curl --silent http://0.0.0.0:8080/state | jq .
             "critical": 3
           }
         },
+        "updated_at": 1593567901,
         "period_health": [
           {
             "period": "2020-06-27-20",

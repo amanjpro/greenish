@@ -23,10 +23,12 @@ class RoutesSpec()
     with Eventually{
 
   val dir1 = new File("/tmp/2020-06-25-14")
+  val tstamp = 1000L
   implicit val patience: PatienceConfig = PatienceConfig(1 minute, 1 second)
   override def beforeAll: Unit = {
     dir1.mkdirs
-    checker = system.actorOf(Props(new StatusChecker(Seq(group1), Seq.empty)))
+    checker = system.actorOf(Props(new StatusChecker(Seq(group1), Seq.empty,
+      () => tstamp)))
     checker ! Refresh(() => ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
     routes = new Routes(checker)
   }
@@ -66,7 +68,7 @@ class RoutesSpec()
           val actual = parse(responseAs[String])
             .flatMap(_.as[Seq[GroupStatus]]).getOrElse(null)
           val expected = Seq(GroupStatus(group1, Array(JobStatus(
-              job1, Seq(
+              job1, tstamp, Seq(
                 PeriodHealth("2020-06-25-14", true),
                 PeriodHealth("2020-06-25-15", false),
                 )
@@ -82,7 +84,7 @@ class RoutesSpec()
           val actual = parse(responseAs[String])
             .flatMap(_.as[Seq[GroupStatus]]).getOrElse(null)
           val expected = Seq(GroupStatus(group1, Array(JobStatus(
-              job1, Seq(
+              job1, tstamp, Seq(
                 PeriodHealth("2020-06-25-15", false),
                 )
             ))))

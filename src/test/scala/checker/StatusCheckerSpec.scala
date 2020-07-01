@@ -35,6 +35,7 @@ class StatusCheckerSpec()
     dir4.mkdirs
   }
 
+  val tstamp = 2000L
   val dir1 = new File("/tmp/job1/2020-06-25-14")
   val dir2 = new File("/tmp/job3/2020-06-25-14")
   val dir3 = new File("/tmp/job4/2020-06-25-13")
@@ -77,7 +78,7 @@ class StatusCheckerSpec()
 
   val singletonChecker = new StatusCheckerApi {
     override protected[this] var state = Seq(GroupStatus(
-        group1, Array(JobStatus(job1, Seq(PeriodHealth("1", false))))
+        group1, Array(JobStatus(job1, tstamp, Seq(PeriodHealth("1", false))))
       ))
   }
 
@@ -85,14 +86,14 @@ class StatusCheckerSpec()
     override protected[this] var state = Seq(
       GroupStatus(
         group1, Array(
-          JobStatus(job1, Seq(PeriodHealth("1", true), PeriodHealth("1", true))),
-          JobStatus(job1, Seq(PeriodHealth("2", false), PeriodHealth("3", false))),
+          JobStatus(job1, tstamp, Seq(PeriodHealth("1", true), PeriodHealth("1", true))),
+          JobStatus(job1, tstamp, Seq(PeriodHealth("2", false), PeriodHealth("3", false))),
         )
       ),
       GroupStatus(
         group1, Array(
-          JobStatus(job1, Seq(PeriodHealth("1", false), PeriodHealth("1", true))),
-          JobStatus(job1, Seq(PeriodHealth("2", false),
+          JobStatus(job1, tstamp, Seq(PeriodHealth("1", false), PeriodHealth("1", true))),
+          JobStatus(job1, tstamp, Seq(PeriodHealth("2", false),
             PeriodHealth("3", false), PeriodHealth("4", false))),
         )
       )
@@ -137,7 +138,7 @@ class StatusCheckerSpec()
 
     "work when state is not empty" in {
       val expected = Seq(GroupStatus(
-        group1, Array(JobStatus(job1, Seq(PeriodHealth("1", false))))
+        group1, Array(JobStatus(job1, tstamp, Seq(PeriodHealth("1", false))))
       ))
 
       singletonChecker.getMissing shouldBe expected
@@ -147,13 +148,13 @@ class StatusCheckerSpec()
       val expected = Seq(
         GroupStatus(
           group1, Array(
-            JobStatus(job1, Seq(PeriodHealth("2", false), PeriodHealth("3", false))),
+            JobStatus(job1, tstamp, Seq(PeriodHealth("2", false), PeriodHealth("3", false))),
           )
         ),
         GroupStatus(
           group1, Array(
-            JobStatus(job1, Seq(PeriodHealth("1", false))),
-            JobStatus(job1, Seq(PeriodHealth("2", false),
+            JobStatus(job1, tstamp, Seq(PeriodHealth("1", false))),
+            JobStatus(job1, tstamp, Seq(PeriodHealth("2", false),
               PeriodHealth("3", false), PeriodHealth("4", false))),
           )
         )
@@ -269,7 +270,8 @@ class StatusCheckerSpec()
       //   StatusChecker.periods(job, )
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
-        new StatusChecker(groups, Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"))))
+        new StatusChecker(groups, Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
+          () => tstamp)))
 
       val expected = List(
         GroupStatus(
@@ -277,11 +279,13 @@ class StatusCheckerSpec()
           Array(
             JobStatus(
               job1,
+              tstamp,
               Vector(
                 PeriodHealth("2020-06-25-14", true),
                 PeriodHealth("2020-06-25-15", false))),
             JobStatus(
               job2,
+              tstamp,
               Vector(
                 PeriodHealth("2020-06-25-15", false))))),
         GroupStatus(
@@ -289,12 +293,14 @@ class StatusCheckerSpec()
           Array(
             JobStatus(
               job3,
+              tstamp,
               Vector(
                 PeriodHealth("2020-06-25-13", false),
                 PeriodHealth("2020-06-25-14", true),
                 PeriodHealth("2020-06-25-15", false))),
             JobStatus(
               job4,
+              tstamp,
               Vector(
                 PeriodHealth("2020-06-25-12", false),
                 PeriodHealth("2020-06-25-13", true),
