@@ -74,8 +74,8 @@ class Routes(statusChecker: ActorRef) {
         case Success(Some(group)) =>
           complete(jsonPrinter.print(group.asJson))
         case _                  =>
-          complete(HttpResponse(StatusCodes.BadRequest,
-            entity = "Group id does not exist"))
+          val error = jsonPrinter.print(errorJson("Group id does not exist"))
+          complete(HttpResponse(StatusCodes.BadRequest, entity = error))
       }
     }
   }
@@ -90,8 +90,9 @@ class Routes(statusChecker: ActorRef) {
           case Success(Some(job)) =>
             complete(jsonPrinter.print(job.asJson))
           case _                  =>
-            complete(HttpResponse(StatusCodes.BadRequest,
-              entity = "Group id and/or job id does not exist"))
+            val error = jsonPrinter
+              .print(errorJson("Group id and/or job id does not exist"))
+            complete(HttpResponse(StatusCodes.BadRequest, entity = error))
         }
     }
   }

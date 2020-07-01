@@ -9,6 +9,16 @@ import io.circe.syntax.EncoderOps
 
 class JsonSerdeSpec() extends Matchers
   with AnyWordSpecLike {
+  "errorJson" must {
+    "produce correct JSON" in {
+      val expected = "Error"
+      val json = errorJson(expected)
+      val actual = json.hcursor.downField("error").as[String].getOrElse(???)
+      actual shouldBe expected
+      json.hcursor.keys.get.size shouldBe 1
+    }
+  }
+
   "AlertLevel" must {
     "produce correct JSON" in {
       (Great: AlertLevel).asJson shouldBe "great".asJson
