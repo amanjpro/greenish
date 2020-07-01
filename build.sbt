@@ -1,6 +1,5 @@
 enablePlugins(JavaAppPackaging)
 enablePlugins(DockerPlugin)
-enablePlugins(AshScriptPlugin)
 
 organization := "me.amanj"
 name := "greenish"
@@ -36,6 +35,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
 )
 
-dockerBaseImage := "openjdk:jre-alpine"
+dockerBaseImage := "openjdk:jre"
 
 bashScriptExtraDefines += """addJava "-Dconfig.file=/app/config.yml""""
