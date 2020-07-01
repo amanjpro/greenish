@@ -7,7 +7,7 @@ import io.circe.Json
 import io.circe.parser._
 import io.circe.syntax.EncoderOps
 
-class JsonSerde() extends Matchers
+class JsonSerdeSpec() extends Matchers
   with AnyWordSpecLike {
   "AlertLevel" must {
     "produce correct JSON" in {

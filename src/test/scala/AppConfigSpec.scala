@@ -5,7 +5,7 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import java.time.ZoneId
 import models._
 
-class CommandRunnerSpec() extends Matchers
+class AppConfigSpec() extends Matchers
   with AnyWordSpecLike {
 
   "AppConfig" must {
