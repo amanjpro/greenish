@@ -6,21 +6,23 @@ import akka.util.Timeout
 import scala.concurrent.duration._
 import akka.actor.{Actor, Props, ActorLogging}
 import scala.sys.process.Process
-import scala.concurrent.{Future, Await}
+import scala.concurrent.{Future}
+import scala.util.{Success, Failure}
 import akka.routing.{ActorRefRoutee, RoundRobinRoutingLogic, Router}
 import akka.pattern.{pipe, ask}
 import scala.language.postfixOps
 import scala.annotation.tailrec
 
 trait StatusCheckerApi {
-  protected[this] var state: Seq[GroupStatus]
+  protected[this] var state: IndexedSeq[GroupStatus]
 
-  protected[checker] def getMissing(): Seq[GroupStatus] = {
+  protected[checker] def getMissing(): IndexedSeq[GroupStatus] = {
     state
       .map { group =>
-        val newJobs: Seq[JobStatus] = group.status.map { job =>
+        val newJobs: Array[JobStatus] = group.status.map { job =>
           job.copy(periodHealth = job.periodHealth.filterNot(_.ok))
         }.filterNot(_.periodHealth.isEmpty)
+          .toArray
 
         group.copy(status = newJobs)
       }.filterNot(_.status.isEmpty)
@@ -36,7 +38,7 @@ trait StatusCheckerApi {
     }
   }
 
-  protected[checker] def allEntries(): Seq[GroupStatus] = state
+  protected[checker] def allEntries(): IndexedSeq[GroupStatus] = state
 
   protected[checker] def summary(): Seq[GroupStatusSummary] =
     state.map { group =>
@@ -48,15 +50,16 @@ trait StatusCheckerApi {
           else if(missing <= status.job.alertLevels.warn) Warn
           else Critical
         JobStatusSummary(status.job.name, missing, alertLevel)
-      }
+      }.toSeq
       GroupStatusSummary(group.group.name, status)
     }
 }
 
 class StatusChecker(groups: Seq[Group],
-    env: Seq[(String, String)] = Seq.empty)
+    env: Seq[(String, String)] = Seq.empty,
+    clockCounter: () => Long = () => System.currentTimeMillis())
       extends Actor with ActorLogging with StatusCheckerApi {
-  override protected[this] var state = Seq.empty[GroupStatus]
+  override protected[this] var state = StatusChecker.initState(groups)
   private[this] implicit val timeout = Timeout(2 minutes)
 
   import context.dispatcher
@@ -74,42 +77,42 @@ class StatusChecker(groups: Seq[Group],
     Router(RoundRobinRoutingLogic(), routees)
   }
 
-  private[this] def refresh(now: ZonedDateTime): Seq[GroupStatus] = {
+  private[this] def refresh(now: ZonedDateTime): Unit = {
 
-    val futureUpdate = groups.map { group =>
-      val jobStatusListFutures = group.jobs.map { entry =>
-        val periods = StatusChecker.periods(entry, now)
+    groups.foreach { group =>
+      group.jobs.foreach { job =>
+        val periods = StatusChecker.periods(job, now)
 
-        val periodHealthFutures = periods.map { period =>
-          val cmd = s"${entry.cmd} $period"
-          (period, self ? Run(cmd, env))
+        val currentClockCounter = clockCounter()
+        val jobStatusUpdateFuture: Seq[Future[PeriodHealth]] = periods.map { period =>
+          val cmd = s"${job.cmd} $period"
+          val future = self ? Run(cmd, env)
+          future.mapTo[Boolean].map(PeriodHealth(period, _))
         }
-        (entry, periodHealthFutures)
-      }
-      (group, jobStatusListFutures)
-    }
 
-    log.info("Refreshing the state")
-    val r = futureUpdate.map { case (group, jobStatusListFutures) =>
-      val jobStatusList = jobStatusListFutures.map { case (entry, periodHealthFutures) =>
-        val periodHealthList = periodHealthFutures.map { case (period, futureHealth) =>
-          PeriodHealth(period, Await.result(futureHealth.mapTo[Boolean], 2 minutes))
-        }
-        JobStatus(entry, periodHealthList)
+        Future.sequence(jobStatusUpdateFuture)
+          .map( periodHealth =>
+              UpdateState(group.groupId,
+                JobStatus(job, currentClockCounter, periodHealth))
+          ).onComplete {
+            case Success(updateMessage) =>
+              self ! updateMessage
+            case Failure(err)          =>
+              log.error(err.getMessage)
+          }
       }
-      GroupStatus(group, jobStatusList)
     }
-    log.info("Refreshing done")
-    r
   }
 
   override def receive: Receive = {
     case Refresh(now) =>
-      val refreshFuture = Future {
-        UpdateState(refresh(now()))
+      refresh(now())
+    case UpdateState(groupId, jobStatus) =>
+      val jobId = jobStatus.job.jobId
+      val bucket = state(groupId)
+      if(bucket.status(jobId).updatedAt < jobStatus.updatedAt) {
+        bucket.status(jobId) = jobStatus
       }
-      refreshFuture.pipeTo(self)
-    case UpdateState(updated) => state = updated
     case GetMissing => context.sender ! getMissing()
     case MaxLag => context.sender ! maxLag()
     case AllEntries => context.sender ! allEntries()
@@ -120,6 +123,15 @@ class StatusChecker(groups: Seq[Group],
 }
 
 object StatusChecker {
+  private[checker] def initState(groups: Seq[Group]): IndexedSeq[GroupStatus] = {
+    groups.map { group =>
+      val jobStatus = group.jobs.map { job =>
+        JobStatus(job, -1, Seq.empty)
+      }
+      GroupStatus(group, jobStatus.toArray)
+    }.toIndexedSeq
+  }
+
   private[checker] def periods(entry: Job, now: ZonedDateTime): Seq[String]= {
     @tailrec def loop(time: ZonedDateTime, count: Int, acc: Seq[String]): Seq[String] = {
       if(count == 0) acc.reverse

@@ -137,6 +137,7 @@ $ curl --silent http://0.0.0.0:8080/missing | jq .
             "critical": 3
           }
         },
+        "updated_at": 1593567901,
         "period_health": [
           {
             "period": "2020-06-27-20",
@@ -196,6 +197,7 @@ $ curl --silent http://0.0.0.0:8080/state | jq .
             "critical": 3
           }
         },
+        "updated_at": 1593567901,
         "period_health": [
           {
             "period": "2020-06-27-20",
@@ -254,10 +256,3 @@ $ docker run --volume PATH_TO_CONFIG_FILE:/app/config.yml --rm -p 8080:8080 gree
 ## Contributing
 
 Contributions are most welcome. Please, fork it, use it, open issues and submit PRs!
-
-## Known issues
-
-As of now, the task that refreshes the monitoring state, waits for all the
-monitoring scripts for all periods to finish their checks. That means, Greenish
-still doesn't support partial state updates, adding it should not be too difficutl,
-but requires some caution. Contributions are more than welcome.

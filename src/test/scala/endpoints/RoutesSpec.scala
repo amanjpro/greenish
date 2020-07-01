@@ -23,10 +23,12 @@ class RoutesSpec()
     with Eventually{
 
   val dir1 = new File("/tmp/2020-06-25-14")
+  val tstamp = 1000L
   implicit val patience: PatienceConfig = PatienceConfig(1 minute, 1 second)
   override def beforeAll: Unit = {
     dir1.mkdirs
-    checker = system.actorOf(Props(new StatusChecker(Seq(group1), Seq.empty)))
+    checker = system.actorOf(Props(new StatusChecker(Seq(group1), Seq.empty,
+      () => tstamp)))
     checker ! Refresh(() => ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
     routes = new Routes(checker)
   }
@@ -38,12 +40,12 @@ class RoutesSpec()
   val lsScript = getClass.getResource("/test-ls").getFile
   val lsEnvScript = getClass.getResource("/test-ls-env").getFile
 
-  val job1 = Job(1, "job1", s"$lsScript /tmp",
+  val job1 = Job(0, "job1", s"$lsScript /tmp",
     "yyyy-MM-dd-HH", Hourly, ZoneId.of("UTC"),
     2, AlertLevels(0, 1, 2, 3),
   )
 
-  val group1 = Group(1, "group1", Seq(job1))
+  val group1 = Group(0, "group1", Seq(job1))
 
   var checker: ActorRef = _
   var routes: Routes = _
@@ -65,8 +67,8 @@ class RoutesSpec()
         Get("/state") ~> routes.routes ~> check {
           val actual = parse(responseAs[String])
             .flatMap(_.as[Seq[GroupStatus]]).getOrElse(null)
-          val expected = Seq(GroupStatus(group1, Seq(JobStatus(
-              job1, Seq(
+          val expected = Seq(GroupStatus(group1, Array(JobStatus(
+              job1, tstamp, Seq(
                 PeriodHealth("2020-06-25-14", true),
                 PeriodHealth("2020-06-25-15", false),
                 )
@@ -81,8 +83,8 @@ class RoutesSpec()
         Get("/missing") ~> routes.routes ~> check {
           val actual = parse(responseAs[String])
             .flatMap(_.as[Seq[GroupStatus]]).getOrElse(null)
-          val expected = Seq(GroupStatus(group1, Seq(JobStatus(
-              job1, Seq(
+          val expected = Seq(GroupStatus(group1, Array(JobStatus(
+              job1, tstamp, Seq(
                 PeriodHealth("2020-06-25-15", false),
                 )
             ))))

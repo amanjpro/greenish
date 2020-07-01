@@ -5,6 +5,7 @@ import io.circe.generic.extras.semiauto.{deriveConfiguredDecoder, deriveConfigur
 
 case class JobStatus (
   job: Job,
+  updatedAt: Long,
   periodHealth: Seq[PeriodHealth],
 ) {
   def countMissing = periodHealth.count(!_.ok)

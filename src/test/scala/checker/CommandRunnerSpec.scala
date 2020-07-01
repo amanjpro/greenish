@@ -19,6 +19,12 @@ class CommandRunnerSpec()
 
   "Run command" must {
 
+    "send back false, when command does not exit" in {
+      val actor = system.actorOf(Props(new CommandRunner()))
+      actor ! Run("a;kjdw", Seq.empty)
+      expectMsg(false)
+    }
+
     "send back false, when command does not exit with 0" in {
       val actor = system.actorOf(Props(new CommandRunner()))
       actor ! Run("false", Seq.empty)

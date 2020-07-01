@@ -7,7 +7,7 @@ import io.circe.Json
 import io.circe.parser._
 import io.circe.syntax.EncoderOps
 
-class JsonSerde() extends Matchers
+class JsonSerdeSpec() extends Matchers
   with AnyWordSpecLike {
   "AlertLevel" must {
     "produce correct JSON" in {
@@ -91,8 +91,8 @@ class JsonSerde() extends Matchers
       Hourly, ZoneId.of("UTC"), 2, AlertLevels(3, 4, 5, 6))
     val group = Group(0, "g", Seq(job))
     val periods = Seq(PeriodHealth("1", true), PeriodHealth("2", false))
-    val jobStatus = JobStatus(job, periods)
-    val groupStatus = GroupStatus(group, Seq(jobStatus))
+    val jobStatus = JobStatus(job, 100, periods)
+    val groupStatus = GroupStatus(group, Array(jobStatus))
 
     "produce correct JSON" in {
             val expected = Json.obj(
@@ -169,11 +169,12 @@ class JsonSerde() extends Matchers
     val job = Job(1, "j", "c", "yyyy-MM-dd",
       Hourly, ZoneId.of("UTC"), 2, AlertLevels(3, 4, 5, 6))
     val periods = Seq(PeriodHealth("1", true), PeriodHealth("2", false))
-    val jobStatus = JobStatus(job, periods)
+    val jobStatus = JobStatus(job, 100, periods)
 
     "produce correct JSON" in {
       val expected = Json.obj(
         "job" -> job.asJson,
+        "updated_at" -> 100.asJson,
         "period_health" -> periods.asJson,
       )
 
