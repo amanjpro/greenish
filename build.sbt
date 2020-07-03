@@ -3,7 +3,7 @@ enablePlugins(DockerPlugin)
 
 organization := "me.amanj"
 name := "greenish"
-version := "0.0.1-SNAPSHOT"
+version := "0.0.1-alpha-7"
 
 scalaVersion := "2.13.2"
 
