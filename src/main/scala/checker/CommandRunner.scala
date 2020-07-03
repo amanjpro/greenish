@@ -12,7 +12,7 @@ class CommandRunner() extends Actor with ActorLogging {
   override def receive: Receive = {
     case Run(cmd, env) =>
       try {
-        val exitStatus = Process(cmd, None, env:_*).! == 0
+        val exitStatus = Process(Seq("bash", "-c", cmd), None, env:_*).! == 0
         context.sender ! exitStatus
       } catch {
         case NonFatal(exp) =>
