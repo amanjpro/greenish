@@ -286,6 +286,7 @@ docker image can be found at the [packages page](https://github.com/amanjpro/gre
 
 - Java 8
 - SBT 1.3.x
+- Bash
 
 ### Building from the source
 
@@ -299,7 +300,8 @@ To run the service from the source:
 #### Packaging
 
 Greenish supports both "fat jar", that is a single and self-contained jar that
-can be distributed and run everwhere (as long as Java is installed):
+can be distributed on any *nix environment (as long as Java and bash are
+installed):
 
 ```
 $ sbt assembly
