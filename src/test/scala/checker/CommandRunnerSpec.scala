@@ -19,16 +19,19 @@ class CommandRunnerSpec()
     with BeforeAndAfterAll {
 
   val dir = new File("/tmp/2020-06-07-01")
+  val dirWithSpaces = new File("/tmp/2020-06-07 01")
   val ls = getClass.getResource("/test-ls").getFile
   val lsEnv = getClass.getResource("/test-ls-env").getFile
   val lsDup = getClass.getResource("/test-duplicate-period").getFile
   val lsPart = getClass.getResource("/test-partial-period").getFile
   override def beforeAll: Unit = {
+    dirWithSpaces.mkdirs
     dir.mkdirs
   }
 
   override def afterAll: Unit = {
     dir.delete
+    dirWithSpaces.delete
     TestKit.shutdownActorSystem(system)
   }
 
@@ -64,6 +67,15 @@ class CommandRunnerSpec()
       val expected = RunResult(Seq(
         PeriodHealth("2020-06-07-01", true),
         PeriodHealth("2020-06-07-02", false)), 0, 1, 2)
+      expectMsg(expected)
+    }
+
+    "Support spaces in the period pattern" in {
+      val actor = system.actorOf(Props(new CommandRunner()))
+      actor ! BatchRun(s"$ls /tmp", Seq("2020-06-07 01", "2020-06-07 02"), Seq.empty, 0, 1, 2)
+      val expected = RunResult(Seq(
+        PeriodHealth("2020-06-07 01", true),
+        PeriodHealth("2020-06-07 02", false)), 0, 1, 2)
       expectMsg(expected)
     }
 

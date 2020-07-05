@@ -12,7 +12,8 @@ class CommandRunner() extends Actor with ActorLogging {
     case BatchRun(cmd, periods, env, group, job, clockCounter) =>
       try {
         val periodsSet = periods.toSet
-        val exec = Seq("bash", "-c", s"$cmd ${periods.mkString(" ")}")
+        val periodsParam = periods.map(p => s"'$p'").mkString(" ")
+        val exec = Seq("bash", "-c", s"$cmd $periodsParam")
         val output = Process(exec, None, env:_*).lazyLines
         val Matcher = "^greenish-period\t(.*)\t(1|0)$".r
         val capturedOutput = output.map { line =>
