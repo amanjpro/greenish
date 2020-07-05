@@ -4,5 +4,4 @@ shift
 
 for period in "$@"; do
   echo -e "greenish-period\t$period\t1"
-  echo -e "greenish-period\t$period\t1"
 done

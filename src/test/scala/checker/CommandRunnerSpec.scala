@@ -22,7 +22,7 @@ class CommandRunnerSpec()
   val ls = getClass.getResource("/test-ls").getFile
   val lsEnv = getClass.getResource("/test-ls-env").getFile
   val lsDup = getClass.getResource("/test-duplicate-period").getFile
-  val lsPart = getClass.getResource("/test-duplicate-period").getFile
+  val lsPart = getClass.getResource("/test-partial-period").getFile
   override def beforeAll: Unit = {
     dir.mkdirs
   }
