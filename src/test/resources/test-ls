@@ -1,3 +1,13 @@
 #!/usr/bin/env bash
 
-ls "$1/$2"
+fst=$1
+
+shift
+
+for period in "$@"; do
+  if ls "$fst/$period"; then
+    echo -e "greenish-period\t$period\t1"
+  else
+    echo -e "greenish-period\t$period\t0"
+  fi
+done
