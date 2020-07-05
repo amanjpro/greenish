@@ -89,7 +89,7 @@ class StatusChecker(groups: Seq[Group],
         val periods = StatusChecker.periods(job, now)
 
         val currentClockCounter = clockCounter()
-        self ! BatchRun(job.cmd, periods.toSet, env,
+        self ! BatchRun(job.cmd, periods, env,
           group.groupId, job.jobId, currentClockCounter)
       }
     }
@@ -102,12 +102,8 @@ class StatusChecker(groups: Seq[Group],
       val bucket = state(groupId)
       val currentStatus = bucket.status(jobId)
       if(currentStatus.updatedAt < clockCounter) {
-        val newPeriodHealth = currentStatus.periodHealth.map {
-          case PeriodHealth(period, _) =>
-            PeriodHealth(period, periodHealth(period))
-          }
         bucket.status(jobId) = currentStatus.copy(updatedAt = clockCounter,
-          periodHealth = newPeriodHealth)
+          periodHealth = periodHealth)
       }
     case GetMissing => context.sender ! getMissing()
     case MaxLag => context.sender ! maxLag()

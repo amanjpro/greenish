@@ -12,6 +12,7 @@ class CommandRunner() extends Actor with ActorLogging {
   override def receive: Receive = {
     case BatchRun(cmd, periods, env, group, job, clockCounter) =>
       try {
+        val periodsSet = periods.toSet
         val output =
           Process(s"$cmd ${periods.mkString(" ")}", None, env:_*).lazyLines_!
         val Matcher = "^greenish-period\t(.*)\t((1|0))$".r
@@ -22,7 +23,7 @@ class CommandRunner() extends Actor with ActorLogging {
             case _                   => None
           }
         }.collect { case Some(periodStatus) => periodStatus }
-         .filter { case (period, _) => periods.contains(period) }
+         .filter { case (period, _) => periodsSet.contains(period) }
          .toSeq
 
        val distinctReturnedPeriods = capturedOutput.map(_._1).distinct
@@ -37,7 +38,11 @@ class CommandRunner() extends Actor with ActorLogging {
                        |Group ID: $group, Job ID: $job
                        |$cmd $periods
                        |state update aborted""".stripMargin)
-       } else context.sender ! RunResult(capturedOutput.toMap, group, job, clockCounter)
+       } else {
+         val mapped = capturedOutput.toMap
+         val periodHealths = periods.map { period => PeriodHealth(period, mapped(period)) }
+         context.sender ! RunResult(periodHealths, group, job, clockCounter)
+       }
       } catch {
         case NonFatal(exp) =>
           log.error(exp.getMessage())
