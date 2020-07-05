@@ -7,14 +7,13 @@ import scala.sys.process.Process
 import scala.util.control.NonFatal
 import akka.actor.ActorLogging
 
-
 class CommandRunner() extends Actor with ActorLogging {
   override def receive: Receive = {
     case BatchRun(cmd, periods, env, group, job, clockCounter) =>
       try {
         val periodsSet = periods.toSet
-        val output =
-          Process(s"$cmd ${periods.mkString(" ")}", None, env:_*).lazyLines_!
+        val exec = Seq("bash", "-c", s"$cmd ${periods.mkString(" ")}")
+        val output = Process(exec, None, env:_*).lazyLines_!
         val Matcher = "^greenish-period\t(.*)\t((1|0))$".r
         val capturedOutput = output.map { line =>
           line match {
@@ -50,4 +49,3 @@ class CommandRunner() extends Actor with ActorLogging {
       }
   }
 }
-
