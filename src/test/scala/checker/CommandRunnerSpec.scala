@@ -32,7 +32,7 @@ class CommandRunnerSpec()
     TestKit.shutdownActorSystem(system)
   }
 
-  "Run command" must {
+  "BatchRun command" must {
 
     "send back nothing, when command does not exit" in {
       val actor = system.actorOf(Props(new CommandRunner()))
