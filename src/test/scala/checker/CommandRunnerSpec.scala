@@ -35,6 +35,109 @@ class CommandRunnerSpec()
     TestKit.shutdownActorSystem(system)
   }
 
+  "parseOutput" must {
+    "parse output lines correctly" in {
+      val lines = LazyList(
+        "greenish-period\t2020-02-17 8\t1",
+        "greenish-period\t2020-02-17-9\t1",
+        "greenish-period\t2020-02-17 10\t0",
+        "greenish-period\t2020-02-17-11\t0",
+        "greenish-period\t2020-02-17 10 38\t0",
+        "Other output",
+        "greenish-period 2020-02-17 10 38 0",
+        "greenish-period\t2020-02-17 10 38\t9",
+      )
+      val periods = Set(
+        "2020-02-17 8",
+        "2020-02-17-9",
+        "2020-02-17 10",
+        "2020-02-17-11",
+        )
+
+      val expected = Seq(
+        ("2020-02-17 8", true),
+        ("2020-02-17-9", true),
+        ("2020-02-17 10", false),
+        ("2020-02-17-11", false),
+        )
+
+      val actual = CommandRunner.parseOutput(lines, periods)
+
+      actual shouldBe expected
+    }
+
+    "ignore lines that do not match the period set" in {
+      val lines = LazyList(
+        "greenish-period\t2020-02-17-10\t1",
+        "greenish-period\t2020-02-17-11\t0",
+      )
+      val periods = Set(
+        "2020-02-17-10",
+        )
+
+      val expected = Seq(
+        ("2020-02-17-10", true),
+        )
+
+      val actual = CommandRunner.parseOutput(lines, periods)
+
+      actual shouldBe expected
+    }
+
+    "capture duplicate periods correctly" in {
+      val lines = LazyList(
+        "greenish-period\t2020-02-17-10\t1",
+        "greenish-period\t2020-02-17-10\t0",
+        "greenish-period\t2020-02-17-11\t0",
+      )
+      val periods = Set(
+        "2020-02-17-10",
+        "2020-02-17-11",
+        )
+
+      val expected = Seq(
+        ("2020-02-17-10", true),
+        ("2020-02-17-10", false),
+        ("2020-02-17-11", false),
+        )
+
+      val actual = CommandRunner.parseOutput(lines, periods)
+
+      actual shouldBe expected
+    }
+
+    "Have no problem if a period in the provided period-set wasn't in the output lines" in {
+      val lines = LazyList(
+        "greenish-period\t2020-02-17-10\t1",
+        "greenish-period\t2020-02-17-11\t0",
+      )
+      val periods = Set(
+        "2020-02-17-10",
+        "2020-02-17-11",
+        "2020-02-17-12",
+        )
+
+      val expected = Seq(
+        ("2020-02-17-10", true),
+        ("2020-02-17-11", false),
+        )
+
+      val actual = CommandRunner.parseOutput(lines, periods)
+
+      actual shouldBe expected
+    }
+  }
+
+  "toBashCommand" must {
+    "single-quote the periods to avoid bash splitting" in {
+      val periods = Seq("20 02", "30 03", "01 10", "400")
+      val cmd = "hey this is a command"
+      val actual = CommandRunner.toBashCommand(cmd, periods)
+      val expected = "hey this is a command '20 02' '30 03' '01 10' '400'"
+      actual shouldBe expected
+    }
+  }
+
   "BatchRun command" must {
 
     "send back nothing, when command does not exit" in {
