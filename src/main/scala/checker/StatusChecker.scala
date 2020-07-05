@@ -102,12 +102,6 @@ class StatusChecker(groups: Seq[Group],
   override def receive: Receive = {
     case Refresh(now) =>
       refresh(now())
-    case UpdateState(groupId, jobStatus) =>
-      val jobId = jobStatus.job.jobId
-      val bucket = state(groupId)
-      if(bucket.status(jobId).updatedAt < jobStatus.updatedAt) {
-        bucket.status(jobId) = jobStatus
-      }
     case RunResult(periodHealth, groupId, jobId, clockCounter) =>
       val bucket = state(groupId)
       val currentStatus = bucket.status(jobId)
@@ -127,8 +121,6 @@ class StatusChecker(groups: Seq[Group],
       context.sender ! getGroupStatus(id)
     case GetJobStatus(gid, jid) =>
       context.sender ! getJobStatus(gid, jid)
-    case run: Run =>
-      router.route(run, context.sender)
     case run: BatchRun =>
       router.route(run, context.sender)
   }

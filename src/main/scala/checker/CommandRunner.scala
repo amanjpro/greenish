@@ -43,15 +43,6 @@ class CommandRunner() extends Actor with ActorLogging {
           log.error(exp.getMessage())
           context.sender ! periods.map((_, false))
       }
-    case Run(cmd, env) =>
-      try {
-        val exitStatus = Process(Seq("bash", "-c", cmd), None, env:_*).! == 0
-        context.sender ! exitStatus
-      } catch {
-        case NonFatal(exp) =>
-          log.error(exp.getMessage())
-          context.sender ! false
-      }
   }
 }
 
