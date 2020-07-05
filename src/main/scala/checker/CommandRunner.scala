@@ -13,8 +13,8 @@ class CommandRunner() extends Actor with ActorLogging {
       try {
         val periodsSet = periods.toSet
         val exec = Seq("bash", "-c", s"$cmd ${periods.mkString(" ")}")
-        val output = Process(exec, None, env:_*).lazyLines_!
-        val Matcher = "^greenish-period\t(.*)\t((1|0))$".r
+        val output = Process(exec, None, env:_*).lazyLines
+        val Matcher = "^greenish-period\t(.*)\t(1|0)$".r
         val capturedOutput = output.map { line =>
           line match {
             case Matcher(period, "1") => Some((period, true))
@@ -23,7 +23,6 @@ class CommandRunner() extends Actor with ActorLogging {
           }
         }.collect { case Some(periodStatus) => periodStatus }
          .filter { case (period, _) => periodsSet.contains(period) }
-         .toSeq
 
        val distinctReturnedPeriods = capturedOutput.map(_._1).distinct
        if(capturedOutput.length != periods.size) {
@@ -45,7 +44,6 @@ class CommandRunner() extends Actor with ActorLogging {
       } catch {
         case NonFatal(exp) =>
           log.error(exp.getMessage())
-          context.sender ! periods.map((_, false))
       }
   }
 }
