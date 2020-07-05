@@ -93,22 +93,8 @@ class StatusChecker(groups: Seq[Group],
         val periods = StatusChecker.periods(job, now)
 
         val currentClockCounter = clockCounter()
-        val jobStatusUpdateFuture: Seq[Future[PeriodHealth]] = periods.map { period =>
-          val cmd = s"${job.cmd} $period"
-          val future = self ? Run(cmd, env)
-          future.mapTo[Boolean].map(PeriodHealth(period, _))
-        }
-
-        Future.sequence(jobStatusUpdateFuture)
-          .map( periodHealth =>
-              UpdateState(group.groupId,
-                JobStatus(job, currentClockCounter, periodHealth))
-          ).onComplete {
-            case Success(updateMessage) =>
-              self ! updateMessage
-            case Failure(err)          =>
-              log.error(err.getMessage)
-          }
+        self ! BatchRun(job.cmd, periods.toSet, env,
+          group.groupId, job.jobId, currentClockCounter)
       }
     }
   }
@@ -122,6 +108,17 @@ class StatusChecker(groups: Seq[Group],
       if(bucket.status(jobId).updatedAt < jobStatus.updatedAt) {
         bucket.status(jobId) = jobStatus
       }
+    case RunResult(periodHealth, groupId, jobId, clockCounter) =>
+      val bucket = state(groupId)
+      val currentStatus = bucket.status(jobId)
+      if(currentStatus.updatedAt < clockCounter) {
+        val newPeriodHealth = currentStatus.periodHealth.map {
+          case PeriodHealth(period, _) =>
+            PeriodHealth(period, periodHealth(period))
+          }
+        bucket.status(jobId) = currentStatus.copy(updatedAt = clockCounter,
+          periodHealth = newPeriodHealth)
+      }
     case GetMissing => context.sender ! getMissing()
     case MaxLag => context.sender ! maxLag()
     case AllEntries => context.sender ! allEntries()
@@ -131,6 +128,8 @@ class StatusChecker(groups: Seq[Group],
     case GetJobStatus(gid, jid) =>
       context.sender ! getJobStatus(gid, jid)
     case run: Run =>
+      router.route(run, context.sender)
+    case run: BatchRun =>
       router.route(run, context.sender)
   }
 }
