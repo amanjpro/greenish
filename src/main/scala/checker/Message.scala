@@ -13,3 +13,7 @@ case class UpdateState(groupId: Int, newJobStatus: JobStatus) extends Message
 case class GetJobStatus(groupId: Int, jobId: Int) extends Message
 case class GetGroupStatus(groupId: Int) extends Message
 case class Run(cmd: String, env: Seq[(String, String)]) extends Message
+case class BatchRun(cmd: String, periods: Set[String], env: Seq[(String, String)],
+  groupId: Int, jobId: Int, clockCounter: Long) extends Message
+case class RunResult(periodHealth: Map[String, Boolean],
+  groupId: Int, jobId: Int, clockCounter: Long) extends Message
