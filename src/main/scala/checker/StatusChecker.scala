@@ -2,15 +2,12 @@ package me.amanj.greenish.checker
 
 import me.amanj.greenish.models._
 import java.time.ZonedDateTime
-import akka.util.Timeout
-import scala.concurrent.duration._
 import akka.actor.{Actor, Props, ActorLogging}
 import scala.sys.process.Process
 import scala.concurrent.{Future}
 import scala.util.{Success, Failure}
 import akka.routing.{ActorRefRoutee, RoundRobinRoutingLogic, Router}
-import akka.pattern.{pipe, ask}
-import scala.language.postfixOps
+import akka.pattern.pipe
 import scala.annotation.tailrec
 
 trait StatusCheckerApi {
@@ -69,7 +66,6 @@ class StatusChecker(groups: Seq[Group],
     clockCounter: () => Long = () => System.currentTimeMillis())
       extends Actor with ActorLogging with StatusCheckerApi {
   override protected[this] var state = StatusChecker.initState(groups)
-  private[this] implicit val timeout = Timeout(2 minutes)
 
   import context.dispatcher
 
