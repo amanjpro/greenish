@@ -23,14 +23,15 @@ class CommandRunner() extends Actor with ActorLogging {
           }
         }.collect { case Some(periodStatus) => periodStatus }
          .filter { case (period, _) => periodsSet.contains(period) }
+         .toList
 
        val distinctReturnedPeriods = capturedOutput.map(_._1).distinct
-       if(capturedOutput.length != periods.size) {
+       if(capturedOutput.length < periods.size) {
          log.error(s"""|Some periods weren't returned for:
                        |Group ID: $group, Job ID: $job
                        |$cmd $periods
                        |state update aborted""".stripMargin)
-       } else if(distinctReturnedPeriods.length != periods.size) {
+       } else if(distinctReturnedPeriods.length != capturedOutput.size) {
          log.error(s"""|Some periods were returned more than once for:
                        |$cmd $periods
                        |Group ID: $group, Job ID: $job

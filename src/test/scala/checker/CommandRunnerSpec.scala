@@ -75,7 +75,6 @@ class CommandRunnerSpec()
         PeriodHealth("2020-06-07-02", false)), 0, 1, 2)
       expectMsg(expected1)
 
-
       actor ! BatchRun(s"$lsEnv .", Seq("2020-06-07-01", "2020-06-07-02"),
         Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"), 0, 1, 2)
       val expected2 = RunResult(Seq(
