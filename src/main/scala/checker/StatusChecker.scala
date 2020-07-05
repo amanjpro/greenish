@@ -69,7 +69,7 @@ class StatusChecker(groups: Seq[Group],
 
   import context.dispatcher
 
-  private[this] val parallelism: Int = groups.map(_.jobs.map(_.lookback).sum).sum
+  private[this] val parallelism: Int = groups.map(_.jobs.length).sum
 
   private[this] val router = {
     val routees = (0 until parallelism) map { _ =>
