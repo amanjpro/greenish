@@ -174,31 +174,90 @@ class RoutesSpec()
       }
     }
 
-    "properly handle GET/group/gid/job/jid request when both gid and jid exist" in {
+    "properly handle GET/group/gid/refresh request when id exists" in {
+      val checker = system.actorOf(Props(
+        new StatusChecker(Seq(group1, group2), Seq.empty, () => tstamp)))
+      val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
+      val routes = new Routes(checker, () => time)
+
+      Get("/group/0/refresh") ~> routes.routes ~> check {
+        status shouldBe StatusCodes.OK
+      }
+
       eventually {
-        Get("/group/0/job/0") ~> routes.routes ~> check {
+        Get("/state") ~> routes.routes ~> check {
           val actual = parse(responseAs[String])
-            .flatMap(_.as[JobStatus]).getOrElse(null)
-          val expected = JobStatus(job1, tstamp, Seq(
-            PeriodHealth("2020-06-25-14", true),
-            PeriodHealth("2020-06-25-15", false),
-            ))
+            .flatMap(_.as[Seq[GroupStatus]]).getOrElse(null)
+          val expected = Seq(
+            GroupStatus(group1, Array(
+              JobStatus(job1, tstamp, Seq(
+                PeriodHealth("2020-06-25-14", true),
+                PeriodHealth("2020-06-25-15", false),
+                )),
+              JobStatus(job2, tstamp, Seq(
+                PeriodHealth("2020-06-25-14", true),
+                PeriodHealth("2020-06-25-15", false),
+                )),
+            )),
+            GroupStatus(group2, Array(
+              JobStatus(job3, -1, Seq.empty)
+            )),
+          )
           actual shouldBe expected
         }
       }
     }
 
-    "properly handle GET/group/gid/job/jid request when gid does not exist" in {
+    "properly handle GET/group/gid/refresh request when gid does not" in {
       eventually {
-        Get("/group/10/job/9") ~> routes.routes ~> check {
+        Get("/group/10/refresh") ~> routes.routes ~> check {
           status shouldBe StatusCodes.BadRequest
         }
       }
     }
 
-    "properly handle GET/group/gid/job/jid request when jid does not exist" in {
+    "properly handle GET/group/gid/job/jid/refresh request when both gid and jid exist" in {
+      val checker = system.actorOf(Props(new StatusChecker(Seq(group1, group2), Seq.empty,
+        () => tstamp)))
+      val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
+      val routes = new Routes(checker, () => time)
+
+      Get("/group/0/job/0/refresh") ~> routes.routes ~> check {
+        status shouldBe StatusCodes.OK
+      }
+
       eventually {
-        Get("/group/0/job/9") ~> routes.routes ~> check {
+        Get("/state") ~> routes.routes ~> check {
+          val actual = parse(responseAs[String])
+            .flatMap(_.as[Seq[GroupStatus]]).getOrElse(null)
+          val expected = Seq(
+            GroupStatus(group1, Array(
+              JobStatus(job1, tstamp, Seq(
+                PeriodHealth("2020-06-25-14", true),
+                PeriodHealth("2020-06-25-15", false),
+                )),
+              JobStatus(job2, -1, Seq.empty)
+            )),
+            GroupStatus(group2, Array(
+              JobStatus(job3, -1, Seq.empty)
+            )),
+          )
+          actual shouldBe expected
+        }
+      }
+    }
+
+    "properly handle GET/group/gid/job/jid/refresh request when gid does not exist" in {
+      eventually {
+        Get("/group/10/job/9/refresh") ~> routes.routes ~> check {
+          status shouldBe StatusCodes.BadRequest
+        }
+      }
+    }
+
+    "properly handle GET/group/gid/job/jid/refresh request when jid does not exist" in {
+      eventually {
+        Get("/group/0/job/9/refresh") ~> routes.routes ~> check {
           status shouldBe StatusCodes.BadRequest
         }
       }
