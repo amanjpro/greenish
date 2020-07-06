@@ -317,6 +317,26 @@ $ curl --silent -G localhost:8080/group/1/job/0 | jq .
 }
 ```
 
+### Refresh the state of job and group by id
+
+You can point refresh the state of a single group by its id:
+
+```
+$ curl --silent -G localhost:8080/group/0/refresh | jq .
+{
+  "ok": "Group status refresh is scheduled"
+}
+```
+
+You can also point refresh the state of a single job by its id:
+
+```
+$ curl --silent -G localhost:8080/group/0/job/0/refresh | jq .
+{
+  "ok": "Job status refresh is scheduled"
+}
+```
+
 An HTML dashboard is expected to land at `/dashboard` in the future releases.
 
 ## Pre-built package
