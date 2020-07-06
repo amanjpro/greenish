@@ -89,7 +89,7 @@ Basically, for all the jobs, find the job that misses the most number of
 period datasets, and return the value.
 
 ```
-$ curl --silent http://0.0.0.0:8080/maxlag | jq .
+$ curl --silent -G http://0.0.0.0:8080/maxlag | jq .
 {
   "lag": 0
 }
@@ -99,7 +99,7 @@ $ curl --silent http://0.0.0.0:8080/maxlag | jq .
 Display the summary of all the monitoring tasks. Very good for a quick glance:
 
 ```
-$ curl --silent http://0.0.0.0:8080/summary | jq .
+$ curl --silent -G http://0.0.0.0:8080/summary | jq .
 [
   {
     "name": "Group1",
@@ -137,7 +137,7 @@ $ curl --silent http://0.0.0.0:8080/summary | jq .
 ### Display all the periods that are missing for all the jobs
 
 ```
-$ curl --silent http://0.0.0.0:8080/missing | jq .
+$ curl --silent -G http://0.0.0.0:8080/missing | jq .
 [
   {
     "group": {
@@ -197,7 +197,7 @@ $ curl --silent http://0.0.0.0:8080/missing | jq .
 A very detailed view for all monitoring tasks:
 
 ```
-$ curl --silent http://0.0.0.0:8080/state | jq .
+$ curl --silent -G http://0.0.0.0:8080/state | jq .
 [
   {
     "group": {
@@ -261,7 +261,7 @@ $ curl --silent http://0.0.0.0:8080/state | jq .
 You can query a single group by its id:
 
 ```
-$ curl --silent localhost:8080/group/1 | jq .
+$ curl --silent -G localhost:8080/group/1 | jq .
 {
   "group": {
     "group_id": 1,
@@ -280,7 +280,7 @@ $ curl --silent localhost:8080/group/1 | jq .
 You can also focus on a single job, and query it:
 
 ```
-$ curl --silent localhost:8080/group/1/job/0 | jq .
+$ curl --silent -G localhost:8080/group/1/job/0 | jq .
 {
   "job": {
     "job_id": 0,
