@@ -179,6 +179,11 @@ class RoutesSpec()
         contentType shouldBe ContentTypes.`text/html(UTF-8)`
       }
     }
-  }
 
+    "properly handle GET/system request" in {
+      Get("/system") ~> routes.routes ~> check {
+        status shouldBe StatusCodes.OK
+      }
+    }
+  }
 }

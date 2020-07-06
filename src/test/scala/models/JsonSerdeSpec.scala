@@ -257,5 +257,16 @@ class JsonSerdeSpec() extends Matchers
       actual shouldBe expected
     }
   }
+
+  "sysinfo" must {
+    "produce correct JSON" in {
+      val json = sysinfo()
+      val cursor = json.hcursor
+      cursor.downField("version").as[Option[String]].isRight shouldBe true
+      cursor.downField("service").as[String] shouldBe Right("Greenish")
+      cursor.downField("uptime").as[Long].isRight shouldBe true
+      cursor.keys.get.size shouldBe 3
+    }
+  }
 }
 

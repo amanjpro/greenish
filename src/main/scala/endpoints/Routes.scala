@@ -8,7 +8,8 @@ import akka.http.scaladsl.server.Directives._
 import scala.concurrent.duration.Duration
 import io.circe.syntax._
 import io.circe.Printer
-import me.amanj.greenish.models._
+import me.amanj.greenish.models
+import models.{sysinfo => _, _}
 import me.amanj.greenish.checker._
 import akka.http.scaladsl.model.HttpResponse
 import scala.util.Success
@@ -107,5 +108,12 @@ class Routes(statusChecker: ActorRef) {
         }
       }
 
-  val routes = getJob ~ getGroup ~ maxlag ~ summary ~ missing ~ state ~ dashboard
+  private[this] val system = get {
+    path("system") {
+      val json = jsonPrinter.print(models.sysinfo())
+      complete(json)
+    }
+  }
+
+  val routes = getJob ~ getGroup ~ maxlag ~ summary ~ missing ~ state ~ dashboard ~ system
 }
