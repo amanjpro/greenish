@@ -384,4 +384,239 @@ class StatusCheckerSpec()
       }
     }
   }
+
+  "RefreshGroup" must {
+    "work and reply with true when group id exists" in {
+      // val actual =
+      //   StatusChecker.periods(job, )
+      val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
+      val actor = system.actorOf(Props(
+        new StatusChecker(groups, Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
+          () => tstamp)))
+
+      val expected = List(
+        GroupStatus(
+          group1,
+          Array(
+            JobStatus(
+              job1,
+              tstamp,
+              Vector(
+                PeriodHealth("2020-06-25-14", true),
+                PeriodHealth("2020-06-25-15", false))),
+            JobStatus(
+              job2,
+              tstamp,
+              Vector(
+                PeriodHealth("2020-06-25-15", false))))),
+        GroupStatus(
+          group2,
+          Array(
+            JobStatus(
+              job3,
+              -1,
+              Vector.empty,
+              ),
+            JobStatus(
+              job4,
+              -1,
+              Vector.empty,
+              ))))
+
+      actor ! RefreshGroup(() => now, 0)
+
+      expectMsg(true)
+
+      eventually {
+        actor ! AllEntries
+        val msg = receiveOne(5 second)
+        msg shouldBe expected
+      }
+    }
+
+    "reply with false when group id does not exist" in {
+      // val actual =
+      //   StatusChecker.periods(job, )
+      val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
+      val actor = system.actorOf(Props(
+        new StatusChecker(groups, Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
+          () => tstamp)))
+
+      val expected = List(
+        GroupStatus(
+          group1,
+          Array(
+            JobStatus(
+              job1,
+              -1,
+              Vector.empty,
+              ),
+            JobStatus(
+              job2,
+              -1,
+              Vector.empty,
+              ))),
+        GroupStatus(
+          group2,
+          Array(
+            JobStatus(
+              job3,
+              -1,
+              Vector.empty,
+              ),
+            JobStatus(
+              job4,
+              -1,
+              Vector.empty,
+              ))))
+
+      actor ! RefreshGroup(() => now, 10)
+
+      expectMsg(false)
+
+      actor ! AllEntries
+      val msg = receiveOne(5 second)
+      msg shouldBe expected
+    }
+  }
+
+  "RefreshJob" must {
+    "work and reply with true when group and job ids exist" in {
+      // val actual =
+      //   StatusChecker.periods(job, )
+      val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
+      val actor = system.actorOf(Props(
+        new StatusChecker(groups, Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
+          () => tstamp)))
+
+      val expected = List(
+        GroupStatus(
+          group1,
+          Array(
+            JobStatus(
+              job1,
+              tstamp,
+              Vector(
+                PeriodHealth("2020-06-25-14", true),
+                PeriodHealth("2020-06-25-15", false))),
+            JobStatus(
+              job2,
+              -1,
+              Vector.empty,
+              ))),
+        GroupStatus(
+          group2,
+          Array(
+            JobStatus(
+              job3,
+              -1,
+              Vector.empty,
+              ),
+            JobStatus(
+              job4,
+              -1,
+              Vector.empty,
+              ))))
+
+      actor ! RefreshJob(() => now, 0, 0)
+
+      expectMsg(true)
+
+      eventually {
+        actor ! AllEntries
+        val msg = receiveOne(5 second)
+        msg shouldBe expected
+      }
+    }
+
+    "reply with false when group id does not exist" in {
+      // val actual =
+      //   StatusChecker.periods(job, )
+      val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
+      val actor = system.actorOf(Props(
+        new StatusChecker(groups, Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
+          () => tstamp)))
+
+      val expected = List(
+        GroupStatus(
+          group1,
+          Array(
+            JobStatus(
+              job1,
+              -1,
+              Vector.empty,
+              ),
+            JobStatus(
+              job2,
+              -1,
+              Vector.empty,
+              ))),
+        GroupStatus(
+          group2,
+          Array(
+            JobStatus(
+              job3,
+              -1,
+              Vector.empty,
+              ),
+            JobStatus(
+              job4,
+              -1,
+              Vector.empty,
+              ))))
+
+      actor ! RefreshJob(() => now, 10, 0)
+
+      expectMsg(false)
+
+      actor ! AllEntries
+      val msg = receiveOne(5 second)
+      msg shouldBe expected
+    }
+
+    "reply with false when job id does not exist" in {
+      // val actual =
+      //   StatusChecker.periods(job, )
+      val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
+      val actor = system.actorOf(Props(
+        new StatusChecker(groups, Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
+          () => tstamp)))
+
+      val expected = List(
+        GroupStatus(
+          group1,
+          Array(
+            JobStatus(
+              job1,
+              -1,
+              Vector.empty,
+              ),
+            JobStatus(
+              job2,
+              -1,
+              Vector.empty,
+              ))),
+        GroupStatus(
+          group2,
+          Array(
+            JobStatus(
+              job3,
+              -1,
+              Vector.empty,
+              ),
+            JobStatus(
+              job4,
+              -1,
+              Vector.empty,
+              ))))
+
+      actor ! RefreshJob(() => now, 0, 10)
+
+      expectMsg(false)
+
+      actor ! AllEntries
+      val msg = receiveOne(5 second)
+      msg shouldBe expected
+    }
+  }
 }

@@ -82,22 +82,44 @@ class StatusChecker(groups: Seq[Group],
     Router(RoundRobinRoutingLogic(), routees)
   }
 
+  private[this] def refresh(now: ZonedDateTime, group: Group, job: Job): Unit = {
+    val periods = StatusChecker.periods(job, now)
+
+    val currentClockCounter = clockCounter()
+    self ! BatchRun(job.cmd, periods, env,
+      group.groupId, job.jobId, currentClockCounter)
+  }
+
+  private[this] def refresh(now: ZonedDateTime, group: Group): Unit = {
+    group.jobs.foreach { job => refresh(now, group, job) }
+  }
+
   private[this] def refresh(now: ZonedDateTime): Unit = {
 
     groups.foreach { group =>
-      group.jobs.foreach { job =>
-        val periods = StatusChecker.periods(job, now)
-
-        val currentClockCounter = clockCounter()
-        self ! BatchRun(job.cmd, periods, env,
-          group.groupId, job.jobId, currentClockCounter)
-      }
+      refresh(now, group)
     }
   }
 
   override def receive: Receive = {
     case Refresh(now) =>
       refresh(now())
+    case RefreshGroup(now, groupId) =>
+      groups.find(_.groupId == groupId) match {
+        case Some(group) =>
+          refresh(now(), group)
+          context.sender ! true
+        case None        =>
+          context.sender ! false
+      }
+    case RefreshJob(now, groupId, jobId) =>
+      val result = for {
+        group <- groups.find(_.groupId == groupId)
+        job   <- group.jobs.lift(jobId)
+      } yield {
+        refresh(now(), group, job)
+      }
+      context.sender ! result.isDefined
     case RunResult(periodHealth, groupId, jobId, clockCounter) =>
       val bucket = state(groupId)
       val currentStatus = bucket.status(jobId)
