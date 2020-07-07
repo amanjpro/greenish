@@ -44,15 +44,15 @@ class SummaryContainer extends React.Component {
       )
     } else {
       return (
-        <div key='GridDiv' className='grid-container'>
+        <div key='overview-grid' className='grid-container'>
           {items.map((group, gid) => (
             <div key={`group-${gid}`} className='grid-item'>
               <h3 key={`group-${gid}-header`}>{group.name}</h3>
               <table key={`group-${gid}-table`}>
                 <tbody key={`group-${gid}-tbody`}>
                   <tr key={`group-${gid}-tr-header`}>
-                    <th key={`group-${gid}-th-1`}>Job Name</th>
-                    <th key={`group-${gid}-th-2`}># Missing Data Sets</th>
+                    <th key={`group-${gid}-th-1`}>Job name</th>
+                    <th key={`group-${gid}-th-2`}># Missing data sets</th>
                   </tr>
                   {group["status"].map((job, jid) =>(
                     <tr key={`job-${gid}-${jid}-row`} className={job.alert_level}>
