@@ -1,8 +1,29 @@
 body {
-  background-color: lightblue;
+  background-color: white;
 }
 
 h1 {
   color: navy;
   margin-left: 20px;
+}
+
+.grid-container {
+  display: grid;
+  grid-gap: 50px 100px;
+}
+
+.great {
+  background-color: lightgreen;
+}
+
+.normal {
+  background-color: lightblue;
+}
+
+.warn {
+  background-color: beige;
+}
+
+.critical {
+  background-color: indianred;
 }
