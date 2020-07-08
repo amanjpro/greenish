@@ -1,5 +1,3 @@
-const e = React.createElement;
-
 class SummaryContainer extends React.Component {
   constructor(props) {
     super(props);
@@ -69,6 +67,3 @@ class SummaryContainer extends React.Component {
     }
   }
 }
-
-const domContainer = document.querySelector('#summary_container');
-ReactDOM.render(e(SummaryContainer), domContainer);

@@ -1,22 +1,22 @@
-class StateContainer extends React.Component {
+class GroupContainer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       error: null,
       isLoaded: false,
-      groups: [],
-      endpoint: props.endpoint,
+      gid: props.group,
+      group: null
     };
   }
 
   componentDidMount() {
-    fetch(`/${this.state.endpoint}`)
+    fetch(`/group/${this.state.gid}`)
       .then(res => res.json())
       .then(
-        (groups) => {
+        (group) => {
           this.setState({
             isLoaded: true,
-            groups: groups
+            group: group
           });
         },
         // Note: it's important to handle errors here
@@ -32,7 +32,7 @@ class StateContainer extends React.Component {
   }
 
   render() {
-    const { error, isLoaded, groups, endpoint} = this.state;
+    const { error, isLoaded, gid, group } = this.state;
     if (error) {
       return (
         <div>Error: {error.message}</div>
@@ -43,8 +43,8 @@ class StateContainer extends React.Component {
       )
     } else {
       return (
-        <div key={`${endpoint}-div-grid`} className='grid-container'>
-          {renderState(groups, endpoint, 'grid-item')}
+        <div key='group-div-view'>
+          {renderGroup(group, 'group-view', 'grid-item')}
         </div>
       )
     }

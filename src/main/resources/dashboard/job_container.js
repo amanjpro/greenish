@@ -1,22 +1,23 @@
-class StateContainer extends React.Component {
+class JobContainer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       error: null,
       isLoaded: false,
-      groups: [],
-      endpoint: props.endpoint,
+      gid: props.group,
+      jid: props.job,
+      job: null
     };
   }
 
   componentDidMount() {
-    fetch(`/${this.state.endpoint}`)
+    fetch(`/group/${this.state.gid}/job/${this.state.jid}`)
       .then(res => res.json())
       .then(
-        (groups) => {
+        (job) => {
           this.setState({
             isLoaded: true,
-            groups: groups
+            job: job
           });
         },
         // Note: it's important to handle errors here
@@ -32,7 +33,7 @@ class StateContainer extends React.Component {
   }
 
   render() {
-    const { error, isLoaded, groups, endpoint} = this.state;
+    const { error, isLoaded, gid, jid, job } = this.state;
     if (error) {
       return (
         <div>Error: {error.message}</div>
@@ -42,9 +43,11 @@ class StateContainer extends React.Component {
         <div>Loading...</div>
       )
     } else {
+      const jobs = renderJob(job, this.state.gid, 'job-view')
       return (
-        <div key={`${endpoint}-div-grid`} className='grid-container'>
-          {renderState(groups, endpoint, 'grid-item')}
+        <div key='job-div-view'>
+          <h3 key={`job-view-${gid}-${jid}-header`}>{job.job.name}</h3>
+          {encloseInTable(jobs, 'job-view', this.state.gid)}
         </div>
       )
     }
