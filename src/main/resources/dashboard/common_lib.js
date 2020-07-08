@@ -37,8 +37,8 @@ function renderGroup(groupStatus, subClassName, keyPrefix, sub) {
   const jobs = groupStatus["status"].map(jobStatus => (
     renderJob(jobStatus, gid, keyPrefix)))
   return (
-    <div key={`${keyPrefix}-group-${gid}`} className={subClassName}>
-      <h3 key={`${keyPrefix}-group-${gid}-header`}>{group.name}{sub}</h3>
+    <div key={`${keyPrefix}-group-${gid}`} className={`${subClassName} dashboard-box`}>
+      <h2 key={`${keyPrefix}-group-${gid}-header`}>{group.name}{sub}</h2>
       {encloseInTable(jobs, keyPrefix, gid)}
     </div>);
 }

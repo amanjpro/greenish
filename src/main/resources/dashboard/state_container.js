@@ -53,7 +53,7 @@ class StateContainer extends React.Component {
       )
     } else {
       return (
-        <div key={`${endpoint}-div-grid`} className='grid-container'>
+        <div key={`${endpoint}-div-grid`} className='grid-container-detail'>
           {renderState(groups, endpoint, 'grid-item')}
         </div>
       )

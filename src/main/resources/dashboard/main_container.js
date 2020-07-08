@@ -16,9 +16,9 @@ class MainContainer extends React.Component {
     if (page == 'state') {
       return (
         <div>
-          <h3 key="state_header">All data sets&nbsp;
+          <h2 key="state_header">All data sets&nbsp;
             <sub className="link" onClick={() => this.setState({page:"main"})}>See main dashboard</sub>
-          </h3>
+          </h2>
           <StateContainer endpoint='state'/>
         </div>
       )
@@ -30,9 +30,10 @@ class MainContainer extends React.Component {
       return(
         <div>
           <SummaryContainer handler={this.handler}/>
-          <h3 key="state_header">Detailed missing periods&nbsp;
+          <br/><hr/><br/>
+          <h2 key="state_header">Detailed missing periods&nbsp;
             <sub className="link" onClick={() => this.setState({page:"state"})}>See all periods</sub>
-          </h3>
+          </h2>
           <StateContainer endpoint='missing'/>
         </div>
       )
