@@ -10,7 +10,7 @@ function timestampToDate(timestamp) {
 
 function renderState(groups, subClassName, keyPrefix) {
   return (
-    groups.map(groupStatus => renderGroup(groupStatus, subClassName, keyPrefix))
+    groups.map(groupStatus => renderGroup(groupStatus, subClassName, keyPrefix, ""))
   );
 }
 
@@ -29,14 +29,14 @@ function encloseInTable(trs, gid, keyPrefix) {
   );
 }
 
-function renderGroup(groupStatus, subClassName, keyPrefix) {
+function renderGroup(groupStatus, subClassName, keyPrefix, sub) {
   const group = groupStatus.group;
   const gid = group.group_id;
   const jobs = groupStatus["status"].map(jobStatus => (
     renderJob(jobStatus, gid, keyPrefix)))
   return (
     <div key={`${keyPrefix}-group-${gid}`} className={subClassName}>
-      <h3 key={`${keyPrefix}-group-${gid}-header`}>{group.name}</h3>
+      <h3 key={`${keyPrefix}-group-${gid}-header`}>{group.name}{sub}</h3>
       {encloseInTable(jobs, keyPrefix, gid)}
     </div>);
 }

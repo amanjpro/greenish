@@ -29,7 +29,6 @@ class MainContainer extends React.Component {
     } else { // page == 'main'
       return(
         <div>
-          <h1 key="greenish_dashboard_header">Greenish dashboard</h1>
           <SummaryContainer handler={this.handler}/>
           <h3 key="state_header">Detailed missing periods&nbsp;
             <sub className="link" onClick={() => this.setState({page:"state"})}>See all periods</sub>
@@ -50,7 +49,10 @@ class MainContainer extends React.Component {
 
   render() {
     return (
-      this.renderMain(this.state.page, this.state.gid, this.state.jid)
+      <div>
+        <h1 key="greenish_dashboard_header">Greenish dashboard</h1>
+        {this.renderMain(this.state.page, this.state.gid, this.state.jid)}
+      </div>
     )
   }
 }

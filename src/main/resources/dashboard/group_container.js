@@ -47,10 +47,12 @@ class GroupContainer extends React.Component {
         <div>Loading...</div>
       )
     } else {
+      const sub = (
+        &nbsp;<sub className="link" onClick={this.handleBack}>See main dashboard</sub>
+      )
       return (
         <div key='group-div-view'>
-          <h5 className="link" onClick={this.handleBack}>See main dashboard</h5>
-          {renderGroup(group, 'group-view', 'grid-item')}
+          {renderGroup(group, 'group-view', 'grid-item', sub)}
         </div>
       )
     }
