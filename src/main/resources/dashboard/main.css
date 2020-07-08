@@ -37,3 +37,10 @@ h1 {
 .link:hover {
   cursor:pointer
 }
+
+.dashboard-box {
+  background:ghostwhite;
+  color:darkslategray;
+  padding: 10px;
+  box-shadow: 5px 5px lightgray;
+}
