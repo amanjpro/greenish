@@ -1,9 +1,17 @@
 body {
-  background-color: snow;
+  background-color: #233502;
   color: darkolivegreen;
+  padding: 0px;
+  margin: 0px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 td {
+  margin: 5px;
+  padding: 5px;
+}
+
+th {
   margin: 5px;
   padding: 5px;
 }
@@ -30,6 +38,16 @@ table {
   grid-gap: 50px 100px;
   grid-template-columns: repeat(2, 1fr);
   justify-content: center;
+}
+
+.detail-div {
+  padding: 10px;
+  background-color: #f3f2f2
+}
+
+.summary-div {
+  padding: 10px;
+  background-color: #e8ece9;
 }
 
 .great {
@@ -59,8 +77,19 @@ table {
   cursor: pointer
 }
 
-.dashboard-box {
+.detail-box {
   background: whitesmoke;
   padding: 10px;
   box-shadow: 5px 5px lightgray;
+}
+
+.summary-box {
+  background: #f6fdfc;
+  padding: 10px;
+  box-shadow: 5px 5px lightgray;
+}
+
+.greenish-header {
+  margin: 8px;
+  color: snow;
 }

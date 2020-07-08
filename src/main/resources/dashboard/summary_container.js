@@ -67,7 +67,7 @@ class SummaryContainer extends React.Component {
             items.map(group => {
               const gid = group.group_id;
               return (
-                <div key={`group-${gid}`} className='grid-item dashboard-box'>
+                <div key={`group-${gid}`} className='grid-item summary-box'>
                   <h2 key={`group-${gid}-header`} className='link'
                         onClick={() => {this.handleGroupClick(gid)}}>
                     {group.name}

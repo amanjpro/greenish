@@ -15,7 +15,7 @@ class MainContainer extends React.Component {
   renderMain(page, gid, jid, handler) {
     if (page == 'state') {
       return (
-        <div>
+        <div className='detail-div'>
           <h2 key="state_header">All data sets&nbsp;
             <sub className="link" onClick={() => this.setState({page:"main"})}>See main dashboard</sub>
           </h2>
@@ -23,18 +23,31 @@ class MainContainer extends React.Component {
         </div>
       )
     } else if(page == 'group'){
-      return(<GroupContainer group={gid} handler={this.handler}/>)
+      return(
+        <div className="detail-div">
+          <GroupContainer group={gid} handler={this.handler}/>
+        </div>
+      )
     } else if(page == 'job'){
-      return(<JobContainer group={gid} job={jid} handler={this.handler}/>)
+      return(
+        <div className="detail-div">
+          <JobContainer group={gid} job={jid} handler={this.handler}/>
+        </div>
+      )
     } else { // page == 'main'
       return(
         <div>
-          <SummaryContainer handler={this.handler}/>
-          <br/><hr/><br/>
-          <h2 key="state_header">Detailed missing periods&nbsp;
-            <sub className="link" onClick={() => this.setState({page:"state"})}>See all periods</sub>
-          </h2>
-          <StateContainer endpoint='missing'/>
+          <div className='summary-div'>
+            <h2 key="state_header">Summary</h2>
+            <SummaryContainer handler={this.handler}/>
+          <br/><br/>
+          </div>
+          <div className="detail-div">
+            <h2 key="state_header">Detailed missing periods&nbsp;
+              <sub className="link" onClick={() => this.setState({page:"state"})}>See all periods</sub>
+            </h2>
+            <StateContainer endpoint='missing'/>
+          </div>
         </div>
       )
     }
@@ -51,7 +64,7 @@ class MainContainer extends React.Component {
   render() {
     return (
       <div>
-        <h1 key="greenish_dashboard_header">Greenish dashboard</h1>
+        <h1 key="greenish_dashboard_header" className='greenish-header'>Greenish dashboard</h1>
         {this.renderMain(this.state.page, this.state.gid, this.state.jid)}
       </div>
     )

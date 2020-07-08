@@ -60,7 +60,7 @@ class JobContainer extends React.Component {
     } else {
       const jobs = renderJob(job, this.state.gid, 'job-view')
       return (
-        <div key='job-div-view' className='dashboard-box'>
+        <div key='job-div-view' className='detail-box'>
           <h2 key={`job-view-${gid}-${jid}-header`}>
             {job.job.name}&nbsp;
             <sub className="link" onClick={this.handleBack}>See main dashboard</sub>
