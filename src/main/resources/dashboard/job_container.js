@@ -8,6 +8,7 @@ class JobContainer extends React.Component {
       jid: props.job,
       job: null
     };
+    this.handleBack = this.handleBack.bind(this);
   }
 
   componentDidMount() {
@@ -32,6 +33,10 @@ class JobContainer extends React.Component {
       )
   }
 
+  handleBack() {
+    this.props.handler("main", null, null);
+  }
+
   render() {
     const { error, isLoaded, gid, jid, job } = this.state;
     if (error) {
@@ -46,7 +51,10 @@ class JobContainer extends React.Component {
       const jobs = renderJob(job, this.state.gid, 'job-view')
       return (
         <div key='job-div-view'>
-          <h3 key={`job-view-${gid}-${jid}-header`}>{job.job.name}</h3>
+          <h3 key={`job-view-${gid}-${jid}-header`}>
+            {job.job.name}&nbsp;
+            <sub className="link" onClick={this.handleBack}>See main dashboard</sub>
+          </h3>
           {encloseInTable(jobs, 'job-view', this.state.gid)}
         </div>
       )

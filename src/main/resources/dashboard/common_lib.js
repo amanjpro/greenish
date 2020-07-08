@@ -47,7 +47,8 @@ function renderJob(jobStatus, gid, keyPrefix) {
     const jid = job.job_id;
     const date = timestampToDate(jobStatus.updated_at);
     return(jobStatus.period_health.map((ph, i) => (
-      <tr key={`${keyPrefix}-job-${gid}-${jid}-${i}-row`}>
+      <tr key={`${keyPrefix}-job-${gid}-${jid}-${i}-row`}
+          className={(ph.ok == "true")?"great":"critical"}>
         <td key={`${keyPrefix}-job-${gid}-${jid}-${i}-job`}>{job.name}</td>
         <td key={`${keyPrefix}-job-${gid}-${jid}-${i}-period`}>{ph.period}</td>
         <td key={`${keyPrefix}-job-${gid}-${jid}-${i}-updated`}>{date}</td>

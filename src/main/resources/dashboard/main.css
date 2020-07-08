@@ -27,5 +27,13 @@ h1 {
 }
 
 .critical {
-  background-color: indianred;
+  background-color: lightcoral;
+}
+
+.link {
+  color:steelblue;
+}
+
+.link:hover {
+  cursor:pointer
 }

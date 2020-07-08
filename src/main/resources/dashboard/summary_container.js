@@ -6,6 +6,8 @@ class SummaryContainer extends React.Component {
       isLoaded: false,
       items: []
     };
+    this.handleGroupClick = this.handleGroupClick.bind(this);
+    this.handleJobClick = this.handleJobClick.bind(this);
   }
 
   componentDidMount() {
@@ -30,6 +32,14 @@ class SummaryContainer extends React.Component {
       )
   }
 
+  handleGroupClick(gid) {
+    this.props.handler("group", gid, null);
+  }
+
+  handleJobClick(gid, jid) {
+    this.props.handler("job", gid, jid);
+  }
+
   render() {
     const { error, isLoaded, items } = this.state;
     if (error) {
@@ -47,8 +57,11 @@ class SummaryContainer extends React.Component {
             items.map(group => {
               const gid = group.group_id;
               return (
-                  <div key={`group-${gid}`} className='grid-item'>
-                  <h3 key={`group-${gid}-header`}>{group.name}</h3>
+                <div key={`group-${gid}`} className='grid-item'>
+                  <h3 key={`group-${gid}-header`} className='link'
+                        onClick={() => {this.handleGroupClick(gid)}}>
+                    {group.name}
+                  </h3>
                   <table key={`group-${gid}-table`}>
                     <tbody key={`group-${gid}-tbody`}>
                       <tr key={`group-${gid}-tr-header`}>
@@ -59,9 +72,14 @@ class SummaryContainer extends React.Component {
                         group["status"].map(job =>{
                           const jid = job.job_id;
                           return(
-                            <tr key={`job-${gid}-${jid}-row`} className={job.alert_level}>
-                              <td key={`job-${gid}-${jid}-name`}>{job.name}</td>
-                              <td key={`job-${gid}-${jid}-missing`}>{job.missing}</td>
+                            <tr key={`job-${gid}-${jid}-row`}>
+                              <td key={`job-${gid}-${jid}-name`}
+                                  className='link'
+                                  onClick={() => {this.handleJobClick(gid, jid)}}>
+                                {job.name}
+                              </td>
+                              <td className={job.alert_level}
+                                key={`job-${gid}-${jid}-missing`}>{job.missing}</td>
                             </tr>
                           )
                         }

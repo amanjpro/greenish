@@ -1,29 +1,5 @@
 const e = React.createElement;
 
-function renderMain(page, gid, jid) {
-  if (page == 'state') {
-    return (
-      <div>
-        <h3 key="state_header">All data sets</h3>
-        <StateContainer endpoint='state'/>
-      </div>
-    )
-  } else if(page == 'group'){
-    return(<GroupContainer group={gid}/>)
-  } else if(page == 'job'){
-    return(<JobContainer group={gid} job={jid}/>)
-  } else { // page == 'main'
-    return(
-      <div>
-        <h1 key="greenish_dashboard_header">Greenish dashboard</h1>
-        <SummaryContainer/>
-        <h3 key="state_header">Detailed missing periods</h3>
-        <StateContainer endpoint='missing'/>
-      </div>
-    )
-  }
-}
-
 class MainContainer extends React.Component {
   constructor(props) {
     super(props);
@@ -32,11 +8,49 @@ class MainContainer extends React.Component {
       gid: null,
       jid: null
     }
+    this.handler = this.handler.bind(this);
+    this.renderMain = this.renderMain.bind(this);
+  }
+
+  renderMain(page, gid, jid, handler) {
+    if (page == 'state') {
+      return (
+        <div>
+          <h3 key="state_header">All data sets&nbsp;
+            <sub className="link" onClick={() => this.setState({page:"main"})}>See main dashboard</sub>
+          </h3>
+          <StateContainer endpoint='state'/>
+        </div>
+      )
+    } else if(page == 'group'){
+      return(<GroupContainer group={gid} handler={this.handler}/>)
+    } else if(page == 'job'){
+      return(<JobContainer group={gid} job={jid} handler={this.handler}/>)
+    } else { // page == 'main'
+      return(
+        <div>
+          <h1 key="greenish_dashboard_header">Greenish dashboard</h1>
+          <SummaryContainer handler={this.handler}/>
+          <h3 key="state_header">Detailed missing periods&nbsp;
+            <sub className="link" onClick={() => this.setState({page:"state"})}>See all periods</sub>
+          </h3>
+          <StateContainer endpoint='missing'/>
+        </div>
+      )
+    }
+  }
+
+  handler(page, gid, jid) {
+    this.setState({
+      page: page,
+      gid: gid,
+      jid: jid,
+    })
   }
 
   render() {
     return (
-      renderMain(this.state.page, this.state.gid, this.state.jid)
+      this.renderMain(this.state.page, this.state.gid, this.state.jid)
     )
   }
 }

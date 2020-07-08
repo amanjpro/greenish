@@ -7,6 +7,7 @@ class GroupContainer extends React.Component {
       gid: props.group,
       group: null
     };
+    this.handleBack = this.handleBack.bind(this);
   }
 
   componentDidMount() {
@@ -31,6 +32,10 @@ class GroupContainer extends React.Component {
       )
   }
 
+  handleBack() {
+    this.props.handler("main", null, null);
+  }
+
   render() {
     const { error, isLoaded, gid, group } = this.state;
     if (error) {
@@ -44,6 +49,7 @@ class GroupContainer extends React.Component {
     } else {
       return (
         <div key='group-div-view'>
+          <h5 className="link" onClick={this.handleBack}>See main dashboard</h5>
           {renderGroup(group, 'group-view', 'grid-item')}
         </div>
       )
