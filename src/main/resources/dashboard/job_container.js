@@ -1,4 +1,5 @@
 class JobContainer extends React.Component {
+  intervalID
   constructor(props) {
     super(props);
     this.state = {
@@ -12,6 +13,14 @@ class JobContainer extends React.Component {
   }
 
   componentDidMount() {
+    this.fetchData()
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.intervalID);
+  }
+
+  fetchData = () => {
     fetch(`/group/${this.state.gid}/job/${this.state.jid}`)
       .then(res => res.json())
       .then(
@@ -31,6 +40,7 @@ class JobContainer extends React.Component {
           });
         }
       )
+    this.intervalID = setTimeout(this.fetchData, fetchInterval);
   }
 
   handleBack() {

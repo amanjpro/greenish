@@ -1,4 +1,5 @@
 class GroupContainer extends React.Component {
+  intervalID
   constructor(props) {
     super(props);
     this.state = {
@@ -10,7 +11,15 @@ class GroupContainer extends React.Component {
     this.handleBack = this.handleBack.bind(this);
   }
 
+  componentWillUnmount() {
+    clearTimeout(this.intervalID);
+  }
+
   componentDidMount() {
+    this.fetchData()
+  }
+
+  fetchData = () => {
     fetch(`/group/${this.state.gid}`)
       .then(res => res.json())
       .then(
@@ -29,7 +38,8 @@ class GroupContainer extends React.Component {
             error
           });
         }
-      )
+      );
+    this.intervalID = setTimeout(this.fetchData, fetchInterval);
   }
 
   handleBack() {
@@ -48,7 +58,7 @@ class GroupContainer extends React.Component {
       )
     } else {
       const sub = (
-        &nbsp;<sub className="link" onClick={this.handleBack}>See main dashboard</sub>
+        <sub className="link" onClick={this.handleBack}>&nbsp;See main dashboard</sub>
       )
       return (
         <div key='group-div-view'>

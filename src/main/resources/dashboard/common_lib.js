@@ -1,3 +1,5 @@
+const fetchInterval = 5000
+
 function timestampToDate(timestamp) {
   return new Intl.DateTimeFormat('en-GB', {
     year: 'numeric',

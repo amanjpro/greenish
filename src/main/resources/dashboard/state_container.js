@@ -1,4 +1,5 @@
 class StateContainer extends React.Component {
+  intervalID
   constructor(props) {
     super(props);
     this.state = {
@@ -10,6 +11,14 @@ class StateContainer extends React.Component {
   }
 
   componentDidMount() {
+    this.fetchData()
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.intervalID);
+  }
+
+  fetchData = () => {
     fetch(`/${this.state.endpoint}`)
       .then(res => res.json())
       .then(
@@ -29,6 +38,7 @@ class StateContainer extends React.Component {
           });
         }
       )
+    this.intervalID = setTimeout(this.fetchData, fetchInterval);
   }
 
   render() {

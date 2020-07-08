@@ -1,4 +1,5 @@
 class SummaryContainer extends React.Component {
+  intervalID
   constructor(props) {
     super(props);
     this.state = {
@@ -11,6 +12,14 @@ class SummaryContainer extends React.Component {
   }
 
   componentDidMount() {
+    this.fetchData()
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.intervalID);
+  }
+
+  fetchData = () => {
     fetch("/summary")
       .then(res => res.json())
       .then(
@@ -30,6 +39,7 @@ class SummaryContainer extends React.Component {
           });
         }
       )
+    this.intervalID = setTimeout(this.fetchData, fetchInterval);
   }
 
   handleGroupClick(gid) {
