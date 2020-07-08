@@ -89,7 +89,18 @@ table {
   box-shadow: 5px 5px lightgray;
 }
 
+.header-div {
+  width: 100%;
+  margin-right: 8px;
+}
+
 .greenish-header {
   margin: 8px;
+  color: snow;
+}
+
+.version-div {
+  text-align: right;
+  right:8px;
   color: snow;
 }
