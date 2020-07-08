@@ -102,14 +102,17 @@ Display the summary of all the monitoring tasks. Very good for a quick glance:
 $ curl --silent -G http://0.0.0.0:8080/summary | jq .
 [
   {
+    "group_id": 0,
     "name": "Group1",
     "status": [
       {
+        "job_id": 0,
         "name": "Job1",
         "missing": 4,
         "alert_level": "warn"
       },
       {
+        "job_id": 1,
         "name": "Job2",
         "missing": 2,
         "alert_level": "normal"
@@ -117,14 +120,17 @@ $ curl --silent -G http://0.0.0.0:8080/summary | jq .
     ]
   },
   {
+    "group_id": 0,
     "name": "Group2",
     "status": [
       {
+        "job_id": 0,
         "name": "Job3",
         "missing": 6,
         "alert_level": "critical"
       },
       {
+        "job_id": 1,
         "name": "Job4",
         "missing": 0,
         "alert_level": "great"

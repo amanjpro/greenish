@@ -172,7 +172,7 @@ class StatusCheckerSpec()
 
     "work when state is not empty" in {
       val expected = Seq(
-          GroupStatusSummary("group1", Seq(JobStatusSummary("job1", 1, Normal)))
+          GroupStatusSummary(0, "group1", Seq(JobStatusSummary(0, "job1", 1, Normal)))
         )
       singletonChecker.summary shouldBe expected
     }
@@ -180,15 +180,15 @@ class StatusCheckerSpec()
     "work when state is deeply nested" in {
       val expected = Seq(
         GroupStatusSummary(
-          "group1", Seq(
-            JobStatusSummary("job1", 0, Great),
-            JobStatusSummary("job1", 2, Warn),
+          0, "group1", Seq(
+            JobStatusSummary(0, "job1", 0, Great),
+            JobStatusSummary(0, "job1", 2, Warn),
           )
         ),
         GroupStatusSummary(
-          "group1", Seq(
-            JobStatusSummary("job1", 1, Normal),
-            JobStatusSummary("job1", 3, Critical),
+          0, "group1", Seq(
+            JobStatusSummary(0, "job1", 1, Normal),
+            JobStatusSummary(0, "job1", 3, Critical),
           )
         )
       )
