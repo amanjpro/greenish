@@ -11,28 +11,73 @@ Greenish jobs are configured in a
 [YAML-like](https://github.com/lightbend/config) configuration file, [here is
 an annotated example](src/test/resources/application.conf). Greenish does not
 have a standard monitoring scripting language/plugin. Monitoring tasks can be
-in any executable form, as long as, they take `period` as the last parameter,
-and they exit with 0 only upon success. Here is a very simple example for a
-script to check if data has arrived:
+in any executable form, details are in [Monitoring Jobs](#monitoring-jobs).
+
+## Monitoring Jobs
+
+As mentioned earlier, monitoring jobs can be any executable program, as long as:
+
+- They are exectable
+- They accept a variable number of `period` arguments, as their last argument
+  sets: `$ monitor_my_job.sh staging 2020-20-06-10 2020-20-06-10 ...` The above
+  is an example of a monitoring script that is written in a `shell-like`
+  scripting language.  Takes a parameter for the environment (in this case,
+  `staging` is applied), and takes a set of `period` parameters, in the
+  example: `2020-02-06-10` and `2020-02-06-11` are passed.
+
+  The `check-command` entry for the above example will be:
+  ```
+    check-command: "monitor_my_job staging"
+    period-pattern: "yyyy-MM-dd-HH"
+  ```
+
+- They print the health for every provided period, exactly once, in the
+  following format: `greenish-period\t$PERIOD\t1` when the the period's health
+  is OK, or `greenish-period\t$PERIOD\t0` otherwise. It is important that:
+    - $PERIOD is in the list of the provided periods.
+    - The text above is in a separate line, namely the line should match:
+      `^greenish-period\t.*(0|1)$`.
+    - The three parts of the line are tab separated.
+- The scripts can have any number debugging printed lines.
+- The script should exit with 0, under normal circumistances even if the entire
+  set of periods are not in a good health.
+
+An example monitoring script can be like this:
 
 ```
 #!/usr/bin/env bash
 
-# $2 is the period
-ls "/var/log/$1/$2"
+farm=$1
+
+shift
+
+echo "LETS PRINT THINGS"
+
+for period in "$@"; do
+  echo "DEBUG HERE TOO"
+  if ls "$farm/$period"; then
+    echo -e "greenish-period\t$period\t1"
+  else
+    echo -e "greenish-period\t$period\t0"
+  fi
+done
 ```
 
-We can use _the above script_, like this:
+## Performance Tweaking
 
-```
-  cmd: "THE_ABOVE_SCRIPT my_job"
-```
+The monitoring jobs are usually blocking IO jobs. Do that network call, wait
+for this API, connect to a DB, HDFS etc. That is why they are running under
+their very own execution contect (thread pool). So that they do not block the
+rest of the service (namely the endpoints). The execution context config for
+the monitoring jobs are controlled by a dispatcher named `refresh-dispatcher`,
+an example config provided in the example application config which is
+introduced earlier.
 
-Note, how we provide the first argument, but expect Greenish to provide the
-second--i.e. the period.
+It is best to use `thread-pool-executor` dispatcher for blocking jobs, as they
+are tailored for IO jobs. More information can be found:
 
-The example config (linked above), explains the possible configurations in
-detail.
+- [ThreadPoolExecutor Javadoc](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ThreadPoolExecutor.html)
+- [Akka documentaiton](https://doc.akka.io/docs/akka-http/current/handling-blocking-operations-in-akka-http-routes.html#solution-dedicated-dispatcher-for-blocking-operations)
 
 ## The API
 

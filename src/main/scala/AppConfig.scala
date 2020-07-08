@@ -10,14 +10,15 @@ case class AppConfig(val groups: Seq[Group], val refreshInSeconds: Int,
   val env: Seq[(String, String)])
 object AppConfig {
   def apply(): AppConfig = {
-    val config = ConfigFactory.load().getObject("check-groups").toConfig
-    val refreshRate = config.getInt("refresh-in-seconds")
-    val port = config.getInt("port")
-    val env = config.getConfig("env")
+    val config = ConfigFactory.load()
+    val appConfig = config.getConfig("check-groups")
+    val refreshRate = appConfig.getInt("refresh-in-seconds")
+    val port = appConfig.getInt("port")
+    val env = appConfig.getConfig("env")
       .entrySet.asScala
       .map(e => (e.getKey, e.getValue.unwrapped.asInstanceOf[String]))
       .toSeq
-    new AppConfig(readEntries(config), refreshRate, port, env)
+    new AppConfig(readEntries(appConfig), refreshRate, port, env)
   }
 
   private[this] def readEntries(config: Config): Seq[Group] = {

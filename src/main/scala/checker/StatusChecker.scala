@@ -2,15 +2,12 @@ package me.amanj.greenish.checker
 
 import me.amanj.greenish.models._
 import java.time.ZonedDateTime
-import akka.util.Timeout
-import scala.concurrent.duration._
 import akka.actor.{Actor, Props, ActorLogging}
 import scala.sys.process.Process
 import scala.concurrent.{Future}
 import scala.util.{Success, Failure}
 import akka.routing.{ActorRefRoutee, RoundRobinRoutingLogic, Router}
-import akka.pattern.{pipe, ask}
-import scala.language.postfixOps
+import akka.pattern.pipe
 import scala.annotation.tailrec
 
 trait StatusCheckerApi {
@@ -69,11 +66,10 @@ class StatusChecker(groups: Seq[Group],
     clockCounter: () => Long = () => System.currentTimeMillis())
       extends Actor with ActorLogging with StatusCheckerApi {
   override protected[this] var state = StatusChecker.initState(groups)
-  private[this] implicit val timeout = Timeout(2 minutes)
 
   import context.dispatcher
 
-  private[this] val parallelism: Int = groups.map(_.jobs.map(_.lookback).sum).sum
+  private[this] val parallelism: Int = groups.map(_.jobs.length).sum
 
   private[this] val router = {
     val routees = (0 until parallelism) map { _ =>
@@ -93,22 +89,8 @@ class StatusChecker(groups: Seq[Group],
         val periods = StatusChecker.periods(job, now)
 
         val currentClockCounter = clockCounter()
-        val jobStatusUpdateFuture: Seq[Future[PeriodHealth]] = periods.map { period =>
-          val cmd = s"${job.cmd} $period"
-          val future = self ? Run(cmd, env)
-          future.mapTo[Boolean].map(PeriodHealth(period, _))
-        }
-
-        Future.sequence(jobStatusUpdateFuture)
-          .map( periodHealth =>
-              UpdateState(group.groupId,
-                JobStatus(job, currentClockCounter, periodHealth))
-          ).onComplete {
-            case Success(updateMessage) =>
-              self ! updateMessage
-            case Failure(err)          =>
-              log.error(err.getMessage)
-          }
+        self ! BatchRun(job.cmd, periods, env,
+          group.groupId, job.jobId, currentClockCounter)
       }
     }
   }
@@ -116,11 +98,12 @@ class StatusChecker(groups: Seq[Group],
   override def receive: Receive = {
     case Refresh(now) =>
       refresh(now())
-    case UpdateState(groupId, jobStatus) =>
-      val jobId = jobStatus.job.jobId
+    case RunResult(periodHealth, groupId, jobId, clockCounter) =>
       val bucket = state(groupId)
-      if(bucket.status(jobId).updatedAt < jobStatus.updatedAt) {
-        bucket.status(jobId) = jobStatus
+      val currentStatus = bucket.status(jobId)
+      if(currentStatus.updatedAt < clockCounter) {
+        bucket.status(jobId) = currentStatus.copy(updatedAt = clockCounter,
+          periodHealth = periodHealth)
       }
     case GetMissing => context.sender ! getMissing()
     case MaxLag => context.sender ! maxLag()
@@ -130,7 +113,7 @@ class StatusChecker(groups: Seq[Group],
       context.sender ! getGroupStatus(id)
     case GetJobStatus(gid, jid) =>
       context.sender ! getJobStatus(gid, jid)
-    case run: Run =>
+    case run: BatchRun =>
       router.route(run, context.sender)
   }
 }

@@ -1,3 +1,19 @@
 #!/usr/bin/env bash
 
-ls "$1/$2"
+fst=$1
+
+shift
+
+echo "LETS PRINT THINGS"
+
+for period in "$@"; do
+  echo "DEBUG HERE TOO"
+  if ls "$fst/$period"; then
+    echo -e "greenish-period\t$period\t1"
+  else
+    echo -e "greenish-period\t$period\t0"
+  fi
+done
+
+
+echo "DEBUG HERE"
