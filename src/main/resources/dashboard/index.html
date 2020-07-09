@@ -2,10 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Example dashboard</title>
+    <title>Greenish dashboard</title>
     <link rel="stylesheet" href="main.css">
 </head>
 <body>
-<h1>Example dashboard</h1>
+  <div id="main_container"></div>
+
+  <!-- Load React. -->
+  <script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+  <!-- Load Greenish React components. -->
+  <script src="common_lib.js" type="text/babel"></script>
+  <script src="summary_container.js" type="text/babel"></script>
+  <script src="state_container.js" type="text/babel"></script>
+  <script src="group_container.js" type="text/babel"></script>
+  <script src="job_container.js" type="text/babel"></script>
+  <script src="version_container.js" type="text/babel"></script>
+  <script src="main_container.js" type="text/babel"></script>
 </body>
 </html>

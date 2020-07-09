@@ -133,11 +133,12 @@ class JsonSerdeSpec() extends Matchers
   }
 
   "GroupStatusSummary" must {
-    val jobStatus = Seq(JobStatusSummary("j", 1, Critical))
-    val groupStatusSummary = GroupStatusSummary("g", jobStatus)
+    val jobStatus = Seq(JobStatusSummary(0, "j", 1, Critical))
+    val groupStatusSummary = GroupStatusSummary(2, "g", jobStatus)
     "produce correct JSON" in {
 
       val expected = Json.obj(
+        "group_id" -> 2.asJson,
         "name" -> "g".asJson,
         "status" -> jobStatus.asJson,
       )
@@ -211,9 +212,10 @@ class JsonSerdeSpec() extends Matchers
   }
 
   "JobStatusSummary" must {
-    val jobStatusSummary = JobStatusSummary("j", 1, Critical)
+    val jobStatusSummary = JobStatusSummary(0, "j", 1, Critical)
     "produce correct JSON" in {
       val expected = Json.obj(
+        "job_id" -> 0.asJson,
         "name" -> "j".asJson,
         "missing" -> 1.asJson,
         "alert_level" -> "critical".asJson,

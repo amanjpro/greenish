@@ -1,5 +1,6 @@
 enablePlugins(JavaAppPackaging)
 enablePlugins(DockerPlugin)
+// enablePlugins(SbtWeb)
 
 organization := "me.amanj"
 name := "greenish"
@@ -33,7 +34,12 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % scalaTestVersion % Test,
   "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % Test,
   "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
+
+  // WebJars
+  // "org.webjars.npm" % "typescript" % "3.9.5",
 )
+
+// JsEngineKeys.engineType := JsEngineKeys.EngineType.Node
 
 dockerBaseImage := "openjdk:jre"
 

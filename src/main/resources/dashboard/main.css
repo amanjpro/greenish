@@ -1,8 +1,107 @@
 body {
-  background-color: lightblue;
+  background-color: #233502;
+  color: darkolivegreen;
+  padding: 0px;
+  margin: 0px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-h1 {
-  color: navy;
-  margin-left: 20px;
+td {
+  margin: 5px;
+  padding: 5px;
+}
+
+th {
+  margin: 5px;
+  padding: 5px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  text-align: left;
+}
+
+.grid-container {
+  display: grid;
+  grid-gap: 50px 100px;
+  grid-template-columns: repeat(3, 1fr);
+  justify-content: center;
+}
+
+.grid-item {
+  vertical-align: top;
+}
+
+.grid-container-detail {
+  display: grid;
+  grid-gap: 50px 100px;
+  grid-template-columns: repeat(2, 1fr);
+  justify-content: center;
+}
+
+.detail-div {
+  padding: 10px;
+  background-color: #f3f2f2
+}
+
+.summary-div {
+  padding: 10px;
+  background-color: #e8ece9;
+}
+
+.great {
+  background-color: #c9daa7;
+  color: #345f34;
+}
+
+.normal {
+  background-color: lightblue;
+  color: steelblue;
+}
+
+.warn {
+  background-color: palegoldenrod;
+  color: sienna;
+}
+
+.critical {
+  background-color: salmon;
+  color: maroon;
+}
+
+.link {
+  color: steelblue;
+}
+
+.link:hover {
+  cursor: pointer
+}
+
+.detail-box {
+  background: whitesmoke;
+  padding: 10px;
+  box-shadow: 5px 5px lightgray;
+}
+
+.summary-box {
+  background: #f6fdfc;
+  padding: 10px;
+  box-shadow: 5px 5px lightgray;
+}
+
+.header-div {
+  width: 100%;
+  margin-right: 8px;
+}
+
+.greenish-header {
+  margin: 8px;
+  color: snow;
+}
+
+.version-div {
+  text-align: right;
+  right:8px;
+  color: snow;
 }

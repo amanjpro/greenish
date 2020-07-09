@@ -46,9 +46,9 @@ trait StatusCheckerApi {
           else if(missing <= status.job.alertLevels.normal) Normal
           else if(missing <= status.job.alertLevels.warn) Warn
           else Critical
-        JobStatusSummary(status.job.name, missing, alertLevel)
+        JobStatusSummary(status.job.jobId, status.job.name, missing, alertLevel)
       }.toSeq
-      GroupStatusSummary(group.group.name, status)
+      GroupStatusSummary(group.group.groupId, group.group.name, status)
     }
 
   protected[checker] def getGroupStatus(groupId: Int): Option[GroupStatus] =
