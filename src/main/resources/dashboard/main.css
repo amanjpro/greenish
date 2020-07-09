@@ -57,11 +57,12 @@ table {
 
 .normal {
   background-color: lightblue;
+  color: steelblue;
 }
 
 .warn {
-  background-color: lemonchiffon;
-  color: goldenrod;
+  background-color: palegoldenrod;
+  color: sienna;
 }
 
 .critical {
