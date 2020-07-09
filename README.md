@@ -79,6 +79,14 @@ are tailored for IO jobs. More information can be found:
 - [ThreadPoolExecutor Javadoc](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ThreadPoolExecutor.html)
 - [Akka documentaiton](https://doc.akka.io/docs/akka-http/current/handling-blocking-operations-in-akka-http-routes.html#solution-dedicated-dispatcher-for-blocking-operations)
 
+## Greenish dashboard
+
+Greenish provides a basic HTML dashboard to visualise the state of the
+monitored jobs. The dashboard can be accessed at: `/dashboard` endpoint.
+Here is a screenshot:
+
+![Screenshot](doc/images/dashboard.png)
+
 ## The API
 
 Greenish supports four REST endpoints:
@@ -342,8 +350,6 @@ $ curl --silent -G localhost:8080/group/0/job/0/refresh | jq .
   "ok": "Job status refresh is scheduled"
 }
 ```
-
-An HTML dashboard is expected to land at `/dashboard` in the future releases.
 
 ## Pre-built package
 
