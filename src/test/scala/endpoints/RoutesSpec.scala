@@ -27,10 +27,11 @@ class RoutesSpec()
   implicit val patience: PatienceConfig = PatienceConfig(1 minute, 1 second)
   override def beforeAll: Unit = {
     dir1.mkdirs
-    checker = system.actorOf(Props(new StatusChecker(Seq(group1), Seq.empty,
+    checker = system.actorOf(Props(new StatusChecker(Seq(group1, group2), Seq.empty,
       () => tstamp)))
-    checker ! Refresh(() => ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
-    routes = new Routes(checker)
+    val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
+    checker ! Refresh(() => time)
+    routes = new Routes(checker, () => time)
   }
   override def afterAll: Unit = {
     dir1.delete
@@ -45,7 +46,18 @@ class RoutesSpec()
     2, AlertLevels(0, 1, 2, 3),
   )
 
-  val group1 = Group(0, "group1", Seq(job1))
+  val job2 = Job(1, "job2", s"$lsScript /tmp",
+    "yyyy-MM-dd-HH", Hourly, ZoneId.of("UTC"),
+    2, AlertLevels(0, 1, 2, 3),
+  )
+
+  val job3 = Job(0, "job3", s"$lsScript /tmp",
+    "yyyy-MM-dd-HH", Hourly, ZoneId.of("UTC"),
+    2, AlertLevels(0, 1, 2, 3),
+  )
+
+  val group1 = Group(0, "group1", Seq(job1, job2))
+  val group2 = Group(1, "group2", Seq(job3))
 
   var checker: ActorRef = _
   var routes: Routes = _
@@ -67,12 +79,24 @@ class RoutesSpec()
         Get("/state") ~> routes.routes ~> check {
           val actual = parse(responseAs[String])
             .flatMap(_.as[Seq[GroupStatus]]).getOrElse(null)
-          val expected = Seq(GroupStatus(group1, Array(JobStatus(
-              job1, tstamp, Seq(
+          val expected = Seq(
+            GroupStatus(group1, Array(
+              JobStatus(job1, tstamp, Seq(
                 PeriodHealth("2020-06-25-14", true),
                 PeriodHealth("2020-06-25-15", false),
-                )
-            ))))
+                )),
+              JobStatus(job2, tstamp, Seq(
+                PeriodHealth("2020-06-25-14", true),
+                PeriodHealth("2020-06-25-15", false),
+                )),
+            )),
+            GroupStatus(group2, Array(
+              JobStatus(job3, tstamp, Seq(
+                PeriodHealth("2020-06-25-14", true),
+                PeriodHealth("2020-06-25-15", false),
+                )),
+            )),
+          )
           actual shouldBe expected
         }
       }
@@ -83,11 +107,21 @@ class RoutesSpec()
         Get("/missing") ~> routes.routes ~> check {
           val actual = parse(responseAs[String])
             .flatMap(_.as[Seq[GroupStatus]]).getOrElse(null)
-          val expected = Seq(GroupStatus(group1, Array(JobStatus(
-              job1, tstamp, Seq(
+          val expected = Seq(
+            GroupStatus(group1, Array(
+              JobStatus(job1, tstamp, Seq(
                 PeriodHealth("2020-06-25-15", false),
-                )
-            ))))
+                )),
+              JobStatus(job2, tstamp, Seq(
+                PeriodHealth("2020-06-25-15", false),
+                ))
+            )),
+            GroupStatus(group2, Array(
+              JobStatus(job3, tstamp, Seq(
+                PeriodHealth("2020-06-25-15", false),
+                )),
+            )),
+          )
           actual shouldBe expected
         }
       }
@@ -98,15 +132,21 @@ class RoutesSpec()
         Get("/summary") ~> routes.routes ~> check {
           val actual = parse(responseAs[String])
             .flatMap(_.as[Seq[GroupStatusSummary]]).getOrElse(null)
-          val expected = Seq(GroupStatusSummary(group1.name, Seq(JobStatusSummary(
-              job1.name, 1, Normal
-            ))))
+          val expected = Seq(
+            GroupStatusSummary(group1.name, Seq(
+              JobStatusSummary(job1.name, 1, Normal),
+              JobStatusSummary(job2.name, 1, Normal),
+              )),
+            GroupStatusSummary(group2.name, Seq(
+              JobStatusSummary(job3.name, 1, Normal),
+              )),
+            )
           actual shouldBe expected
         }
       }
     }
 
-    "properly handle GET/group request when id exists" in {
+    "properly handle GET/group/gid request when id exists" in {
       eventually {
         Get("/group/0") ~> routes.routes ~> check {
           val actual = parse(responseAs[String])
@@ -115,13 +155,18 @@ class RoutesSpec()
             JobStatus(job1, tstamp, Seq(
                 PeriodHealth("2020-06-25-14", true),
                 PeriodHealth("2020-06-25-15", false),
-                ))))
+                )),
+            JobStatus(job2, tstamp, Seq(
+                PeriodHealth("2020-06-25-14", true),
+                PeriodHealth("2020-06-25-15", false),
+                )),
+            ))
           actual shouldBe expected
         }
       }
     }
 
-    "properly handle GET/group/gid request when gid does not" in {
+    "properly handle GET/group/gid request when gid does not exist" in {
       eventually {
         Get("/group/10") ~> routes.routes ~> check {
           status shouldBe StatusCodes.BadRequest
@@ -154,6 +199,95 @@ class RoutesSpec()
     "properly handle GET/group/gid/job/jid request when jid does not exist" in {
       eventually {
         Get("/group/0/job/9") ~> routes.routes ~> check {
+          status shouldBe StatusCodes.BadRequest
+        }
+      }
+    }
+
+    "properly handle GET/group/gid/refresh request when id exists" in {
+      val checker = system.actorOf(Props(
+        new StatusChecker(Seq(group1, group2), Seq.empty, () => tstamp)))
+      val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
+      val routes = new Routes(checker, () => time)
+
+      Get("/group/0/refresh") ~> routes.routes ~> check {
+        status shouldBe StatusCodes.OK
+      }
+
+      eventually {
+        Get("/state") ~> routes.routes ~> check {
+          val actual = parse(responseAs[String])
+            .flatMap(_.as[Seq[GroupStatus]]).getOrElse(null)
+          val expected = Seq(
+            GroupStatus(group1, Array(
+              JobStatus(job1, tstamp, Seq(
+                PeriodHealth("2020-06-25-14", true),
+                PeriodHealth("2020-06-25-15", false),
+                )),
+              JobStatus(job2, tstamp, Seq(
+                PeriodHealth("2020-06-25-14", true),
+                PeriodHealth("2020-06-25-15", false),
+                )),
+            )),
+            GroupStatus(group2, Array(
+              JobStatus(job3, -1, Seq.empty)
+            )),
+          )
+          actual shouldBe expected
+        }
+      }
+    }
+
+    "properly handle GET/group/gid/refresh request when gid does not" in {
+      eventually {
+        Get("/group/10/refresh") ~> routes.routes ~> check {
+          status shouldBe StatusCodes.BadRequest
+        }
+      }
+    }
+
+    "properly handle GET/group/gid/job/jid/refresh request when both gid and jid exist" in {
+      val checker = system.actorOf(Props(new StatusChecker(Seq(group1, group2), Seq.empty,
+        () => tstamp)))
+      val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
+      val routes = new Routes(checker, () => time)
+
+      Get("/group/0/job/0/refresh") ~> routes.routes ~> check {
+        status shouldBe StatusCodes.OK
+      }
+
+      eventually {
+        Get("/state") ~> routes.routes ~> check {
+          val actual = parse(responseAs[String])
+            .flatMap(_.as[Seq[GroupStatus]]).getOrElse(null)
+          val expected = Seq(
+            GroupStatus(group1, Array(
+              JobStatus(job1, tstamp, Seq(
+                PeriodHealth("2020-06-25-14", true),
+                PeriodHealth("2020-06-25-15", false),
+                )),
+              JobStatus(job2, -1, Seq.empty)
+            )),
+            GroupStatus(group2, Array(
+              JobStatus(job3, -1, Seq.empty)
+            )),
+          )
+          actual shouldBe expected
+        }
+      }
+    }
+
+    "properly handle GET/group/gid/job/jid/refresh request when gid does not exist" in {
+      eventually {
+        Get("/group/10/job/9/refresh") ~> routes.routes ~> check {
+          status shouldBe StatusCodes.BadRequest
+        }
+      }
+    }
+
+    "properly handle GET/group/gid/job/jid/refresh request when jid does not exist" in {
+      eventually {
+        Get("/group/0/job/9/refresh") ~> routes.routes ~> check {
           status shouldBe StatusCodes.BadRequest
         }
       }

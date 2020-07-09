@@ -5,6 +5,8 @@ import me.amanj.greenish.models.{JobStatus, PeriodHealth}
 
 sealed trait Message
 case class Refresh(now: () => ZonedDateTime) extends Message
+case class RefreshGroup(now: () => ZonedDateTime, groupId: Int) extends Message
+case class RefreshJob(now: () => ZonedDateTime, groupId: Int, jobId: Int) extends Message
 case object MaxLag extends Message
 case object AllEntries extends Message
 case object GetMissing extends Message

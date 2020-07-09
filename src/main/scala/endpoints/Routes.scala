@@ -1,5 +1,6 @@
 package me.amanj.greenish.endpoints
 
+import java.time.ZonedDateTime
 import akka.actor.ActorRef
 import akka.util.Timeout
 import akka.pattern.ask
@@ -14,7 +15,8 @@ import me.amanj.greenish.checker._
 import akka.http.scaladsl.model.HttpResponse
 import scala.util.Success
 
-class Routes(statusChecker: ActorRef) {
+class Routes(statusChecker: ActorRef,
+    now: () => ZonedDateTime = () => ZonedDateTime.now) {
   private[this] implicit val timeout = Timeout(Duration.fromNanos(5000000L))
   private[this] val jsonPrinter = Printer (
     dropNullValues = true,
@@ -98,6 +100,39 @@ class Routes(statusChecker: ActorRef) {
     }
   }
 
+  private[this] val refreshGroup = get {
+    path("group" / IntNumber / "refresh") { id =>
+      val statusFuture = (
+        statusChecker ? RefreshGroup(now, id)
+      ).mapTo[Boolean]
+
+      onComplete(statusFuture) {
+        case Success(true) =>
+          complete(jsonPrinter.print(okJson("Group status refresh is scheduled")))
+        case _                  =>
+          val error = jsonPrinter.print(errorJson("Group id does not exist"))
+          complete(HttpResponse(StatusCodes.BadRequest, entity = error))
+      }
+    }
+  }
+
+  private[this] val refreshJob = get {
+    path("group" / IntNumber / "job" / IntNumber / "refresh") {
+      (gid, jid) =>
+        val statusFuture = (
+          statusChecker ? RefreshJob(now, gid, jid)
+        ).mapTo[Boolean]
+        onComplete(statusFuture) {
+          case Success(true) =>
+            complete(jsonPrinter.print(okJson("Job status refresh is scheduled")))
+          case _                  =>
+            val error = jsonPrinter
+              .print(errorJson("Group id and/or job id does not exist"))
+            complete(HttpResponse(StatusCodes.BadRequest, entity = error))
+        }
+    }
+  }
+
   private[this] val dashboard =
       (get & pathPrefix("dashboard")) {
         (pathEndOrSingleSlash &
@@ -115,5 +150,7 @@ class Routes(statusChecker: ActorRef) {
     }
   }
 
-  val routes = getJob ~ getGroup ~ maxlag ~ summary ~ missing ~ state ~ dashboard ~ system
+  val routes =
+    getJob ~ getGroup ~ refreshGroup ~ refreshJob ~
+      maxlag ~ summary ~ missing ~ state ~ dashboard ~ system
 }

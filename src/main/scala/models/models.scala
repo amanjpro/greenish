@@ -22,4 +22,8 @@ package object models {
       "uptime" -> ManagementFactory.getRuntimeMXBean().getUptime().asJson,
     )
   }
+
+  def okJson(str: String): Json = Json.obj (
+    "ok" -> str.asJson
+  )
 }

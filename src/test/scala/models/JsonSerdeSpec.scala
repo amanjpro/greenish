@@ -19,6 +19,16 @@ class JsonSerdeSpec() extends Matchers
     }
   }
 
+  "okJson" must {
+    "produce correct JSON" in {
+      val expected = "OK"
+      val json = okJson(expected)
+      val actual = json.hcursor.downField("ok").as[String].getOrElse(???)
+      actual shouldBe expected
+      json.hcursor.keys.get.size shouldBe 1
+    }
+  }
+
   "AlertLevel" must {
     "produce correct JSON" in {
       (Great: AlertLevel).asJson shouldBe "great".asJson
