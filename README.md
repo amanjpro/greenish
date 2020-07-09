@@ -382,7 +382,7 @@ installed):
 
 ```
 $ sbt assembly
-$ java -Dconfig.file=PATH_TO_CONFIG_FILE target/scala-2.13/greenish-assembly-*.jar
+$ java -Dconfig.file=PATH_TO_CONFIG_FILE -jar target/scala-2.13/greenish-assembly-*.jar
 ```
 
 You can also build docker images:
