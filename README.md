@@ -379,7 +379,7 @@ SBT takes care of building/testing both the Scala and JavaScript/JSX:
 To run the service from the source:
 `$ sbt -Dconfig.file=PATH_TO_CONFIG_FILE run`
 
-*Note* Unfortunately, the JavaScript code has no tests yet, this is an issue
+**Note** Unfortunately, the JavaScript code has no tests yet, this is an issue
 that needs to be resolved.
 
 #### Packaging
