@@ -40,9 +40,9 @@ bashScriptExtraDefines += """addJava "-Dconfig.file=/app/config.yml""""
 
 // JS/JSX compiling
 
-lazy val babel = taskKey[Seq[File]]("Compile JSX files")
+lazy val jsxCompile = taskKey[Seq[File]]("Compile JSX files")
 
-babel in ThisBuild := Def.task {
+jsxCompile in ThisBuild := Def.task {
   val src = (resourceDirectory in Compile).value / "dashboard"
   val destDir = (resourceManaged in Compile).value / "dashboard"
   destDir.mkdirs
@@ -59,5 +59,5 @@ babel in ThisBuild := Def.task {
   }
 }.value
 
-resourceGenerators in Compile += babel.taskValue
-babel := babel.triggeredBy(Compile / compile).value
+resourceGenerators in Compile += jsxCompile.taskValue
+jsxCompile := jsxCompile.triggeredBy(Compile / compile).value
