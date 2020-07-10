@@ -1,6 +1,5 @@
 enablePlugins(JavaAppPackaging)
 enablePlugins(DockerPlugin)
-// enablePlugins(SbtWeb)
 
 organization := "me.amanj"
 name := "greenish"
@@ -33,13 +32,32 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % scalaTestVersion % Test,
   "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % Test,
   "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
-
-  // WebJars
-  // "org.webjars.npm" % "typescript" % "3.9.5",
 )
-
-// JsEngineKeys.engineType := JsEngineKeys.EngineType.Node
 
 dockerBaseImage := "openjdk:jre"
 
 bashScriptExtraDefines += """addJava "-Dconfig.file=/app/config.yml""""
+
+// JS/JSX compiling
+
+lazy val babel = taskKey[Seq[File]]("Compile JSX files")
+
+babel in ThisBuild := Def.task {
+  val src = (resourceDirectory in Compile).value / "dashboard"
+  val destDir = (resourceManaged in Compile).value / "dashboard"
+  destDir.mkdirs
+  import scala.sys.process._
+  src.listFiles.filter(_.getName.endsWith(".jsx")).map { file =>
+    val dest = destDir / file.getName.dropRight(1)
+    val compile =
+      s"npx babel --minified --compact --out-file $dest --presets react-app/prod $file"
+    val succeeded = Seq("bash", "-c", compile).!
+    if(succeeded != 0) {
+      throw new Exception("JSX Compilation failed")
+    }
+    dest
+  }
+}.value
+
+resourceGenerators in Compile += babel.taskValue
+babel := babel.triggeredBy(Compile / compile).value
