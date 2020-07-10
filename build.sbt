@@ -1,6 +1,5 @@
 enablePlugins(JavaAppPackaging)
 enablePlugins(DockerPlugin)
-// enablePlugins(SbtWeb)
 
 organization := "me.amanj"
 name := "greenish"
@@ -33,13 +32,49 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % scalaTestVersion % Test,
   "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % Test,
   "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
-
-  // WebJars
-  // "org.webjars.npm" % "typescript" % "3.9.5",
 )
-
-// JsEngineKeys.engineType := JsEngineKeys.EngineType.Node
 
 dockerBaseImage := "openjdk:jre"
 
 bashScriptExtraDefines += """addJava "-Dconfig.file=/app/config.yml""""
+
+// JS/JSX compiling
+
+lazy val jsxCompile = taskKey[Seq[File]]("Compile JSX files")
+
+jsxCompile in ThisBuild := Def.task {
+  val src = (resourceDirectory in Compile).value / "dashboard"
+  val destDir = (resourceManaged in Compile).value / "dashboard"
+  val srcFiles = src.listFiles.filter(_.getName.endsWith(".jsx")).toSet
+  val stream = (jsxCompile / streams).value
+  val JsxFilter: NameFilter =  "*.jsx"
+  val JsFilter: NameFilter =  "*.js"
+  destDir.mkdirs
+  var errors = 0
+  val cachedCompile =
+    FileFunction.cached(stream.cacheDirectory / "jsx",
+      FilesInfo.lastModified, FilesInfo.exists) { files =>
+        stream.log.info("JSX compiler")
+        import scala.sys.process._
+        val compiled = srcFiles.map { file =>
+          val dest = destDir / file.getName.dropRight(1)
+          val compile =
+            s"npx babel --minified --compact --out-file $dest --presets react-app/prod $file"
+          val succeeded = Seq("bash", "-c", compile).!
+          if(succeeded != 0) {
+            errors += 1
+          }
+          dest
+        }
+        (compiled ** JsFilter).get.toSet
+      }
+  val files = cachedCompile((srcFiles ** JsxFilter).get.toSet).toSeq
+
+  if(errors > 0) {
+    throw new Error(s"JSX Compilation failed\nThere were $errors issues")
+  }
+  files
+}.value
+
+resourceGenerators in Compile += jsxCompile.taskValue
+compile in Compile := (compile in Compile).dependsOn(jsxCompile).value

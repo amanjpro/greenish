@@ -364,15 +364,23 @@ docker image can be found at the [packages page](https://github.com/amanjpro/gre
 - Java 8
 - SBT 1.3.x
 - Bash
+- NodeJS 14+
 
 ### Building from the source
 
-SBT takes care of building/testing:
+First install `npm` dependencies:
+
+`$ npm install`
+
+SBT takes care of building/testing both the Scala and JavaScript/JSX:
 
 `$ sbt clean test package`
 
 To run the service from the source:
 `$ sbt -Dconfig.file=PATH_TO_CONFIG_FILE run`
+
+**Note** Unfortunately, the JavaScript code has no tests yet, this is an issue
+that needs to be resolved.
 
 #### Packaging
 

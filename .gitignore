@@ -6,9 +6,12 @@ dist/*
 target/
 lib_managed/
 src_managed/
+project/metals.sbt
+project/.bloop
 project/boot/
 project/plugins/project/
 .history
+.bloop
 .cache
 .lib/
 *.class
@@ -57,3 +60,7 @@ Sessionx.vim
 tags
 # Persistent undo
 [._]*.un~
+
+# NPM junks
+node_modules/
+package-lock.json
