@@ -45,19 +45,36 @@ lazy val jsxCompile = taskKey[Seq[File]]("Compile JSX files")
 jsxCompile in ThisBuild := Def.task {
   val src = (resourceDirectory in Compile).value / "dashboard"
   val destDir = (resourceManaged in Compile).value / "dashboard"
+  val srcFiles = src.listFiles.filter(_.getName.endsWith(".jsx")).toSet
+  val stream = (jsxCompile / streams).value
+  val JsxFilter: NameFilter =  "*.jsx"
+  val JsFilter: NameFilter =  "*.js"
   destDir.mkdirs
-  import scala.sys.process._
-  src.listFiles.filter(_.getName.endsWith(".jsx")).map { file =>
-    val dest = destDir / file.getName.dropRight(1)
-    val compile =
-      s"npx babel --minified --compact --out-file $dest --presets react-app/prod $file"
-    val succeeded = Seq("bash", "-c", compile).!
-    if(succeeded != 0) {
-      throw new Exception("JSX Compilation failed")
-    }
-    dest
+  var errors = 0
+  val cachedCompile =
+    FileFunction.cached(stream.cacheDirectory / "jsx",
+      FilesInfo.lastModified, FilesInfo.exists) { files =>
+        stream.log.info("JSX compiler")
+        import scala.sys.process._
+        val compiled = srcFiles.map { file =>
+          val dest = destDir / file.getName.dropRight(1)
+          val compile =
+            s"npx babel --minified --compact --out-file $dest --presets react-app/prod $file"
+          val succeeded = Seq("bash", "-c", compile).!
+          if(succeeded != 0) {
+            errors += 1
+          }
+          dest
+        }
+        (compiled ** JsFilter).get.toSet
+      }
+  val files = cachedCompile((srcFiles ** JsxFilter).get.toSet).toSeq
+
+  if(errors > 0) {
+    throw new Error(s"JSX Compilation failed\nThere were $errors issues")
   }
+  files
 }.value
 
 resourceGenerators in Compile += jsxCompile.taskValue
-jsxCompile := jsxCompile.triggeredBy(Compile / compile).value
+compile in Compile := (compile in Compile).dependsOn(jsxCompile).value
