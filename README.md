@@ -32,11 +32,11 @@ As mentioned earlier, monitoring jobs can be any executable program, as long as:
   ```
 
 - They print the health for every provided period, exactly once, in the
-  following format: `greenish-period\t$PERIOD\t1` when the the period's health
+  following format: `greenish-period\t$PERIOD\t1` when the period's health
   is OK, or `greenish-period\t$PERIOD\t0` otherwise. It is important that:
     - $PERIOD is in the list of the provided periods.
     - The text above is in a separate line, namely the line should match:
-      `^greenish-period\t.*(0|1)$`.
+      `^greenish-period\t.*\t(0|1)$`.
     - The three parts of the line are tab separated.
 - The scripts can have any number debugging printed lines.
 - The script should exit with 0, under normal circumistances even if the entire
