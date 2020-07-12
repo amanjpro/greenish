@@ -19,11 +19,12 @@ As mentioned earlier, monitoring jobs can be any executable program, as long as:
 
 - They are exectable
 - They accept a variable number of `period` arguments, as their last argument
-  sets: `$ monitor_my_job.sh staging 2020-20-06-10 2020-20-06-10 ...` The above
-  is an example of a monitoring script that is written in a `shell-like`
-  scripting language.  Takes a parameter for the environment (in this case,
-  `staging` is applied), and takes a set of `period` parameters, in the
-  example: `2020-02-06-10` and `2020-02-06-11` are passed.
+  sets: `$ monitor_my_job.sh staging 2020-20-06-10 2020-20-06-11 ...`
+  The above is an example of a monitoring script that is written in a
+  `shell-like` scripting language. In the example, the script takes a
+  parameter for the environment (in this case, `staging` is applied), and takes
+  a set of `period` parameters, in the example: `2020-02-06-10` and
+  `2020-02-06-11` are passed.
 
   The `check-command` entry for the above example will be:
   ```
@@ -31,14 +32,14 @@ As mentioned earlier, monitoring jobs can be any executable program, as long as:
     period-pattern: "yyyy-MM-dd-HH"
   ```
 
-- They print the health for every provided period, exactly once, in the
-  following format: `greenish-period\t$PERIOD\t1` when the period's health
-  is OK, or `greenish-period\t$PERIOD\t0` otherwise. It is important that:
-    - $PERIOD is in the list of the provided periods.
+- They print the health for every provided periods, exactly once, in the
+  following format: `greenish-period\t$PERIOD\t1` when the period's health is
+  OK, or `greenish-period\t$PERIOD\t0` otherwise. It is important that:
+    - `$PERIOD` is in the list of the provided periods.
     - The text above is in a separate line, namely the line should match:
       `^greenish-period\t.*\t(0|1)$`.
     - The three parts of the line are tab separated.
-- The scripts can have any number debugging printed lines.
+- The scripts can have any number of debugging/application output lines.
 - The script should exit with 0, under normal circumistances even if the entire
   set of periods are not in a good health.
 
@@ -67,10 +68,10 @@ done
 
 The monitoring jobs are usually blocking IO jobs. Do that network call, wait
 for this API, connect to a DB, HDFS etc. That is why they are running under
-their very own execution contect (thread pool). So that they do not block the
+their very own execution context (thread pool). So that they do not block the
 rest of the service (namely the endpoints). The execution context config for
 the monitoring jobs are controlled by a dispatcher named `refresh-dispatcher`,
-an example config provided in the example application config which is
+an example config is provided in the example application config which is
 introduced earlier.
 
 It is best to use `thread-pool-executor` dispatcher for blocking jobs, as they
@@ -89,12 +90,12 @@ Here is a screenshot:
 
 ## The API
 
-Greenish supports four REST endpoints:
+Greenish provides a few REST endpoints:
 
 ### Display the maximum number of missing datasets 
 
 Basically, for all the jobs, find the job that misses the most number of
-period datasets, and return the value.
+period datasets, and return the number.
 
 ```
 $ curl --silent -G http://0.0.0.0:8080/maxlag | jq .
@@ -353,9 +354,10 @@ $ curl --silent -G localhost:8080/group/0/job/0/refresh | jq .
 
 ## Pre-built package
 
-You can download pre-built packages (both fat(assembly) jar and docker) from
-the [releases page](https://github.com/amanjpro/greenish/releases). The latest
-docker image can be found at the [packages page](https://github.com/amanjpro/greenish/packages).
+You can download pre-built packages (both fat (i.e. assembly) jar and docker)
+from the [releases page](https://github.com/amanjpro/greenish/releases). The
+latest docker image can be found at the [packages
+page](https://github.com/amanjpro/greenish/packages).
 
 ## Development
 
@@ -384,9 +386,9 @@ that needs to be resolved.
 
 #### Packaging
 
-Greenish supports both "fat jar", that is a single and self-contained jar that
-can be distributed on any *nix environment (as long as Java and bash are
-installed):
+Greenish supports both "fat jar" and docker. Fat jar is a single and
+self-contained jar that can be distributed on any *nix environment (as long as
+Java and Bash are installed):
 
 ```
 $ sbt assembly
