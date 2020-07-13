@@ -35,6 +35,7 @@ class AppConfigSpec() extends Matchers
             )),
         ),
         30,
+        "127.0.0.1",
         8080,
         Seq("VAR1" -> "foo", "VAR2" -> "bar"),
       )

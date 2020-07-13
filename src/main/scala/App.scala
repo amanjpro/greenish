@@ -16,7 +16,7 @@ object App {
     implicit val system = ActorSystem("greenish-system")
     // needed for the future flatMap/onComplete in the end
     implicit val executionContext = system.dispatcher
-    implicit val schedulerActor = system.actorOf(Props.empty)
+    val schedulerActor = system.actorOf(Props.empty)
 
     val appConfig = AppConfig()
     val statusChecker = system.actorOf(
@@ -28,8 +28,8 @@ object App {
       statusChecker, Refresh(() => ZonedDateTime.now()))
 
     val bindingFuture = Http().bindAndHandle(new Routes(statusChecker).routes,
-      "0.0.0.0", appConfig.port)
+      appConfig.address, appConfig.port)
 
-    println(s"Server online at http://localhost:${appConfig.port}...")
+    println(s"Server online at http://${appConfig.address}:${appConfig.port}...")
   }
 }
