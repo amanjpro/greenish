@@ -23,12 +23,17 @@ object AppConfig {
   }
 
   private[this] def readEntries(config: Config): Seq[Group] = {
+    val defaultPeriodCheckOffset = config.getInt("default-period-check-offset")
     config.getConfigList("groups").asScala.zipWithIndex.map { case (groupConfig, index) =>
       val name = groupConfig.getString("group-name")
+      val groupPeriodCheckOffset =
+        groupConfig.getIntWithDefault("group-period-check-offset", defaultPeriodCheckOffset)
       val checkEntries = groupConfig.getConfigList("job-entries")
         .asScala.zipWithIndex.map { case (jobConfig, index) =>
           val name = jobConfig.getString("job-name")
           val cmd = jobConfig.getString("check-command")
+          val jobPeriodCheckOffset =
+            jobConfig.getIntWithDefault("job-period-check-offset", groupPeriodCheckOffset)
           val timePattern = jobConfig.getString("period-pattern")
           val timezone = ZoneId.of(jobConfig.getString("timezone"))
           val lookback = jobConfig.getInt("lookback")
@@ -53,11 +58,19 @@ object AppConfig {
             cmd,
             timePattern,
             frequency,
+            jobPeriodCheckOffset,
             timezone,
             lookback,
             AlertLevels(greatAt, normalAt, warnAt, errorAt))
         }.toSeq
       Group(index, name, checkEntries)
     }.toSeq
+  }
+
+  implicit class ConfigExt[C <: Config](self: Config) {
+    def getIntWithDefault(path: String, default: Int): Int =
+      if(self.hasPath(path))
+        self.getInt(path)
+      else default
   }
 }

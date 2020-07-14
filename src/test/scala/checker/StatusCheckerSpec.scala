@@ -48,22 +48,22 @@ class StatusCheckerSpec()
   val lsEnvScript = getClass.getResource("/test-ls-env").getFile
 
   val job1 = Job(0, "job1", s"$lsScript /tmp/job1",
-      "yyyy-MM-dd-HH", Hourly, ZoneId.of("UTC"),
+      "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
       2, AlertLevels(0, 1, 2, 3),
     )
 
   val job2 = Job(1, "job2", s"$lsScript /tmp/job2",
-      "yyyy-MM-dd-HH", Hourly, ZoneId.of("UTC"),
+      "yyyy-MM-dd-HH", Hourly, 2, ZoneId.of("UTC"),
       1, AlertLevels(1, 2, 3, 4),
     )
 
   val job3 = Job(0, "job3", s"$lsScript /tmp/job3",
-      "yyyy-MM-dd-HH", Hourly, ZoneId.of("UTC"),
+      "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
       3, AlertLevels(0, 1, 2, 3),
     )
 
   val job4 = Job(1, "job4", s"$lsEnvScript job4",
-      "yyyy-MM-dd-HH", Hourly, ZoneId.of("UTC"),
+      "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
       4, AlertLevels(0, 1, 2, 3),
     )
 
@@ -268,7 +268,7 @@ class StatusCheckerSpec()
 
     "work for hourly frequency" in {
       val job = Job(1, null, null,
-        "yyyy-MM-dd-HH", Hourly, ZoneId.of("UTC"),
+        "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
         3, null,
       )
 
@@ -281,7 +281,7 @@ class StatusCheckerSpec()
 
     "respect job timezone" in {
       val job = Job(1, null, null,
-        "yyyy-MM-dd-HH", Hourly, ZoneId.of("UTC"),
+        "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
         3, null,
       )
 
@@ -294,7 +294,7 @@ class StatusCheckerSpec()
 
     "work for daily frequency" in {
       val job = Job(1, null, null,
-        "yyyy-MM-dd", Daily, ZoneId.of("UTC"),
+        "yyyy-MM-dd", Daily, 1, ZoneId.of("UTC"),
         3, null,
       )
 
@@ -307,7 +307,7 @@ class StatusCheckerSpec()
 
     "work for monthly frequency" in {
       val job = Job(1, null, null,
-        "yyyy-MM-01", Monthly, ZoneId.of("UTC"),
+        "yyyy-MM-01", Monthly, 1, ZoneId.of("UTC"),
         3, null,
       )
 
@@ -320,7 +320,7 @@ class StatusCheckerSpec()
 
     "work for yearly frequency" in {
       val job = Job(1, null, null,
-        "yyyy-01-01", Annually, ZoneId.of("UTC"),
+        "yyyy-01-01", Annually, 1, ZoneId.of("UTC"),
         3, null,
       )
 

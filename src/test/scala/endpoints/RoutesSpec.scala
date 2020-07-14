@@ -42,17 +42,17 @@ class RoutesSpec()
   val lsEnvScript = getClass.getResource("/test-ls-env").getFile
 
   val job1 = Job(0, "job1", s"$lsScript /tmp",
-    "yyyy-MM-dd-HH", Hourly, ZoneId.of("UTC"),
+    "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
     2, AlertLevels(0, 1, 2, 3),
   )
 
   val job2 = Job(1, "job2", s"$lsScript /tmp",
-    "yyyy-MM-dd-HH", Hourly, ZoneId.of("UTC"),
+    "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
     2, AlertLevels(0, 1, 2, 3),
   )
 
   val job3 = Job(0, "job3", s"$lsScript /tmp",
-    "yyyy-MM-dd-HH", Hourly, ZoneId.of("UTC"),
+    "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
     2, AlertLevels(0, 1, 2, 3),
   )
 

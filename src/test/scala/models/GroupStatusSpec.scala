@@ -8,12 +8,12 @@ class GroupStatusSpec() extends Matchers
   with AnyWordSpecLike {
 
   val job1 = Job(1, "job1", "foo",
-      "yyyy-MM-dd-HH", Hourly, ZoneId.of("UTC"),
+      "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
       4, AlertLevels(0, 1, 2, 3),
     )
 
   val job2 = Job(2, "job2", "bar",
-      "yyyy-MM-dd-HH", Hourly, ZoneId.of("UTC"),
+      "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
       4, AlertLevels(0, 1, 2, 3),
     )
 
