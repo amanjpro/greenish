@@ -150,7 +150,7 @@ object StatusChecker {
     }.toIndexedSeq
   }
 
-  private[checker] def periods(entry: Job, now: ZonedDateTime): Seq[String]= {
+  private[checker] def periods(entry: Job, now: ZonedDateTime): Seq[String] = {
     @tailrec def loop(time: ZonedDateTime, count: Int, acc: Seq[String]): Seq[String] = {
       if(count == 0) acc.reverse
       else
@@ -158,7 +158,16 @@ object StatusChecker {
           acc :+ time.format(entry.timeFormat))
     }
 
-    loop(now.withZoneSameInstant(entry.timezone),
+    loop(nowMinusOffset(entry, now),
       entry.lookback, Vector.empty[String])
   }
+
+  private[checker] def nowMinusOffset(entry: Job,
+    now: ZonedDateTime): ZonedDateTime =
+      if(entry.periodCheckOffset == 0)
+        now.withZoneSameInstant(entry.timezone)
+      else
+        (1 to entry.periodCheckOffset)
+          .foldLeft(now.withZoneSameInstant(entry.timezone))(
+            (acc, next) => entry.frequency.prev(acc))
 }

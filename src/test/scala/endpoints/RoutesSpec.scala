@@ -82,18 +82,18 @@ class RoutesSpec()
           val expected = Seq(
             GroupStatus(group1, Array(
               JobStatus(job1, tstamp, Seq(
+                PeriodHealth("2020-06-25-13", false),
                 PeriodHealth("2020-06-25-14", true),
-                PeriodHealth("2020-06-25-15", false),
                 )),
               JobStatus(job2, tstamp, Seq(
+                PeriodHealth("2020-06-25-13", false),
                 PeriodHealth("2020-06-25-14", true),
-                PeriodHealth("2020-06-25-15", false),
                 )),
             )),
             GroupStatus(group2, Array(
               JobStatus(job3, tstamp, Seq(
+                PeriodHealth("2020-06-25-13", false),
                 PeriodHealth("2020-06-25-14", true),
-                PeriodHealth("2020-06-25-15", false),
                 )),
             )),
           )
@@ -110,15 +110,15 @@ class RoutesSpec()
           val expected = Seq(
             GroupStatus(group1, Array(
               JobStatus(job1, tstamp, Seq(
-                PeriodHealth("2020-06-25-15", false),
+                PeriodHealth("2020-06-25-13", false),
                 )),
               JobStatus(job2, tstamp, Seq(
-                PeriodHealth("2020-06-25-15", false),
+                PeriodHealth("2020-06-25-13", false),
                 ))
             )),
             GroupStatus(group2, Array(
               JobStatus(job3, tstamp, Seq(
-                PeriodHealth("2020-06-25-15", false),
+                PeriodHealth("2020-06-25-13", false),
                 )),
             )),
           )
@@ -153,12 +153,12 @@ class RoutesSpec()
             .flatMap(_.as[GroupStatus]).getOrElse(null)
           val expected = GroupStatus(group1, Array(
             JobStatus(job1, tstamp, Seq(
+                PeriodHealth("2020-06-25-13", false),
                 PeriodHealth("2020-06-25-14", true),
-                PeriodHealth("2020-06-25-15", false),
                 )),
             JobStatus(job2, tstamp, Seq(
+                PeriodHealth("2020-06-25-13", false),
                 PeriodHealth("2020-06-25-14", true),
-                PeriodHealth("2020-06-25-15", false),
                 )),
             ))
           actual shouldBe expected
@@ -180,8 +180,8 @@ class RoutesSpec()
           val actual = parse(responseAs[String])
             .flatMap(_.as[JobStatus]).getOrElse(null)
           val expected = JobStatus(job1, tstamp, Seq(
+            PeriodHealth("2020-06-25-13", false),
             PeriodHealth("2020-06-25-14", true),
-            PeriodHealth("2020-06-25-15", false),
             ))
           actual shouldBe expected
         }
@@ -221,12 +221,12 @@ class RoutesSpec()
           val expected = Seq(
             GroupStatus(group1, Array(
               JobStatus(job1, tstamp, Seq(
+                PeriodHealth("2020-06-25-13", false),
                 PeriodHealth("2020-06-25-14", true),
-                PeriodHealth("2020-06-25-15", false),
                 )),
               JobStatus(job2, tstamp, Seq(
+                PeriodHealth("2020-06-25-13", false),
                 PeriodHealth("2020-06-25-14", true),
-                PeriodHealth("2020-06-25-15", false),
                 )),
             )),
             GroupStatus(group2, Array(
@@ -263,8 +263,8 @@ class RoutesSpec()
           val expected = Seq(
             GroupStatus(group1, Array(
               JobStatus(job1, tstamp, Seq(
+                PeriodHealth("2020-06-25-13", false),
                 PeriodHealth("2020-06-25-14", true),
-                PeriodHealth("2020-06-25-15", false),
                 )),
               JobStatus(job2, -1, Seq.empty)
             )),

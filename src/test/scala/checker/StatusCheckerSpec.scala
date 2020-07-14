@@ -39,7 +39,7 @@ class StatusCheckerSpec()
   val dir1 = new File("/tmp/job1/2020-06-25-14")
   val dir2 = new File("/tmp/job3/2020-06-25-14")
   val dir3 = new File("/tmp/job4/2020-06-25-13")
-  val dir4 = new File("/tmp/job4/2020-06-25-15")
+  val dir4 = new File("/tmp/job4/2020-06-25-14")
 
 
   implicit val patience: PatienceConfig = PatienceConfig(1 minute, 1 second)
@@ -275,7 +275,7 @@ class StatusCheckerSpec()
       val actual =
         StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
 
-      val expected = Seq("2020-06-25-13", "2020-06-25-14", "2020-06-25-15")
+      val expected = Seq("2020-06-25-12", "2020-06-25-13", "2020-06-25-14")
       actual shouldBe expected
     }
 
@@ -288,7 +288,7 @@ class StatusCheckerSpec()
       val actual =
         StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[Africa/Cairo]"))
 
-      val expected = Seq("2020-06-25-11", "2020-06-25-12", "2020-06-25-13")
+      val expected = Seq("2020-06-25-10", "2020-06-25-11", "2020-06-25-12")
       actual shouldBe expected
     }
 
@@ -301,13 +301,13 @@ class StatusCheckerSpec()
       val actual =
         StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
 
-      val expected = Seq("2020-06-23", "2020-06-24", "2020-06-25")
+      val expected = Seq("2020-06-22", "2020-06-23", "2020-06-24")
       actual shouldBe expected
     }
 
     "work for monthly frequency" in {
       val job = Job(1, null, null,
-        "yyyy-MM-01", Monthly, 1, ZoneId.of("UTC"),
+        "yyyy-MM-01", Monthly, 0, ZoneId.of("UTC"),
         3, null,
       )
 
@@ -327,15 +327,13 @@ class StatusCheckerSpec()
       val actual =
         StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
 
-      val expected = Seq("2018-01-01", "2019-01-01", "2020-01-01")
+      val expected = Seq("2017-01-01", "2018-01-01", "2019-01-01")
       actual shouldBe expected
     }
   }
 
   "Refresh" must {
     "work" in {
-      // val actual =
-      //   StatusChecker.periods(job, )
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
@@ -349,13 +347,13 @@ class StatusCheckerSpec()
               job1,
               tstamp,
               Vector(
-                PeriodHealth("2020-06-25-14", true),
-                PeriodHealth("2020-06-25-15", false))),
+                PeriodHealth("2020-06-25-13", false),
+                PeriodHealth("2020-06-25-14", true))),
             JobStatus(
               job2,
               tstamp,
               Vector(
-                PeriodHealth("2020-06-25-15", false))))),
+                PeriodHealth("2020-06-25-13", false))))),
         GroupStatus(
           group2,
           Array(
@@ -363,17 +361,17 @@ class StatusCheckerSpec()
               job3,
               tstamp,
               Vector(
+                PeriodHealth("2020-06-25-12", false),
                 PeriodHealth("2020-06-25-13", false),
-                PeriodHealth("2020-06-25-14", true),
-                PeriodHealth("2020-06-25-15", false))),
+                PeriodHealth("2020-06-25-14", true))),
             JobStatus(
               job4,
               tstamp,
               Vector(
+                PeriodHealth("2020-06-25-11", false),
                 PeriodHealth("2020-06-25-12", false),
                 PeriodHealth("2020-06-25-13", true),
-                PeriodHealth("2020-06-25-14", false),
-                PeriodHealth("2020-06-25-15", true))))))
+                PeriodHealth("2020-06-25-14", true))))))
 
       actor ! Refresh(() => now)
 
@@ -402,13 +400,13 @@ class StatusCheckerSpec()
               job1,
               tstamp,
               Vector(
-                PeriodHealth("2020-06-25-14", true),
-                PeriodHealth("2020-06-25-15", false))),
+                PeriodHealth("2020-06-25-13", false),
+                PeriodHealth("2020-06-25-14", true))),
             JobStatus(
               job2,
               tstamp,
               Vector(
-                PeriodHealth("2020-06-25-15", false))))),
+                PeriodHealth("2020-06-25-13", false))))),
         GroupStatus(
           group2,
           Array(
@@ -497,8 +495,8 @@ class StatusCheckerSpec()
               job1,
               tstamp,
               Vector(
-                PeriodHealth("2020-06-25-14", true),
-                PeriodHealth("2020-06-25-15", false))),
+                PeriodHealth("2020-06-25-13", false),
+                PeriodHealth("2020-06-25-14", true))),
             JobStatus(
               job2,
               -1,
