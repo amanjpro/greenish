@@ -83,7 +83,7 @@ class JsonSerdeSpec() extends Matchers
 
   "Group" must {
     val job = Job(1, "j", "c", "yyyy-MM-dd",
-      Hourly, ZoneId.of("UTC"), 2, AlertLevels(3, 4, 5, 6))
+      Hourly, 1, ZoneId.of("UTC"), 2, AlertLevels(3, 4, 5, 6))
     val group = Group(0, "g", Seq(job))
 
     "produce correct JSON" in {
@@ -108,7 +108,7 @@ class JsonSerdeSpec() extends Matchers
 
   "GroupStatus" must {
     val job = Job(1, "j", "c", "yyyy-MM-dd",
-      Hourly, ZoneId.of("UTC"), 2, AlertLevels(3, 4, 5, 6))
+      Hourly, 1, ZoneId.of("UTC"), 2, AlertLevels(3, 4, 5, 6))
     val group = Group(0, "g", Seq(job))
     val periods = Seq(PeriodHealth("1", true), PeriodHealth("2", false))
     val jobStatus = JobStatus(job, 100, periods)
@@ -158,7 +158,7 @@ class JsonSerdeSpec() extends Matchers
   "Job" must {
     val alertLevels = AlertLevels(3, 4, 5, 6)
     val job = Job(1, "j", "c", "yyyy-MM-dd",
-      Hourly, ZoneId.of("UTC"), 2, alertLevels)
+      Hourly, 1, ZoneId.of("UTC"), 2, alertLevels)
 
     "produce correct JSON" in {
       val alertLevels = AlertLevels(3, 4, 5, 6)
@@ -170,6 +170,7 @@ class JsonSerdeSpec() extends Matchers
         "cmd" -> "c".asJson,
         "time_pattern" -> "yyyy-MM-dd".asJson,
         "frequency" -> "hourly".asJson,
+        "period_check_offset" -> 1.asJson,
         "timezone" -> Json.obj ("zone_id" -> "UTC".asJson),
         "lookback" -> 2.asJson,
         "alert_levels" -> alertLevels.asJson,
@@ -188,7 +189,7 @@ class JsonSerdeSpec() extends Matchers
 
   "JobStatus" must {
     val job = Job(1, "j", "c", "yyyy-MM-dd",
-      Hourly, ZoneId.of("UTC"), 2, AlertLevels(3, 4, 5, 6))
+      Hourly, 1, ZoneId.of("UTC"), 2, AlertLevels(3, 4, 5, 6))
     val periods = Seq(PeriodHealth("1", true), PeriodHealth("2", false))
     val jobStatus = JobStatus(job, 100, periods)
 

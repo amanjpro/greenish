@@ -12,6 +12,7 @@ case class Job(
   cmd: String,
   timePattern: String,
   frequency: CheckFrequency,
+  periodCheckOffset: Int,
   timezone: ZoneId,
   lookback: Int,
   alertLevels: AlertLevels,
