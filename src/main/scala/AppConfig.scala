@@ -70,9 +70,17 @@ object AppConfig {
   }
 
   implicit class ConfigExt[C <: Config](self: Config) {
+    def getStringWithDefault(path: String, default: String): String =
+      if(self.hasPath(path))
+        self.getString(path)
+      else default
     def getIntWithDefault(path: String, default: Int): Int =
       if(self.hasPath(path))
         self.getInt(path)
+      else default
+    def getBooleanWithDefault(path: String, default: Boolean): Boolean =
+      if(self.hasPath(path))
+        self.getBoolean(path)
       else default
   }
 }
