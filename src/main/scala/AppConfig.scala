@@ -5,20 +5,21 @@ import java.time.ZoneId
 import models._
 import scala.jdk.CollectionConverters._
 
-case class AppConfig(val groups: Seq[Group], val refreshInSeconds: Int,
-  val port: Int,
-  val env: Seq[(String, String)])
+case class AppConfig(groups: Seq[Group], refreshInSeconds: Int,
+  address: String, port: Int,
+  env: Seq[(String, String)])
 object AppConfig {
   def apply(): AppConfig = {
     val config = ConfigFactory.load()
     val appConfig = config.getConfig("check-groups")
     val refreshRate = appConfig.getInt("refresh-in-seconds")
     val port = appConfig.getInt("port")
+    val address = appConfig.getString("binding-address")
     val env = appConfig.getConfig("env")
       .entrySet.asScala
       .map(e => (e.getKey, e.getValue.unwrapped.asInstanceOf[String]))
       .toSeq
-    new AppConfig(readEntries(appConfig), refreshRate, port, env)
+    new AppConfig(readEntries(appConfig), refreshRate, address, port, env)
   }
 
   private[this] def readEntries(config: Config): Seq[Group] = {
