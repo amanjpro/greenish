@@ -265,6 +265,18 @@ class StatusCheckerSpec()
   }
 
   "periods" must {
+    "work when job's period-check-offset is 0" in {
+      val job = Job(1, null, null,
+        "yyyy-MM-dd-HH", Hourly, 0, ZoneId.of("UTC"),
+        3, null,
+      )
+
+      val actual =
+        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
+
+      val expected = Seq("2020-06-25-13", "2020-06-25-14", "2020-06-25-15")
+      actual shouldBe expected
+    }
 
     "work for hourly frequency" in {
       val job = Job(1, null, null,
@@ -328,6 +340,60 @@ class StatusCheckerSpec()
         StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
 
       val expected = Seq("2017-01-01", "2018-01-01", "2019-01-01")
+      actual shouldBe expected
+    }
+  }
+
+  "nowMinusOffset" must {
+    "work with UTC when offset is zero" in {
+      val job = Job(0, null, null,
+        "yyyy-01-01", Hourly, 0, ZoneId.of("UTC"),
+        3, null,
+      )
+
+      val actual =
+        StatusChecker.nowMinusOffset(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
+
+      val expected = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
+      actual shouldBe expected
+    }
+
+    "work with UTC when offset is not zero" in {
+      val job = Job(1, null, null,
+        "yyyy-01-01", Annually, 1, ZoneId.of("UTC"),
+        3, null,
+      )
+
+      val actual =
+        StatusChecker.nowMinusOffset(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
+
+      val expected = ZonedDateTime.parse("2019-06-25T15:05:30+01:00[UTC]")
+      actual shouldBe expected
+    }
+
+    "work with non-UTC when offset is zero" in {
+      val job = Job(0, null, null,
+        "yyyy-01-01", Hourly, 0, ZoneId.of("UTC"),
+        3, null,
+      )
+
+      val actual =
+        StatusChecker.nowMinusOffset(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[Africa/Cairo]"))
+
+      val expected = ZonedDateTime.parse("2020-06-25T13:05:30+01:00[UTC]")
+      actual shouldBe expected
+    }
+
+    "work with non-UTC when offset is not zero" in {
+      val job = Job(1, null, null,
+        "yyyy-01-01", Annually, 1, ZoneId.of("UTC"),
+        3, null,
+      )
+
+      val actual =
+        StatusChecker.nowMinusOffset(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[Africa/Cairo]"))
+
+      val expected = ZonedDateTime.parse("2019-06-25T13:05:30+01:00[UTC]")
       actual shouldBe expected
     }
   }
