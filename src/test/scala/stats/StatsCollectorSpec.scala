@@ -22,6 +22,8 @@ class StatsCollectorSpec()
     with BeforeAndAfterAll
     with Eventually {
 
+  import StatsCollectorSpec._
+
   "StatsCollector" must {
     "initialize labels upon instantiation" in {
       val jobs = Set("p1", "p2")
@@ -147,11 +149,24 @@ class StatsCollectorSpec()
 
       val expected = Set("p1")
 
-      val actual = receiveOne(2 seconds)
+      val prom = receiveOne(2 seconds)
         .asInstanceOf[StatsCollector.MetricsEntity]
         .samples.asScala.toList
-        .filter { prom =>
-          prom.name == "greenish_state_refresh_time_seconds"
+
+      val actual =
+        getNoneZeroHistogramLabels(prom,
+          "greenish_state_refresh_time_seconds")
+      actual shouldBe expected
+    }
+  }
+}
+
+object StatsCollectorSpec extends Matchers {
+  def getNoneZeroHistogramLabels(
+    prom: List[MetricFamilySamples],
+    name: String): Set[String] =
+      prom.filter { prom =>
+          prom.name == name
         }.flatMap { metric =>
           metric.samples.asScala
             .map(sample => (sample.labelValues.asScala, sample.value))
@@ -161,11 +176,8 @@ class StatsCollectorSpec()
         }.map { case (seq, num) => seq.head }
         .toSet
 
-      actual shouldBe expected
-    }
-  }
 
-  private def checkSamples(
+  def checkSamples(
     prom: List[MetricFamilySamples],
     name: String,
     expected: Seq[(Seq[String], Double)]): Unit = {
