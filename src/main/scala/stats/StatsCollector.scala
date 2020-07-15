@@ -14,32 +14,32 @@ class StatsCollector(jobIDs: Set[String],
     registry: CollectorRegistry = new CollectorRegistry()) extends Actor with ActorLogging {
 
   // Job related metrics
-  val refreshGauge = Gauge.build()
+  private[this] val refreshGauge = Gauge.build()
     .name("greenish_active_refresh_tasks")
     .help("Current number active state refresh tasks")
     .labelNames("job_id")
     .register(registry)
 
-  val refreshTime = Histogram.build()
+  private[this] val refreshTime = Histogram.build()
     .name("greenish_state_refresh_time_seconds")
     .help("Job state refreshing time")
     .labelNames("job_id")
     .buckets(StatsCollector.HistogramTimeBuckets:_*)
     .register(registry)
 
-  val refreshCounter = Counter.build()
+  private[this] val refreshCounter = Counter.build()
     .name("greenish_state_refresh_total")
     .help("Total number of job state refresh instances")
     .labelNames("job_id")
     .register(registry)
 
-   val badRefreshCounter = Counter.build()
+   private[this] val badRefreshCounter = Counter.build()
     .name("greenish_state_refresh_failed_total")
     .help("Total number of failed job state refresh instances")
     .labelNames("job_id")
     .register(registry)
 
-  val missingPeriods = Gauge.build()
+  private[this] val missingPeriods = Gauge.build()
     .name("greenish_missing_periods_total")
     .help("Current number of missing dataset periods")
     .labelNames("job_id")
@@ -56,6 +56,7 @@ class StatsCollector(jobIDs: Set[String],
       missingPeriods.labels(jobId)
     }
   }
+
   override def receive: Receive = {
     case RefreshTime(jobId, time) =>
       refreshTime.labels(jobId).observe(time)
