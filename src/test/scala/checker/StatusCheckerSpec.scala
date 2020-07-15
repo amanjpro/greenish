@@ -10,6 +10,7 @@ import java.time.{ZoneId, ZonedDateTime}
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import me.amanj.greenish.models._
+import me.amanj.greenish.stats._
 import java.io.File
 
 class StatusCheckerSpec()
@@ -41,28 +42,30 @@ class StatusCheckerSpec()
   val dir3 = new File("/tmp/job4/2020-06-25-13")
   val dir4 = new File("/tmp/job4/2020-06-25-14")
 
+  val stats = system.actorOf(
+    Props(new StatsCollector(Set("p1", "p2", "p3"))))
 
-  implicit val patience: PatienceConfig = PatienceConfig(1 minute, 1 second)
+  implicit val patience: PatienceConfig = PatienceConfig(15 seconds, 1 second)
 
   val lsScript = getClass.getResource("/test-ls").getFile
   val lsEnvScript = getClass.getResource("/test-ls-env").getFile
 
-  val job1 = Job(0, "job1", s"$lsScript /tmp/job1",
+  val job1 = Job(0, "job1", "p1", s"$lsScript /tmp/job1",
       "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
       2, AlertLevels(0, 1, 2, 3),
     )
 
-  val job2 = Job(1, "job2", s"$lsScript /tmp/job2",
+  val job2 = Job(1, "job2", "p2", s"$lsScript /tmp/job2",
       "yyyy-MM-dd-HH", Hourly, 2, ZoneId.of("UTC"),
       1, AlertLevels(1, 2, 3, 4),
     )
 
-  val job3 = Job(0, "job3", s"$lsScript /tmp/job3",
+  val job3 = Job(0, "job3", "p3", s"$lsScript /tmp/job3",
       "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
       3, AlertLevels(0, 1, 2, 3),
     )
 
-  val job4 = Job(1, "job4", s"$lsEnvScript job4",
+  val job4 = Job(1, "job4", "p4", s"$lsEnvScript job4",
       "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
       4, AlertLevels(0, 1, 2, 3),
     )
@@ -266,7 +269,7 @@ class StatusCheckerSpec()
 
   "periods" must {
     "work when job's period-check-offset is 0" in {
-      val job = Job(1, null, null,
+      val job = Job(1, null, null, null,
         "yyyy-MM-dd-HH", Hourly, 0, ZoneId.of("UTC"),
         3, null,
       )
@@ -279,7 +282,7 @@ class StatusCheckerSpec()
     }
 
     "work for hourly frequency" in {
-      val job = Job(1, null, null,
+      val job = Job(1, null, null, null,
         "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
         3, null,
       )
@@ -292,7 +295,7 @@ class StatusCheckerSpec()
     }
 
     "respect job timezone" in {
-      val job = Job(1, null, null,
+      val job = Job(1, null, null, null,
         "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
         3, null,
       )
@@ -305,7 +308,7 @@ class StatusCheckerSpec()
     }
 
     "work for daily frequency" in {
-      val job = Job(1, null, null,
+      val job = Job(1, null, null, null,
         "yyyy-MM-dd", Daily, 1, ZoneId.of("UTC"),
         3, null,
       )
@@ -318,7 +321,7 @@ class StatusCheckerSpec()
     }
 
     "work for monthly frequency" in {
-      val job = Job(1, null, null,
+      val job = Job(1, null, null, null,
         "yyyy-MM-01", Monthly, 0, ZoneId.of("UTC"),
         3, null,
       )
@@ -331,7 +334,7 @@ class StatusCheckerSpec()
     }
 
     "work for yearly frequency" in {
-      val job = Job(1, null, null,
+      val job = Job(1, null, null, null,
         "yyyy-01-01", Annually, 1, ZoneId.of("UTC"),
         3, null,
       )
@@ -346,7 +349,7 @@ class StatusCheckerSpec()
 
   "nowMinusOffset" must {
     "work with UTC when offset is zero" in {
-      val job = Job(0, null, null,
+      val job = Job(0, null, null, null,
         "yyyy-01-01", Hourly, 0, ZoneId.of("UTC"),
         3, null,
       )
@@ -359,7 +362,7 @@ class StatusCheckerSpec()
     }
 
     "work with UTC when offset is not zero" in {
-      val job = Job(1, null, null,
+      val job = Job(1, null, null, null,
         "yyyy-01-01", Annually, 1, ZoneId.of("UTC"),
         3, null,
       )
@@ -372,7 +375,7 @@ class StatusCheckerSpec()
     }
 
     "work with non-UTC when offset is zero" in {
-      val job = Job(0, null, null,
+      val job = Job(0, null, null, null,
         "yyyy-01-01", Hourly, 0, ZoneId.of("UTC"),
         3, null,
       )
@@ -385,7 +388,7 @@ class StatusCheckerSpec()
     }
 
     "work with non-UTC when offset is not zero" in {
-      val job = Job(1, null, null,
+      val job = Job(1, null, null, null,
         "yyyy-01-01", Annually, 1, ZoneId.of("UTC"),
         3, null,
       )
@@ -402,7 +405,8 @@ class StatusCheckerSpec()
     "work" in {
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
-        new StatusChecker(groups, Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
+        new StatusChecker(groups, stats,
+          Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
           () => tstamp)))
 
       val expected = List(
@@ -455,7 +459,8 @@ class StatusCheckerSpec()
       //   StatusChecker.periods(job, )
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
-        new StatusChecker(groups, Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
+        new StatusChecker(groups, stats,
+          Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
           () => tstamp)))
 
       val expected = List(
@@ -503,7 +508,8 @@ class StatusCheckerSpec()
       //   StatusChecker.periods(job, )
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
-        new StatusChecker(groups, Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
+        new StatusChecker(groups, stats,
+          Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
           () => tstamp)))
 
       val expected = List(
@@ -550,7 +556,8 @@ class StatusCheckerSpec()
       //   StatusChecker.periods(job, )
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
-        new StatusChecker(groups, Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
+        new StatusChecker(groups, stats,
+          Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
           () => tstamp)))
 
       val expected = List(
@@ -598,7 +605,8 @@ class StatusCheckerSpec()
       //   StatusChecker.periods(job, )
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
-        new StatusChecker(groups, Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
+        new StatusChecker(groups, stats,
+          Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
           () => tstamp)))
 
       val expected = List(
@@ -643,7 +651,8 @@ class StatusCheckerSpec()
       //   StatusChecker.periods(job, )
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
-        new StatusChecker(groups, Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
+        new StatusChecker(groups, stats,
+          Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
           () => tstamp)))
 
       val expected = List(

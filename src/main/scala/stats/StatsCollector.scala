@@ -11,7 +11,7 @@ import akka.http.scaladsl.model.{MediaType, HttpCharsets, HttpEntity}
 import akka.http.scaladsl.marshalling.{ToEntityMarshaller, Marshaller}
 
 class StatsCollector(jobIDs: Set[String],
-    registry: CollectorRegistry = CollectorRegistry.defaultRegistry) extends Actor with ActorLogging {
+    registry: CollectorRegistry = new CollectorRegistry()) extends Actor with ActorLogging {
 
   // Job related metrics
   val refreshGauge = Gauge.build()
