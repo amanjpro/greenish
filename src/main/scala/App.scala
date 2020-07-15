@@ -34,8 +34,10 @@ object App {
       appConfig.refreshInSeconds seconds,
       statusChecker, Refresh(() => ZonedDateTime.now()))
 
-    val bindingFuture = Http().bindAndHandle(new Routes(statusChecker).routes,
-      appConfig.address, appConfig.port)
+    val bindingFuture = Http()
+      .bindAndHandle(
+        new Routes(statusChecker, statsActor).routes,
+        appConfig.address, appConfig.port)
 
     println(s"Server online at http://${appConfig.address}:${appConfig.port}...")
   }
