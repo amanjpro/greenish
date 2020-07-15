@@ -326,5 +326,17 @@ class RoutesSpec()
         status shouldBe StatusCodes.OK
       }
     }
+
+    "properly handle GET/prometheus request" in {
+      Get("/prometheus") ~> routes.routes ~> check {
+        contentType.toString.contains("text/plain") shouldBe true
+        contentType.toString.contains("version=0.0.4") shouldBe true
+        status shouldBe StatusCodes.OK
+        val actual = responseAs[String]
+        actual.contains("greenish") shouldBe true
+        actual.contains("# TYPE") shouldBe true
+        actual.contains("# HELP") shouldBe true
+      }
+    }
   }
 }
