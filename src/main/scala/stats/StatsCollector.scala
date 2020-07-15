@@ -45,7 +45,9 @@ class StatsCollector(jobIDs: Set[String],
     .labelNames("job_id")
     .register(registry)
 
-  def init(): Unit = {
+  init()
+
+  private[this] def init(): Unit = {
     jobIDs.foreach { jobId =>
       refreshGauge.labels(jobId)
       refreshTime.labels(jobId)
