@@ -13,7 +13,9 @@ case object GetMissing extends Message
 case object Summary extends Message
 case class GetJobStatus(groupId: Int, jobId: Int) extends Message
 case class GetGroupStatus(groupId: Int) extends Message
-case class BatchRun(cmd: String, periods: Seq[String], env: Seq[(String, String)],
-  groupId: Int, jobId: Int, clockCounter: Long) extends Message
+case class BatchRun(cmd: String, periods: Seq[String],
+  env: Seq[(String, String)],
+  groupId: Int, jobId: Int,
+  prometheusId: String, clockCounter: Long) extends Message
 case class RunResult(periodHealth: Seq[PeriodHealth],
   groupId: Int, jobId: Int, clockCounter: Long) extends Message

@@ -19,8 +19,15 @@ object App {
     val schedulerActor = system.actorOf(Props.empty)
 
     val appConfig = AppConfig()
+
+    val prometheusIds = appConfig.groups.flatMap ( g =>
+      g.jobs.map(j => j.prometheusId)).toSet
+
+    val statsActor = system.actorOf(
+      Props(new stats.StatsCollector(prometheusIds)))
+
     val statusChecker = system.actorOf(
-      Props(new StatusChecker(appConfig.groups, appConfig.env)))
+      Props(new StatusChecker(appConfig.groups, statsActor, appConfig.env)))
 
     system.scheduler.scheduleWithFixedDelay(
       0 seconds,

@@ -1,40 +1,64 @@
 package me.amanj.greenish.checker
 
+import me.amanj.greenish.stats._
 import me.amanj.greenish.models._
 import java.time.ZonedDateTime
-import akka.actor.Actor
 import scala.sys.process.Process
 import scala.util.control.NonFatal
-import akka.actor.ActorLogging
+import akka.actor.{Actor, ActorRef, ActorLogging}
 
-class CommandRunner() extends Actor with ActorLogging {
+class CommandRunner(statsActor: ActorRef) extends Actor with ActorLogging {
   override def receive: Receive = {
-    case BatchRun(cmd, periods, env, group, job, clockCounter) =>
+    case BatchRun(cmd, periods, env, group, job,
+        prometheusId, clockCounter) =>
+      statsActor ! IncRefresh(prometheusId)
+      val startTime = System.currentTimeMillis.toDouble
       try {
-        val exec = Seq("bash", "-c", CommandRunner.toBashCommand(cmd, periods))
-        val output = Process(exec, None, env:_*).lazyLines
-        val capturedOutput = CommandRunner.parseOutput(output, periods.toSet)
-        val distinctReturnedPeriods = capturedOutput.map(_._1).distinct
-        if(capturedOutput.length < periods.size) {
-          log.error(s"""|Some periods weren't returned for:
-                        |Group ID: $group, Job ID: $job
-                        |$cmd $periods
-                        |state update aborted""".stripMargin)
-        } else if(distinctReturnedPeriods.length != capturedOutput.size) {
-          log.error(s"""|Some periods were returned more than once for:
-                        |$cmd $periods
-                        |Group ID: $group, Job ID: $job
-                        |$cmd $periods
-                        |state update aborted""".stripMargin)
-        } else {
-          val mapped = capturedOutput.toMap
-          val periodHealths = periods.map { period => PeriodHealth(period, mapped(period)) }
-          context.sender ! RunResult(periodHealths, group, job, clockCounter)
-        }
+        run(cmd, periods, env, group, job, prometheusId, clockCounter)
       } catch {
         case NonFatal(exp) =>
           log.error(exp.getMessage())
+          statsActor ! IncBadRefresh(prometheusId)
+      } finally {
+        statsActor ! DecRefresh(prometheusId)
+        val endTime = System.currentTimeMillis.toDouble
+        statsActor ! RefreshTime(prometheusId,
+          (endTime - startTime) / 1000)
       }
+  }
+
+  private[this] def run(
+    cmd: String,
+    periods: Seq[String],
+    env: Seq[(String, String)],
+    group: Int,
+    job: Int,
+    prometheusId: String,
+    clockCounter: Long): Unit = {
+    val exec = Seq("bash", "-c", CommandRunner.toBashCommand(cmd, periods))
+    val output = Process(exec, None, env:_*).lazyLines
+    val capturedOutput = CommandRunner.parseOutput(output, periods.toSet)
+    val distinctReturnedPeriods = capturedOutput.map(_._1).distinct
+    if(capturedOutput.length < periods.size) {
+      log.error(s"""|Some periods weren't returned for:
+                    |Group ID: $group, Job ID: $job
+                    |$cmd $periods
+                    |state update aborted""".stripMargin)
+      statsActor ! IncBadRefresh(prometheusId)
+    } else if(distinctReturnedPeriods.length != capturedOutput.size) {
+      log.error(s"""|Some periods were returned more than once for:
+                    |$cmd $periods
+                    |Group ID: $group, Job ID: $job
+                    |$cmd $periods
+                    |state update aborted""".stripMargin)
+      statsActor ! IncBadRefresh(prometheusId)
+    } else {
+      val mapped = capturedOutput.toMap
+      val periodHealths = periods.map {
+        period => PeriodHealth(period, mapped(period)) }
+      context.sender ! RunResult(periodHealths, group, job, clockCounter)
+      statsActor ! MissingPeriods(prometheusId, periodHealths.count(!_.ok))
+    }
   }
 }
 
