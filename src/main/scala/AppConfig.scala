@@ -31,6 +31,7 @@ object AppConfig {
       val checkEntries = groupConfig.getConfigList("job-entries")
         .asScala.zipWithIndex.map { case (jobConfig, index) =>
           val name = jobConfig.getString("job-name")
+          val prometheusId = jobConfig.getString("prometheus-id")
           val cmd = jobConfig.getString("check-command")
           val jobPeriodCheckOffset =
             jobConfig.getIntWithDefault("job-period-check-offset", groupPeriodCheckOffset)
@@ -55,6 +56,7 @@ object AppConfig {
           Job(
             index,
             name,
+            prometheusId,
             cmd,
             timePattern,
             frequency,

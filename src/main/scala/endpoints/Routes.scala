@@ -5,17 +5,19 @@ import akka.actor.ActorRef
 import akka.util.Timeout
 import akka.pattern.ask
 import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.server.Directive
 import akka.http.scaladsl.server.Directives._
 import scala.concurrent.duration.Duration
 import io.circe.syntax._
 import io.circe.Printer
-import me.amanj.greenish.models
-import models.{sysinfo => _, _}
+import me.amanj.greenish.models._
+import me.amanj.greenish.stats._
 import me.amanj.greenish.checker._
 import akka.http.scaladsl.model.HttpResponse
 import scala.util.Success
 
 class Routes(statusChecker: ActorRef,
+    statsActor: ActorRef,
     now: () => ZonedDateTime = () => ZonedDateTime.now) {
   private[this] implicit val timeout = Timeout(Duration.fromNanos(5000000L))
   private[this] val jsonPrinter = Printer (
@@ -24,7 +26,7 @@ class Routes(statusChecker: ActorRef,
   )
 
   private[this] val maxlag = get {
-    pathPrefix("maxlag") {
+    path("maxlag") {
       val lagFuture = (
         statusChecker ? MaxLag
       ).mapTo[Lag]
@@ -35,7 +37,7 @@ class Routes(statusChecker: ActorRef,
   }
 
   private[this] val summary = get {
-    pathPrefix("summary") {
+    path("summary") {
       val lagFuture = (
         statusChecker ? Summary
       ).mapTo[Seq[GroupStatusSummary]]
@@ -145,12 +147,24 @@ class Routes(statusChecker: ActorRef,
 
   private[this] val system = get {
     path("system") {
-      val json = jsonPrinter.print(models.sysinfo())
+      val json = jsonPrinter.print(sysinfo())
       complete(json)
+    }
+  }
+
+  private[this] val prometheus = get {
+    path("prometheus") {
+      val statsFuture =
+        (statsActor ? GetPrometheus)
+          .mapTo[StatsCollector.MetricsEntity]
+      onComplete(statsFuture) { entity =>
+        complete(entity)
+      }
     }
   }
 
   val routes =
     getJob ~ getGroup ~ refreshGroup ~ refreshJob ~
-      maxlag ~ summary ~ missing ~ state ~ dashboard ~ system
+      maxlag ~ summary ~ missing ~ state ~ dashboard ~ system ~
+      prometheus
 }

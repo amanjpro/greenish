@@ -11,6 +11,7 @@ import java.time.{ZoneId, ZonedDateTime}
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import me.amanj.greenish.models._
+import me.amanj.greenish.stats._
 import me.amanj.greenish.checker._
 import io.circe.parser._
 import java.io.File
@@ -24,14 +25,17 @@ class RoutesSpec()
 
   val dir1 = new File("/tmp/2020-06-25-14")
   val tstamp = 1000L
-  implicit val patience: PatienceConfig = PatienceConfig(1 minute, 1 second)
+  implicit val patience: PatienceConfig = PatienceConfig(15 seconds, 1 second)
   override def beforeAll: Unit = {
     dir1.mkdirs
-    checker = system.actorOf(Props(new StatusChecker(Seq(group1, group2), Seq.empty,
-      () => tstamp)))
+    stats = system.actorOf(
+      Props(new StatsCollector(Set("p1", "p2", "p3"))))
+    checker = system.actorOf(
+      Props(new StatusChecker(Seq(group1, group2), stats, Seq.empty,
+        () => tstamp)))
     val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
     checker ! Refresh(() => time)
-    routes = new Routes(checker, () => time)
+    routes = new Routes(checker, stats, () => time)
   }
   override def afterAll: Unit = {
     dir1.delete
@@ -41,17 +45,17 @@ class RoutesSpec()
   val lsScript = getClass.getResource("/test-ls").getFile
   val lsEnvScript = getClass.getResource("/test-ls-env").getFile
 
-  val job1 = Job(0, "job1", s"$lsScript /tmp",
+  val job1 = Job(0, "job1", "p1", s"$lsScript /tmp",
     "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
     2, AlertLevels(0, 1, 2, 3),
   )
 
-  val job2 = Job(1, "job2", s"$lsScript /tmp",
+  val job2 = Job(1, "job2", "p2", s"$lsScript /tmp",
     "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
     2, AlertLevels(0, 1, 2, 3),
   )
 
-  val job3 = Job(0, "job3", s"$lsScript /tmp",
+  val job3 = Job(0, "job3", "p3", s"$lsScript /tmp",
     "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
     2, AlertLevels(0, 1, 2, 3),
   )
@@ -60,6 +64,7 @@ class RoutesSpec()
   val group2 = Group(1, "group2", Seq(job3))
 
   var checker: ActorRef = _
+  var stats: ActorRef = _
   var routes: Routes = _
 
   "Routes" must {
@@ -206,9 +211,10 @@ class RoutesSpec()
 
     "properly handle GET/group/gid/refresh request when id exists" in {
       val checker = system.actorOf(Props(
-        new StatusChecker(Seq(group1, group2), Seq.empty, () => tstamp)))
+        new StatusChecker(Seq(group1, group2), stats,
+          Seq.empty, () => tstamp)))
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
-      val routes = new Routes(checker, () => time)
+      val routes = new Routes(checker, stats, () => time)
 
       Get("/group/0/refresh") ~> routes.routes ~> check {
         status shouldBe StatusCodes.OK
@@ -247,10 +253,11 @@ class RoutesSpec()
     }
 
     "properly handle GET/group/gid/job/jid/refresh request when both gid and jid exist" in {
-      val checker = system.actorOf(Props(new StatusChecker(Seq(group1, group2), Seq.empty,
+      val checker = system.actorOf(
+        Props(new StatusChecker(Seq(group1, group2), stats, Seq.empty,
         () => tstamp)))
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
-      val routes = new Routes(checker, () => time)
+      val routes = new Routes(checker, stats, () => time)
 
       Get("/group/0/job/0/refresh") ~> routes.routes ~> check {
         status shouldBe StatusCodes.OK
@@ -317,6 +324,18 @@ class RoutesSpec()
     "properly handle GET/system request" in {
       Get("/system") ~> routes.routes ~> check {
         status shouldBe StatusCodes.OK
+      }
+    }
+
+    "properly handle GET/prometheus request" in {
+      Get("/prometheus") ~> routes.routes ~> check {
+        contentType.toString.contains("text/plain") shouldBe true
+        contentType.toString.contains("version=0.0.4") shouldBe true
+        status shouldBe StatusCodes.OK
+        val actual = responseAs[String]
+        actual.contains("greenish") shouldBe true
+        actual.contains("# TYPE") shouldBe true
+        actual.contains("# HELP") shouldBe true
       }
     }
   }

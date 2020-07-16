@@ -9,6 +9,7 @@ import io.circe.generic.extras.semiauto.{deriveConfiguredDecoder, deriveConfigur
 case class Job(
   jobId: Int,
   name: String,
+  prometheusId: String,
   cmd: String,
   timePattern: String,
   frequency: CheckFrequency,
