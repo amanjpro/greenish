@@ -94,6 +94,7 @@ $ curl --silent -G http://0.0.0.0:8080/missing | jq .
     "status": [
       {
         "job": {
+          "group": "Group1",
           "job_id": 0,
           "name": "Job1",
           "cmd": "/tmp/first_script",
@@ -154,6 +155,7 @@ $ curl --silent -G http://0.0.0.0:8080/state | jq .
     "status": [
       {
         "job": {
+          "group": "Group1",
           "job_id": 0,
           "name": "Job1",
           "cmd": "/tmp/first_script",
@@ -210,6 +212,7 @@ You can also focus on a single job, and query it:
 ```
 $ curl --silent -G localhost:8080/group/1/job/0 | jq .
 {
+  "group": "Group1",
   "job": {
     "job_id": 0,
     "name": "Job3",
