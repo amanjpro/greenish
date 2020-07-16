@@ -81,7 +81,7 @@ class StatusCheckerSpec()
 
   val singletonChecker = new StatusCheckerApi {
     override protected[this] var state = IndexedSeq(GroupStatus(
-        group1, Array(JobStatus(job1, tstamp, Seq(PeriodHealth("1", false))))
+        group1, Array(JobStatus("group1", job1, tstamp, Seq(PeriodHealth("1", false))))
       ))
   }
 
@@ -89,14 +89,14 @@ class StatusCheckerSpec()
     override protected[this] var state = IndexedSeq(
       GroupStatus(
         group1, Array(
-          JobStatus(job1, tstamp, Seq(PeriodHealth("1", true), PeriodHealth("1", true))),
-          JobStatus(job1, tstamp, Seq(PeriodHealth("2", false), PeriodHealth("3", false))),
+          JobStatus("group1", job1, tstamp, Seq(PeriodHealth("1", true), PeriodHealth("1", true))),
+          JobStatus("group1", job1, tstamp, Seq(PeriodHealth("2", false), PeriodHealth("3", false))),
         )
       ),
       GroupStatus(
         group1, Array(
-          JobStatus(job1, tstamp, Seq(PeriodHealth("1", false), PeriodHealth("1", true))),
-          JobStatus(job1, tstamp, Seq(PeriodHealth("2", false),
+          JobStatus("group1", job1, tstamp, Seq(PeriodHealth("1", false), PeriodHealth("1", true))),
+          JobStatus("group1", job1, tstamp, Seq(PeriodHealth("2", false),
             PeriodHealth("3", false), PeriodHealth("4", false))),
         )
       )
@@ -141,7 +141,7 @@ class StatusCheckerSpec()
 
     "work when state is not empty" in {
       val expected = Seq(GroupStatus(
-        group1, Array(JobStatus(job1, tstamp, Seq(PeriodHealth("1", false))))
+        group1, Array(JobStatus("group1", job1, tstamp, Seq(PeriodHealth("1", false))))
       ))
 
       singletonChecker.getMissing shouldBe expected
@@ -151,13 +151,13 @@ class StatusCheckerSpec()
       val expected = Seq(
         GroupStatus(
           group1, Array(
-            JobStatus(job1, tstamp, Seq(PeriodHealth("2", false), PeriodHealth("3", false))),
+            JobStatus("group1", job1, tstamp, Seq(PeriodHealth("2", false), PeriodHealth("3", false))),
           )
         ),
         GroupStatus(
           group1, Array(
-            JobStatus(job1, tstamp, Seq(PeriodHealth("1", false))),
-            JobStatus(job1, tstamp, Seq(PeriodHealth("2", false),
+            JobStatus("group1", job1, tstamp, Seq(PeriodHealth("1", false))),
+            JobStatus("group1", job1, tstamp, Seq(PeriodHealth("2", false),
               PeriodHealth("3", false), PeriodHealth("4", false))),
           )
         )
@@ -207,7 +207,7 @@ class StatusCheckerSpec()
 
     "return Some when state is not empty and groupId exists" in {
       val expected = Some(GroupStatus(group1, Array(
-        JobStatus(job1, tstamp, Seq(PeriodHealth("1", false))))))
+        JobStatus("group1", job1, tstamp, Seq(PeriodHealth("1", false))))))
       singletonChecker.getGroupStatus(0) shouldBe expected
     }
 
@@ -231,7 +231,7 @@ class StatusCheckerSpec()
     }
 
     "return Some when state is not empty and groupId and jobId exist" in {
-      val expected = Some(JobStatus(job1, tstamp, Seq(PeriodHealth("1", false))))
+      val expected = Some(JobStatus("group1", job1, tstamp, Seq(PeriodHealth("1", false))))
       singletonChecker.getJobStatus(0, 0) shouldBe expected
     }
   }
@@ -245,8 +245,8 @@ class StatusCheckerSpec()
     "work when groups is not empty" in {
       val expected = IndexedSeq(
           GroupStatus(group1, Array(
-            JobStatus(job1, -1, Seq.empty),
-            JobStatus(job2, -1, Seq.empty),
+            JobStatus("group1", job1, -1, Seq.empty),
+            JobStatus("group1", job2, -1, Seq.empty),
             ))
         )
       StatusChecker.initState(Seq(group1)) shouldBe expected
@@ -255,12 +255,12 @@ class StatusCheckerSpec()
     "work when groups is deeply nested" in {
       val expected = IndexedSeq(
           GroupStatus(group1, Array(
-            JobStatus(job1, -1, Seq.empty),
-            JobStatus(job2, -1, Seq.empty),
+            JobStatus("group1", job1, -1, Seq.empty),
+            JobStatus("group1", job2, -1, Seq.empty),
             )),
           GroupStatus(group2, Array(
-            JobStatus(job3, -1, Seq.empty),
-            JobStatus(job4, -1, Seq.empty),
+            JobStatus("group2", job3, -1, Seq.empty),
+            JobStatus("group2", job4, -1, Seq.empty),
             )),
         )
       StatusChecker.initState(groups) shouldBe expected
@@ -414,12 +414,14 @@ class StatusCheckerSpec()
           group1,
           Array(
             JobStatus(
+              "group1",
               job1,
               tstamp,
               Vector(
                 PeriodHealth("2020-06-25-13", false),
                 PeriodHealth("2020-06-25-14", true))),
             JobStatus(
+              "group1",
               job2,
               tstamp,
               Vector(
@@ -428,6 +430,7 @@ class StatusCheckerSpec()
           group2,
           Array(
             JobStatus(
+              "group2",
               job3,
               tstamp,
               Vector(
@@ -435,6 +438,7 @@ class StatusCheckerSpec()
                 PeriodHealth("2020-06-25-13", false),
                 PeriodHealth("2020-06-25-14", true))),
             JobStatus(
+              "group2",
               job4,
               tstamp,
               Vector(
@@ -468,12 +472,14 @@ class StatusCheckerSpec()
           group1,
           Array(
             JobStatus(
+              "group1",
               job1,
               tstamp,
               Vector(
                 PeriodHealth("2020-06-25-13", false),
                 PeriodHealth("2020-06-25-14", true))),
             JobStatus(
+              "group1",
               job2,
               tstamp,
               Vector(
@@ -482,11 +488,13 @@ class StatusCheckerSpec()
           group2,
           Array(
             JobStatus(
+              "group2",
               job3,
               -1,
               Vector.empty,
               ),
             JobStatus(
+              "group2",
               job4,
               -1,
               Vector.empty,
@@ -517,11 +525,13 @@ class StatusCheckerSpec()
           group1,
           Array(
             JobStatus(
+              "group1",
               job1,
               -1,
               Vector.empty,
               ),
             JobStatus(
+              "group1",
               job2,
               -1,
               Vector.empty,
@@ -530,11 +540,13 @@ class StatusCheckerSpec()
           group2,
           Array(
             JobStatus(
+              "group2",
               job3,
               -1,
               Vector.empty,
               ),
             JobStatus(
+              "group2",
               job4,
               -1,
               Vector.empty,
@@ -565,12 +577,14 @@ class StatusCheckerSpec()
           group1,
           Array(
             JobStatus(
+              "group1",
               job1,
               tstamp,
               Vector(
                 PeriodHealth("2020-06-25-13", false),
                 PeriodHealth("2020-06-25-14", true))),
             JobStatus(
+              "group1",
               job2,
               -1,
               Vector.empty,
@@ -579,11 +593,13 @@ class StatusCheckerSpec()
           group2,
           Array(
             JobStatus(
+              "group2",
               job3,
               -1,
               Vector.empty,
               ),
             JobStatus(
+              "group2",
               job4,
               -1,
               Vector.empty,
@@ -614,11 +630,13 @@ class StatusCheckerSpec()
           group1,
           Array(
             JobStatus(
+              "group1",
               job1,
               -1,
               Vector.empty,
               ),
             JobStatus(
+              "group1",
               job2,
               -1,
               Vector.empty,
@@ -627,11 +645,13 @@ class StatusCheckerSpec()
           group2,
           Array(
             JobStatus(
+              "group2",
               job3,
               -1,
               Vector.empty,
               ),
             JobStatus(
+              "group2",
               job4,
               -1,
               Vector.empty,
@@ -660,11 +680,13 @@ class StatusCheckerSpec()
           group1,
           Array(
             JobStatus(
+              "group1",
               job1,
               -1,
               Vector.empty,
               ),
             JobStatus(
+              "group1",
               job2,
               -1,
               Vector.empty,
@@ -673,11 +695,13 @@ class StatusCheckerSpec()
           group2,
           Array(
             JobStatus(
+              "group2",
               job3,
               -1,
               Vector.empty,
               ),
             JobStatus(
+              "group2",
               job4,
               -1,
               Vector.empty,

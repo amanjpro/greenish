@@ -129,7 +129,7 @@ class JsonSerdeSpec() extends Matchers
       Hourly, 1, ZoneId.of("UTC"), 2, AlertLevels(3, 4, 5, 6))
     val group = Group(0, "g", Seq(job))
     val periods = Seq(PeriodHealth("1", true), PeriodHealth("2", false))
-    val jobStatus = JobStatus(job, 100, periods)
+    val jobStatus = JobStatus("g", job, 100, periods)
     val groupStatus = GroupStatus(group, Array(jobStatus))
 
     "produce correct JSON" in {
@@ -210,10 +210,11 @@ class JsonSerdeSpec() extends Matchers
     val job = Job(1, "j", "p", "c", "yyyy-MM-dd",
       Hourly, 1, ZoneId.of("UTC"), 2, AlertLevels(3, 4, 5, 6))
     val periods = Seq(PeriodHealth("1", true), PeriodHealth("2", false))
-    val jobStatus = JobStatus(job, 100, periods)
+    val jobStatus = JobStatus("g", job, 100, periods)
 
     "produce correct JSON" in {
       val expected = Json.obj(
+        "group" -> "g".asJson,
         "job" -> job.asJson,
         "updated_at" -> 100.asJson,
         "period_health" -> periods.asJson,

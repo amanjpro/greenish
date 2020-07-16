@@ -20,9 +20,9 @@ class GroupStatusSpec() extends Matchers
   val group1 = Group(0, "group1", Seq(job1))
   val group2 = Group(1, "group2", Seq(job2))
 
-  val gs1 = GroupStatus(group1, Array(JobStatus(job1, -1, Seq.empty)))
-  val gs1Copy = GroupStatus(group1, Array(JobStatus(job1, -1, Seq.empty)))
-  val gs2 = GroupStatus(group2, Array(JobStatus(job2, -1, Seq.empty)))
+  val gs1 = GroupStatus(group1, Array(JobStatus("group1", job1, -1, Seq.empty)))
+  val gs1Copy = GroupStatus(group1, Array(JobStatus("group1", job1, -1, Seq.empty)))
+  val gs2 = GroupStatus(group2, Array(JobStatus("group2", job2, -1, Seq.empty)))
 
   "equals" must {
     "work if that is null" in {
@@ -63,4 +63,3 @@ class GroupStatusSpec() extends Matchers
     }
   }
 }
-
