@@ -13,11 +13,51 @@ an annotated example](src/test/resources/application.conf). Greenish does not
 have a standard monitoring scripting language/plugin. Monitoring tasks can be
 in any executable form, details are in [Monitoring Jobs](#monitoring-jobs).
 
+*A Logo* is currently being designed. If you have an idea for a logo, please
+share :)
+
+## Greenish dashboard
+
+Greenish provides a basic HTML dashboard to visualise the state of the
+monitored jobs. The dashboard can be accessed at: `/dashboard` endpoint.
+Here is a screenshot:
+
+![Screenshot](doc/images/dashboard.png)
+
+## The API
+
+Greenish API is documented [here](doc/api.md)
+
+## Who uses Greenish?
+
+Greenish is still new. As of now, [Samsung
+Ads](https://www.samsung.com/us/business/samsungads/) uses Greenish to monitor
+a _very sensitive and business critical set of datasets_.
+
+## Greenish vs. Others
+
+**Nagios** is a monitoring tool for systems, network and infra. It is very good to
+keep track of the current state of the system. But it does not know about data
+sets that follow a periodic pattern (daily jobs, hourly jobs and etc.). Making
+Nagios aware of periods is entirely on the shoulder of the check writers, which
+can be very tricky to do (or even impossible?).
+
+**Prometheus** is another great tool for monitoring metrics, and the health of
+other systems, but again it doesn't know about datasets that follow periodic
+patterns. It is worth mentioning that Greenish provides an to export metrics to _Prometheus_.
+
+**Airflow** knows about periods, but it is not a monitoring tool. Airflow can
+alert when a run fails, but if a computed data was mistakenly deleted Airflow
+stays unaware.
+
+What set's Greenish apart is that, it knows about periods, and keeps checking
+the existence of the datasets.
+
 ## Monitoring Jobs
 
 As mentioned earlier, monitoring jobs can be any executable program, as long as:
 
-- They are exectable
+- They are executable
 - They accept a variable number of `period` arguments, as their last argument
   sets: `$ monitor_my_job.sh staging 2020-20-06-10 2020-20-06-11 ...`
   The above is an example of a monitoring script that is written in a
@@ -40,7 +80,7 @@ As mentioned earlier, monitoring jobs can be any executable program, as long as:
       `^greenish-period\t.*\t(0|1)$`.
     - The three parts of the line are tab separated.
 - The scripts can have any number of debugging/application output lines.
-- The script should exit with 0, under normal circumistances even if the entire
+- The script should exit with 0, under normal circumstances even if the entire
   set of periods are not in a good health.
 
 An example monitoring script can be like this:
@@ -79,18 +119,6 @@ are tailored for IO jobs. More information can be found:
 
 - [ThreadPoolExecutor Javadoc](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ThreadPoolExecutor.html)
 - [Akka documentaiton](https://doc.akka.io/docs/akka-http/current/handling-blocking-operations-in-akka-http-routes.html#solution-dedicated-dispatcher-for-blocking-operations)
-
-## Greenish dashboard
-
-Greenish provides a basic HTML dashboard to visualise the state of the
-monitored jobs. The dashboard can be accessed at: `/dashboard` endpoint.
-Here is a screenshot:
-
-![Screenshot](doc/images/dashboard.png)
-
-## The API
-
-Greenish API is documented [here](doc/api.md)
 
 ## Pre-built package
 
