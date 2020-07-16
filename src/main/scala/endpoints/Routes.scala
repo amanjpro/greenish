@@ -163,8 +163,30 @@ class Routes(statusChecker: ActorRef,
     }
   }
 
+  private[this] val health = get {
+    path("health") {
+      val entriesFuture = (statusChecker ? AllEntries)
+        .mapTo[Seq[GroupStatus]]
+
+      onComplete(entriesFuture) { entity =>
+        val health = entity.map(Routes.isHealthy).getOrElse(false)
+        val json = jsonPrinter.print(healthJson(health))
+        complete(json)
+      }
+    }
+  }
+
   val routes =
     getJob ~ getGroup ~ refreshGroup ~ refreshJob ~
       maxlag ~ summary ~ missing ~ state ~ dashboard ~ system ~
-      prometheus
+      prometheus ~ health
+}
+
+object Routes {
+  private[endpoints] def isHealthy(groups: Seq[GroupStatus]): Boolean =
+    groups.map { group =>
+      group.status.filterNot { job =>
+        job.periodHealth.isEmpty
+      }.length
+    }.exists(_ > 0)
 }

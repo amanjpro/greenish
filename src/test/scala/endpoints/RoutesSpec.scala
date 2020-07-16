@@ -67,6 +67,60 @@ class RoutesSpec()
   var stats: ActorRef = _
   var routes: Routes = _
 
+  "isHealthy" must {
+    "return false when group summary is empty" in {
+      Routes.isHealthy(Seq.empty) shouldBe false
+    }
+
+    "return false when no jobs has returned their peirods healths" in {
+      val groups = Seq(
+        GroupStatus(group1, Array(
+          JobStatus(job1, tstamp, Seq.empty),
+          JobStatus(job2, tstamp, Seq.empty))
+        ),
+        GroupStatus(group2, Array(
+          JobStatus(job3, tstamp, Seq.empty))
+        ),
+      )
+      Routes.isHealthy(groups) shouldBe false
+    }
+
+    "return true when some jobs has returned their peirods healths" in {
+      val groups = Seq(
+        GroupStatus(group1, Array(
+          JobStatus(job1, tstamp, Seq(PeriodHealth("2020-06-25-13", false))),
+          JobStatus(job2, tstamp, Seq.empty))
+        ),
+        GroupStatus(group2, Array(
+          JobStatus(job3, tstamp, Seq.empty))
+        ),
+      )
+      Routes.isHealthy(groups) shouldBe true
+    }
+
+    "return true when all jobs has returned their peirods healths" in {
+      val groups = Seq(
+        GroupStatus(group1, Array(
+          JobStatus(job1, tstamp, Seq(
+            PeriodHealth("2020-06-25-13", false),
+            PeriodHealth("2020-06-25-14", true),
+            )),
+          JobStatus(job2, tstamp, Seq(
+            PeriodHealth("2020-06-25-13", false),
+            PeriodHealth("2020-06-25-14", true),
+            )),
+        )),
+        GroupStatus(group2, Array(
+          JobStatus(job3, tstamp, Seq(
+            PeriodHealth("2020-06-25-13", false),
+            PeriodHealth("2020-06-25-14", true),
+            )),
+        )),
+      )
+      Routes.isHealthy(groups) shouldBe true
+    }
+  }
+
   "Routes" must {
     "properly handle GET/maxlag request" in {
       eventually {
@@ -336,6 +390,32 @@ class RoutesSpec()
         actual.contains("greenish") shouldBe true
         actual.contains("# TYPE") shouldBe true
         actual.contains("# HELP") shouldBe true
+      }
+    }
+
+    "send good health when hitting GET/health after successful refresh" in {
+      eventually {
+        Get("/health") ~> routes.routes ~> check {
+          val actual = parse(responseAs[String])
+            .getOrElse(null)
+          val expected = healthJson(true)
+          actual shouldBe expected
+        }
+      }
+    }
+
+    "send bad health when hitting GET/health befor successful refresh" in {
+      checker = system.actorOf(
+        Props(new StatusChecker(Seq(group1, group2), stats, Seq.empty,
+          () => tstamp)))
+      val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
+      routes = new Routes(checker, stats, () => time)
+
+      Get("/health") ~> routes.routes ~> check {
+        val actual = parse(responseAs[String])
+          .getOrElse(null)
+        val expected = healthJson(false)
+        actual shouldBe expected
       }
     }
   }

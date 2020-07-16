@@ -9,6 +9,24 @@ import io.circe.syntax.EncoderOps
 
 class JsonSerdeSpec() extends Matchers
   with AnyWordSpecLike {
+  "healthJson" must {
+    "produce correct JSON when health is bad" in {
+      val expected = "bad"
+      val json = healthJson(false)
+      val actual = json.hcursor.downField("health").as[String].getOrElse(???)
+      actual shouldBe expected
+      json.hcursor.keys.get.size shouldBe 1
+    }
+
+    "produce correct JSON when health is good" in {
+      val expected = "good"
+      val json = healthJson(true)
+      val actual = json.hcursor.downField("health").as[String].getOrElse(???)
+      actual shouldBe expected
+      json.hcursor.keys.get.size shouldBe 1
+    }
+  }
+
   "errorJson" must {
     "produce correct JSON" in {
       val expected = "Error"
