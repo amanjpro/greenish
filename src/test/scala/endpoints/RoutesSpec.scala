@@ -7,7 +7,7 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.concurrent.Eventually
-import java.time.{ZoneId, ZonedDateTime}
+import java.time.{ZoneId, ZonedDateTime, Instant}
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import me.amanj.greenish.models._
@@ -35,7 +35,7 @@ class RoutesSpec()
         () => tstamp)))
     val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
     checker ! Refresh(() => time)
-    routes = new Routes(checker, stats, () => time)
+    routes = new Routes(checker, stats, 10, () => time)
   }
   override def afterAll: Unit = {
     dir1.delete
@@ -69,7 +69,7 @@ class RoutesSpec()
 
   "isHealthy" must {
     "return false when group summary is empty" in {
-      Routes.isHealthy(Seq.empty) shouldBe false
+      Routes.isHealthy(Seq.empty, Long.MaxValue) shouldBe false
     }
 
     "return false when no jobs has returned their peirods healths" in {
@@ -82,10 +82,10 @@ class RoutesSpec()
           JobStatus(job3, tstamp, Seq.empty))
         ),
       )
-      Routes.isHealthy(groups) shouldBe false
+      Routes.isHealthy(groups, Long.MaxValue) shouldBe false
     }
 
-    "return true when some jobs has returned their peirods healths" in {
+    "return true when some jobs have returned their peirods healths" in {
       val groups = Seq(
         GroupStatus(group1, Array(
           JobStatus(job1, tstamp, Seq(PeriodHealth("2020-06-25-13", false))),
@@ -95,10 +95,10 @@ class RoutesSpec()
           JobStatus(job3, tstamp, Seq.empty))
         ),
       )
-      Routes.isHealthy(groups) shouldBe true
+      Routes.isHealthy(groups, Long.MaxValue) shouldBe true
     }
 
-    "return true when all jobs has returned their peirods healths" in {
+    "return true when all jobs have returned their peirods healths" in {
       val groups = Seq(
         GroupStatus(group1, Array(
           JobStatus(job1, tstamp, Seq(
@@ -117,7 +117,29 @@ class RoutesSpec()
             )),
         )),
       )
-      Routes.isHealthy(groups) shouldBe true
+      Routes.isHealthy(groups, Long.MaxValue) shouldBe true
+    }
+
+    "return false when all jobs have returned their peirods healths, but not recently" in {
+      val groups = Seq(
+        GroupStatus(group1, Array(
+          JobStatus(job1, tstamp, Seq(
+            PeriodHealth("2020-06-25-13", false),
+            PeriodHealth("2020-06-25-14", true),
+            )),
+          JobStatus(job2, tstamp, Seq(
+            PeriodHealth("2020-06-25-13", false),
+            PeriodHealth("2020-06-25-14", true),
+            )),
+        )),
+        GroupStatus(group2, Array(
+          JobStatus(job3, tstamp, Seq(
+            PeriodHealth("2020-06-25-13", false),
+            PeriodHealth("2020-06-25-14", true),
+            )),
+        )),
+      )
+      Routes.isHealthy(groups, 1) shouldBe false
     }
   }
 
@@ -268,7 +290,7 @@ class RoutesSpec()
         new StatusChecker(Seq(group1, group2), stats,
           Seq.empty, () => tstamp)))
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
-      val routes = new Routes(checker, stats, () => time)
+      val routes = new Routes(checker, stats, 10 * 1000 * 5, () => time)
 
       Get("/group/0/refresh") ~> routes.routes ~> check {
         status shouldBe StatusCodes.OK
@@ -311,7 +333,7 @@ class RoutesSpec()
         Props(new StatusChecker(Seq(group1, group2), stats, Seq.empty,
         () => tstamp)))
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
-      val routes = new Routes(checker, stats, () => time)
+      val routes = new Routes(checker, stats, 1000 * 10 * 5, () => time)
 
       Get("/group/0/job/0/refresh") ~> routes.routes ~> check {
         status shouldBe StatusCodes.OK
@@ -393,7 +415,14 @@ class RoutesSpec()
       }
     }
 
-    "send good health when hitting GET/health after successful refresh" in {
+    "send good health when hitting GET/health after successful refresh, then if no further refresh happens, goes to unhealthy again" in {
+      val checker = system.actorOf(
+        Props(new StatusChecker(Seq(group1, group2), stats)))
+      val nowFun = () => ZonedDateTime.ofInstant(Instant.now(),
+        ZoneId.systemDefault())
+      checker ! Refresh(nowFun)
+      routes = new Routes(checker, stats, 1000 * 1 * 2)
+
       eventually {
         Get("/health") ~> routes.routes ~> check {
           val actual = parse(responseAs[String])
@@ -402,14 +431,24 @@ class RoutesSpec()
           actual shouldBe expected
         }
       }
+
+      // And the status will eventually decays
+      eventually {
+        Get("/health") ~> routes.routes ~> check {
+          val actual = parse(responseAs[String])
+            .getOrElse(null)
+          val expected = healthJson(false)
+          actual shouldBe expected
+        }
+      }
     }
 
     "send bad health when hitting GET/health befor successful refresh" in {
       checker = system.actorOf(
         Props(new StatusChecker(Seq(group1, group2), stats, Seq.empty,
-          () => tstamp)))
+          () => System.currentTimeMillis)))
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
-      routes = new Routes(checker, stats, () => time)
+      routes = new Routes(checker, stats, 1000 * 10 * 5, () => time)
 
       Get("/health") ~> routes.routes ~> check {
         val actual = parse(responseAs[String])

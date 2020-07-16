@@ -18,6 +18,7 @@ import scala.util.Success
 
 class Routes(statusChecker: ActorRef,
     statsActor: ActorRef,
+    goodRefreshRecency: Long,
     now: () => ZonedDateTime = () => ZonedDateTime.now) {
   private[this] implicit val timeout = Timeout(Duration.fromNanos(5000000L))
   private[this] val jsonPrinter = Printer (
@@ -169,7 +170,8 @@ class Routes(statusChecker: ActorRef,
         .mapTo[Seq[GroupStatus]]
 
       onComplete(entriesFuture) { entity =>
-        val health = entity.map(Routes.isHealthy).getOrElse(false)
+        val health = entity.map( groups =>
+            Routes.isHealthy(groups, goodRefreshRecency)).getOrElse(false)
         val json = jsonPrinter.print(healthJson(health))
         complete(json)
       }
@@ -183,10 +185,13 @@ class Routes(statusChecker: ActorRef,
 }
 
 object Routes {
-  private[endpoints] def isHealthy(groups: Seq[GroupStatus]): Boolean =
+  private[endpoints] def isHealthy(groups: Seq[GroupStatus],
+      recency: Long): Boolean = {
+    val now = System.currentTimeMillis
     groups.map { group =>
       group.status.filterNot { job =>
-        job.periodHealth.isEmpty
+        (now - job.updatedAt) > recency || job.periodHealth.isEmpty
       }.length
     }.exists(_ > 0)
+  }
 }
