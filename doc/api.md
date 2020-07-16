@@ -1,4 +1,6 @@
-## The API
+# The API
+
+## REST
 
 Greenish provides a few REST endpoints:
 
@@ -262,4 +264,46 @@ $ curl --silent -G localhost:8080/group/0/job/0/refresh | jq .
 }
 ```
 
+## Prometheus
 
+Greenish can also export data to Prometheus. These are the supported metrics:
+
+```
+TYPE: GAUGE
+NAME: greenish_active_refresh_tasks
+HELP: Current number active state refresh tasks
+LABELS: job_id
+
+TYPE: HISTOGRAM
+NAME: greenish_state_refresh_time_seconds
+HELP: Job state refreshing time
+LABELS: job_id
+
+TYPE: COUNTER
+NAME: greenish_state_refresh_total
+HELP: Total number of job state refresh instances
+LABELS: job_id
+
+TYPE: COUNTER
+NAME: greenish_state_refresh_failed_total
+HELP: Total number of failed job state refresh instances
+LABELS: job_id
+
+TYPE: GAUGE
+NAME: greenish_missing_periods_total
+HELP: Current number of missing dataset periods
+LABELS: job_id
+```
+
+Prometheus metrics can be accessed at `/prometheus` endpoint:
+
+```
+$ curl --silent -G localhost:8080/prometheus
+# HELP greenish_active_refresh_tasks Current number active state refresh tasks
+# TYPE greenish_active_refresh_tasks gauge
+greenish_active_refresh_tasks{job_id="job_2",} 1.0
+greenish_active_refresh_tasks{job_id="job_1",} 0.0
+greenish_active_refresh_tasks{job_id="job_4",} 1.0
+greenish_active_refresh_tasks{job_id="job_3",} 1.0
+...
+```
