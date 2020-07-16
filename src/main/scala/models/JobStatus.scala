@@ -4,6 +4,7 @@ import io.circe.{Encoder, Decoder}
 import io.circe.generic.extras.semiauto.{deriveConfiguredDecoder, deriveConfiguredEncoder}
 
 case class JobStatus (
+  group: String,
   job: Job,
   updatedAt: Long,
   periodHealth: Seq[PeriodHealth],

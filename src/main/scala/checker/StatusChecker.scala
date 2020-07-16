@@ -147,7 +147,7 @@ object StatusChecker {
   private[checker] def initState(groups: Seq[Group]): IndexedSeq[GroupStatus] = {
     groups.map { group =>
       val jobStatus = group.jobs.map { job =>
-        JobStatus(job, -1, Seq.empty)
+        JobStatus(group.name, job, -1, Seq.empty)
       }
       GroupStatus(group, jobStatus.toArray)
     }.toIndexedSeq
