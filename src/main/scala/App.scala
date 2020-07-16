@@ -40,7 +40,10 @@ object App {
 
     val bindingFuture = Http()
       .bindAndHandle(
-        new Routes(statusChecker, statsActor).routes,
+        new Routes(statusChecker,
+          statsActor,
+          // At least there should be one good run in the last 5 refresh sets
+          appConfig.refreshInSeconds * 1000 * 5).routes,
         appConfig.address, appConfig.port)
 
     println(s"Server online at http://${appConfig.address}:${appConfig.port}...")

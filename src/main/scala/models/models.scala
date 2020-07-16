@@ -26,4 +26,8 @@ package object models {
   def okJson(str: String): Json = Json.obj (
     "ok" -> str.asJson
   )
+
+  def healthJson(status: Boolean): Json = Json.obj (
+    "health" -> (if(status) "good".asJson else "bad".asJson)
+  )
 }

@@ -15,6 +15,7 @@ $ curl --silent -G http://0.0.0.0:8080/maxlag | jq .
   "lag": 0
 }
 ```
+
 ### Summary
 
 Display the summary of all the monitoring tasks. Very good for a quick glance:
@@ -261,6 +262,17 @@ You can also point refresh the state of a single job by its id:
 $ curl --silent -G localhost:8080/group/0/job/0/refresh | jq .
 {
   "ok": "Job status refresh is scheduled"
+}
+```
+### Health-check
+
+Checks if any of the last 5 state refreshes succeeded, if yes, then it is
+considered a good health.
+
+```
+$ curl --silent -G http://0.0.0.0:8080/health | jq .
+{
+  "health": "good"
 }
 ```
 
