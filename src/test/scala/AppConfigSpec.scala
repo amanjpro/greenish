@@ -81,7 +81,7 @@ class AppConfigSpec() extends Matchers
       intercept[Exception](normalizePrometheusId("9a b\nc\td\t"))
     }
 
-    "throw exception when prometheus_id contains anything but [a-zA-Z0-9:_]" in {
+    "throw exception when prometheus_id contains anything but [a-zA-Z0-9_]" in {
       intercept[Exception](normalizePrometheusId("a;a"))
     }
 
@@ -92,7 +92,6 @@ class AppConfigSpec() extends Matchers
       normalizePrometheusId("a") shouldBe "a"
       normalizePrometheusId("A") shouldBe "a"
       normalizePrometheusId("_") shouldBe "_"
-      normalizePrometheusId(":") shouldBe ":"
     }
   }
 
