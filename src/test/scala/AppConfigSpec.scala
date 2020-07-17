@@ -14,19 +14,23 @@ class AppConfigSpec() extends Matchers
       val expected = new AppConfig(
         Seq(
           Group(0, "Group1", Seq(
-              Job(0, "Job1", "job_1", "/tmp/first_script",
-                "yyyy-MM-dd-HH", Hourly, 3,
-                ZoneId.of("UTC"), 24,
-                AlertLevels(0, 1, 2, 3)),
-              Job(1, "Job2", "job_2", "/tmp/second_script job2",
-                "yyyy-MM-dd-HH", Daily, 2,
-                ZoneId.of("UTC"), 24,
-                AlertLevels(0, 1, 2, 3)),
-              Job(2, "Job5", "group1_job5", "/tmp/second_script job5",
-                "yyyy-MM-dd-HH", Hourly, 2,
-                ZoneId.of("US/Alaska"), 24,
-                AlertLevels(0, 1, 2, 3)),
-            )),
+            Job(0, "Job1", "job_1", "/tmp/first_script",
+              "yyyy-MM-dd-HH", Hourly, 3,
+              ZoneId.of("UTC"), 24,
+              AlertLevels(0, 1, 2, 3)),
+            Job(1, "Job2", "job_2", "/tmp/second_script job2",
+              "yyyy-MM-dd-HH", Daily, 2,
+              ZoneId.of("UTC"), 24,
+              AlertLevels(0, 1, 2, 3)),
+            Job(2, "Job5", "group1_job5", "/tmp/second_script job5",
+              "yyyy-MM-dd-HH", Hourly, 2,
+              ZoneId.of("US/Alaska"), 24,
+              AlertLevels(0, 1, 2, 3)),
+            Job(3, "Job7", "group1_job7", "/tmp/second_script job7",
+              "yyyy-MM-dd-HH", Cron("0 * * * *"), 2,
+              ZoneId.of("US/Alaska"), 24,
+              AlertLevels(0, 1, 2, 3)),
+          )),
           Group(1, "Group2", Seq(
             Job(0, "Job3", "job_3", "/tmp/third_script",
                 "yyyy-MM-dd", Monthly, 1,
@@ -53,6 +57,19 @@ class AppConfigSpec() extends Matchers
 
   "toFrequency" must {
     import AppConfig.toFrequency
+    "handle Unix cron syntax" in {
+      val patterns = Seq(
+        "* * * * *",
+        "1-2 * * * *",
+        "*/5 * * * *",
+        "0 23 * * MON-FRI",
+        "1-5 0 * JAN-DEC 0-4",
+        )
+      patterns.foreach { pattern =>
+        toFrequency(pattern) shouldBe Cron(pattern)
+      }
+    }
+
     "handle both lower and upper case frequencies" in {
       toFrequency("hOURly") shouldBe Hourly
       toFrequency("AnnuaLLy") shouldBe Annually
