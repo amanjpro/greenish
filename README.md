@@ -11,7 +11,7 @@ Greenish jobs are configured in a
 [YAML-like](https://github.com/lightbend/config) configuration file, [here is
 an annotated example](src/test/resources/application.conf). Greenish provides
 default values for most of the settings, the defaults can be found
-[here](src/main/resources/application.conf)
+[here](src/main/resources/reference.conf).
 
 Greenish does not have a standard monitoring scripting language/plugin.
 Monitoring tasks can be in any executable form, details are in [Monitoring
