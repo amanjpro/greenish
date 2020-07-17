@@ -1,7 +1,7 @@
 # Greenish
 
 [![Build Status](https://travis-ci.org/amanjpro/greenish.svg?branch=master)](https://travis-ci.org/amanjpro/greenish)
-[![codecov](https://codecov.io/gh/amanjpro/greenish/branch/master/graph/badge.svg)](https://codecov.io/gh/amanjpro/greenish)
+[![codecov](https://codecov.io/gh/amanjpro/greenish/branch/master/graph/badge.svg)](https://codecov.io/gh/amanjpro/greenish) [![Join the chat at https://gitter.im/greenish-monitoring/greenish](https://badges.gitter.im/greenish-monitoring/greenish.svg)](https://gitter.im/greenish-monitoring/greenish?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Greenish is a monitoring tool, that can be used to monitor the presense of
 data-sets. Greenish understands periods, for example for an hourly job,
