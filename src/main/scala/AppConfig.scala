@@ -7,7 +7,7 @@ import scala.jdk.CollectionConverters._
 
 case class AppConfig(groups: Seq[Group], refreshInSeconds: Int,
   address: String, port: Int,
-  env: Seq[(String, String)])
+  )
 object AppConfig {
   def apply(): AppConfig = {
     val config = ConfigFactory.load()
@@ -15,11 +15,7 @@ object AppConfig {
     val refreshRate = appConfig.getInt("refresh-in-seconds")
     val port = appConfig.getInt("port")
     val address = appConfig.getString("binding-address")
-    val env = appConfig.getConfig("env")
-      .entrySet.asScala
-      .map(e => (e.getKey, e.getValue.unwrapped.asInstanceOf[String]))
-      .toSeq
-    new AppConfig(readEntries(appConfig), refreshRate, address, port, env)
+    new AppConfig(readEntries(appConfig), refreshRate, address, port)
   }
 
   private[this] def readEntries(config: Config): Seq[Group] = {
@@ -32,6 +28,7 @@ object AppConfig {
     val defaultNormalAt = config.getInt("default-normal-at")
     val defaultWarnAt = config.getInt("default-warn-at")
     val defaultErrorAt = config.getInt("default-error-at")
+    val globalEnv = config.getEnv("env", Seq.empty)
 
     config.getConfigList("groups").asScala.zipWithIndex.map { case (groupConfig, index) =>
       val groupName = groupConfig.getString("group-name")
@@ -53,6 +50,7 @@ object AppConfig {
         "group-warn-at", defaultWarnAt)
       val groupErrorAt = groupConfig.getIntWithDefault(
         "group-error-at", defaultErrorAt)
+      val groupEnv = groupConfig.getEnv("env", globalEnv)
 
       val checkEntries = groupConfig.getConfigList("job-entries")
         .asScala.zipWithIndex.map { case (jobConfig, index) =>
@@ -80,6 +78,7 @@ object AppConfig {
             "warn-at", groupWarnAt)
           val errorAt = jobConfig.getIntWithDefault(
             "error-at", groupErrorAt)
+          val jobEnv = jobConfig.getEnv("env", groupEnv)
 
           Job(
             index,
@@ -91,7 +90,9 @@ object AppConfig {
             jobPeriodCheckOffset,
             timezone,
             lookback,
-            AlertLevels(greatAt, normalAt, warnAt, errorAt))
+            AlertLevels(greatAt, normalAt, warnAt, errorAt),
+            jobEnv,
+          )
         }.toSeq
       Group(index, groupName, checkEntries)
     }.toSeq
@@ -133,9 +134,24 @@ object AppConfig {
       if(self.hasPath(path))
         self.getString(path)
       else default
+
     def getIntWithDefault(path: String, default: Int): Int =
       if(self.hasPath(path))
         self.getInt(path)
       else default
+
+    def getEnv(path: String, parent: Seq[(String, String)]): Seq[(String, String)] =
+      if(self.hasPath(path)) {
+        val localEnv = self.getConfig("env")
+          .entrySet.asScala
+          .map(e => (e.getKey, e.getValue.unwrapped.asInstanceOf[String]))
+          .toMap
+
+        val overriddenParent = parent.filterNot { case (k, _) =>
+          localEnv.contains(k)
+        }
+
+        (localEnv.toSeq ++ overriddenParent).sorted
+      } else parent
   }
 }

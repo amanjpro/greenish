@@ -64,7 +64,6 @@ trait StatusCheckerApi {
 
 class StatusChecker(groups: Seq[Group],
     statsActor: ActorRef,
-    env: Seq[(String, String)] = Seq.empty,
     clockCounter: () => Long = () => System.currentTimeMillis())
       extends Actor with ActorLogging with StatusCheckerApi {
   override protected[this] var state = StatusChecker.initState(groups)
@@ -89,7 +88,7 @@ class StatusChecker(groups: Seq[Group],
     val periods = StatusChecker.periods(job, now)
 
     val currentClockCounter = clockCounter()
-    self ! BatchRun(job.cmd, periods, env,
+    self ! BatchRun(job.cmd, periods, job.env,
       group.groupId, job.jobId, job.prometheusId, currentClockCounter)
   }
 

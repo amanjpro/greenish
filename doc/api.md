@@ -88,6 +88,7 @@ $ curl --silent -G http://0.0.0.0:8080/missing | jq .
             "warn": 2,
             "critical": 3
           }
+          env: []
         }
       ]
     },
@@ -109,6 +110,7 @@ $ curl --silent -G http://0.0.0.0:8080/missing | jq .
             "warn": 2,
             "critical": 3
           }
+          env: []
         },
         "updated_at": 1593567901,
         "period_health": [
@@ -148,6 +150,7 @@ $ curl --silent -G http://0.0.0.0:8080/state | jq .
             "warn": 2,
             "critical": 3
           }
+          env: []
         }
       ]
     },
@@ -169,6 +172,7 @@ $ curl --silent -G http://0.0.0.0:8080/state | jq .
             "warn": 2,
             "critical": 3
           }
+          env: []
         },
         "updated_at": 1593567901,
         "period_health": [
@@ -226,6 +230,7 @@ $ curl --silent -G localhost:8080/group/1/job/0 | jq .
       "warn": 2,
       "critical": 3
     }
+    env: []
   },
   "updated_at": 1593585049298,
   "period_health": [

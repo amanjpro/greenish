@@ -17,39 +17,53 @@ class AppConfigSpec() extends Matchers
             Job(0, "Job1", "job_1", "/tmp/first_script",
               "yyyy-MM-dd-HH", Hourly, 3,
               ZoneId.of("UTC"), 24,
-              AlertLevels(0, 1, 2, 3)),
+              AlertLevels(0, 1, 2, 3),
+              Seq("VAR1" -> "baz", "VAR2" -> "bazomba",
+                "VAR3" -> "bada", "VAR4" -> "badam"),
+              ),
             Job(1, "Job2", "job_2", "/tmp/second_script job2",
               "yyyy-MM-dd-HH", Daily, 2,
               ZoneId.of("UTC"), 24,
-              AlertLevels(0, 1, 2, 3)),
+              AlertLevels(0, 1, 2, 3),
+              Seq("VAR1" -> "baz", "VAR2" -> "bar", "VAR3" -> "bazooka"),
+              ),
             Job(2, "Job5", "group1_job5", "/tmp/second_script job5",
               "yyyy-MM-dd-HH", Hourly, 2,
               ZoneId.of("US/Alaska"), 24,
-              AlertLevels(0, 1, 2, 3)),
+              AlertLevels(0, 1, 2, 3),
+              Seq("VAR1" -> "baz", "VAR2" -> "bar", "VAR3" -> "bazooka"),
+              ),
             Job(3, "Job7", "group1_job7", "/tmp/second_script job7",
               "yyyy-MM-dd-HH", Cron("0 * * * *"), 2,
               ZoneId.of("US/Alaska"), 24,
-              AlertLevels(0, 1, 2, 3)),
+              AlertLevels(0, 1, 2, 3),
+              Seq("VAR1" -> "baz", "VAR2" -> "bar", "VAR3" -> "bazooka"),
+              ),
           )),
           Group(1, "Group2", Seq(
             Job(0, "Job3", "job_3", "/tmp/third_script",
                 "yyyy-MM-dd", Monthly, 1,
                 ZoneId.of("UTC"), 3,
-                AlertLevels(0, 1, 2, 3)),
+                AlertLevels(0, 1, 2, 3),
+                Seq("VAR1" -> "foo", "VAR2" -> "bar"),
+                ),
             Job(1, "Job4", "job_4", "/tmp/fourth_script",
                 "yyyy-01-01", Annually, 1,
                 ZoneId.of("UTC"), 3,
-                AlertLevels(0, 1, 2, 3)),
+                AlertLevels(0, 1, 2, 3),
+                Seq("VAR1" -> "foo", "VAR2" -> "bar"),
+                ),
             Job(2, "Job6", "group2_job6", "/tmp/second_script job6",
               "yyyy-MM-dd-HH-mm", Daily, 1,
               ZoneId.of("US/Samoa"), 270,
-              AlertLevels(30, 40, 50, 60)),
+              AlertLevels(30, 40, 50, 60),
+              Seq("VAR1" -> "baz", "VAR2" -> "bar", "VAR3" -> "bazooka"),
+              ),
             )),
         ),
         30,
         "127.0.0.1",
         8080,
-        Seq("VAR1" -> "foo", "VAR2" -> "bar"),
       )
       actual shouldBe expected
     }
@@ -148,6 +162,40 @@ class AppConfigSpec() extends Matchers
     "return default value if the key doesn't exists" in {
       val actual = appConfig.getStringWithDefault("naaah", "kkkk")
       val expected = "kkkk"
+      actual shouldBe expected
+    }
+  }
+
+  "getEnv" must {
+    import com.typesafe.config.ConfigFactory
+    import AppConfig._
+    val config = ConfigFactory.load()
+    val appConfig = config.getConfig("check-groups")
+    val groupConfig = appConfig.getConfigList("groups").iterator.next()
+    val jobConfig = groupConfig.getConfigList("job-entries").iterator.next()
+    val appEnv = appConfig.getEnv("env", Seq.empty)
+
+    "get value if parent is empty, and key exists" in {
+      appEnv shouldBe Seq("VAR1" -> "foo", "VAR2" -> "bar")
+    }
+
+    "properly dedup parent and child lists, if key exists" in {
+      val actualGroup = groupConfig.getEnv("env", appEnv)
+      val expectedGroup = Seq("VAR1" -> "baz", "VAR2" -> "bar",
+        "VAR3" -> "bazooka")
+
+      actualGroup shouldBe expectedGroup
+
+      val actualJob = jobConfig.getEnv("env", expectedGroup)
+      val expectedJob = Seq("VAR1" -> "baz", "VAR2" -> "bazomba",
+        "VAR3" -> "bada", "VAR4" -> "badam")
+
+      actualJob shouldBe expectedJob
+    }
+
+    "return parent env if the key doesn't exists" in {
+      val actual = appConfig.getEnv("naaah", appEnv)
+      val expected = appEnv
       actual shouldBe expected
     }
   }
