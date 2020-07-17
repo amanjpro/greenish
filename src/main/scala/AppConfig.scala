@@ -24,38 +24,66 @@ object AppConfig {
 
   private[this] def readEntries(config: Config): Seq[Group] = {
     val defaultPeriodCheckOffset = config.getInt("default-period-check-offset")
+    val defaultTimePattern = config.getString("default-period-pattern")
+    val defaultFrequency = config.getString("default-job-run-frequency")
+    val defaultTimezone = config.getString("default-timezone")
+    val defaultLookback = config.getInt("default-lookback")
+    val defaultGreatAt = config.getInt("default-great-at")
+    val defaultNormalAt = config.getInt("default-normal-at")
+    val defaultWarnAt = config.getInt("default-warn-at")
+    val defaultErrorAt = config.getInt("default-error-at")
+
     config.getConfigList("groups").asScala.zipWithIndex.map { case (groupConfig, index) =>
-      val name = groupConfig.getString("group-name")
+      val groupName = groupConfig.getString("group-name")
       val groupPeriodCheckOffset =
         groupConfig.getIntWithDefault("group-period-check-offset", defaultPeriodCheckOffset)
+      val groupTimePattern = groupConfig.getStringWithDefault(
+        "group-period-pattern", defaultTimePattern)
+      val groupFrequency = groupConfig.getStringWithDefault(
+        "group-job-run-frequency", defaultFrequency)
+      val groupTimezone = groupConfig.getStringWithDefault(
+        "group-timezone", defaultTimezone)
+      val groupLookback = groupConfig.getIntWithDefault(
+        "group-lookback", defaultLookback)
+      val groupGreatAt = groupConfig.getIntWithDefault(
+        "group-great-at", defaultGreatAt)
+      val groupNormalAt = groupConfig.getIntWithDefault(
+        "group-normal-at", defaultNormalAt)
+      val groupWarnAt = groupConfig.getIntWithDefault(
+        "group-warn-at", defaultWarnAt)
+      val groupErrorAt = groupConfig.getIntWithDefault(
+        "group-error-at", defaultErrorAt)
+
       val checkEntries = groupConfig.getConfigList("job-entries")
         .asScala.zipWithIndex.map { case (jobConfig, index) =>
-          val name = jobConfig.getString("job-name")
-          val prometheusId = jobConfig.getString("prometheus-id")
+          val jobName = jobConfig.getString("job-name")
+          val prometheusId = normalizePrometheusId(
+            jobConfig.getStringWithDefault(
+              "prometheus-id", s"$groupName $jobName"))
           val cmd = jobConfig.getString("check-command")
-          val jobPeriodCheckOffset =
-            jobConfig.getIntWithDefault("job-period-check-offset", groupPeriodCheckOffset)
-          val timePattern = jobConfig.getString("period-pattern")
-          val timezone = ZoneId.of(jobConfig.getString("timezone"))
-          val lookback = jobConfig.getInt("lookback")
-          val greatAt = jobConfig.getInt("great-at")
-          val normalAt = jobConfig.getInt("normal-at")
-          val warnAt = jobConfig.getInt("warn-at")
-          val errorAt = jobConfig.getInt("error-at")
+          val jobPeriodCheckOffset = jobConfig.getIntWithDefault(
+            "job-period-check-offset", groupPeriodCheckOffset)
+          val timePattern = jobConfig.getStringWithDefault(
+            "period-pattern", groupTimePattern)
+          val frequency = toFrequency(
+            jobConfig.getStringWithDefault(
+              "job-run-frequency", groupFrequency))
+          val timezone = ZoneId.of(
+            jobConfig.getStringWithDefault("timezone", groupTimezone))
+          val lookback = jobConfig.getIntWithDefault(
+            "lookback", groupLookback)
+          val greatAt = jobConfig.getIntWithDefault(
+            "great-at", groupGreatAt)
+          val normalAt = jobConfig.getIntWithDefault(
+            "normal-at", groupNormalAt)
+          val warnAt = jobConfig.getIntWithDefault(
+            "warn-at", groupWarnAt)
+          val errorAt = jobConfig.getIntWithDefault(
+            "error-at", groupErrorAt)
 
-          val frequency = jobConfig.getString("job-run-frequency").toLowerCase match {
-            case "hourly" => Hourly
-            case "daily" => Daily
-            case "monthly" => Monthly
-            case "annually" => Annually
-            case _         =>
-              throw new Exception(
-                """|Unsupported frequency, supported frequenices are:
-                   |hourly, daily, monthly and annually""".stripMargin)
-          }
           Job(
             index,
-            name,
+            jobName,
             prometheusId,
             cmd,
             timePattern,
@@ -65,11 +93,39 @@ object AppConfig {
             lookback,
             AlertLevels(greatAt, normalAt, warnAt, errorAt))
         }.toSeq
-      Group(index, name, checkEntries)
+      Group(index, groupName, checkEntries)
     }.toSeq
   }
 
+  private[greenish] def normalizePrometheusId(id: String): String = {
+    val spacelessId = id.replaceAll("\\s+","_").toLowerCase
+    val pattern = "[a-zA-Z_:][a-zA-Z0-9_:]*"
+    if(!spacelessId.matches(pattern)) {
+      throw new Exception(
+        s"""|$id: Invalid prometheus label ID, please provide a valid one.
+            |Prometheus label names should match: "$pattern"""".stripMargin)
+    }
+    spacelessId
+  }
+
+  private[greenish] def toFrequency(freq: String): CheckFrequency = {
+    freq.toLowerCase match {
+      case "hourly" => Hourly
+      case "daily" => Daily
+      case "monthly" => Monthly
+      case "annually" => Annually
+      case _         =>
+        throw new Exception(
+          """|Unsupported frequency, supported frequenices are:
+             |hourly, daily, monthly and annually""".stripMargin)
+    }
+  }
+
   implicit class ConfigExt[C <: Config](self: Config) {
+    def getStringWithDefault(path: String, default: String): String =
+      if(self.hasPath(path))
+        self.getString(path)
+      else default
     def getIntWithDefault(path: String, default: Int): Int =
       if(self.hasPath(path))
         self.getInt(path)

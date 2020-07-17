@@ -9,9 +9,13 @@ Greenish can check for data for all the past _N_ hour data-sets.
 
 Greenish jobs are configured in a
 [YAML-like](https://github.com/lightbend/config) configuration file, [here is
-an annotated example](src/test/resources/application.conf). Greenish does not
-have a standard monitoring scripting language/plugin. Monitoring tasks can be
-in any executable form, details are in [Monitoring Jobs](#monitoring-jobs).
+an annotated example](src/test/resources/application.conf). Greenish provides
+default values for most of the settings, the defaults can be found
+[here](src/main/resources/application.conf)
+
+Greenish does not have a standard monitoring scripting language/plugin.
+Monitoring tasks can be in any executable form, details are in [Monitoring
+Jobs](#monitoring-jobs).
 
 *A Logo* is currently being designed. If you have an idea for a logo, please
 share :)
@@ -44,7 +48,7 @@ can be very tricky to do (or even impossible?).
 
 **Prometheus** is another great tool for monitoring metrics, and the health of
 other systems, but again it doesn't know about datasets that follow periodic
-patterns. It is worth mentioning that Greenish provides an to export metrics to _Prometheus_.
+patterns. It is worth mentioning that Greenish provides an endpoint to export metrics to _Prometheus_.
 
 **Airflow** knows about periods, but it is not a monitoring tool. Airflow can
 alert when a run fails, but if a computed data was mistakenly deleted Airflow
@@ -110,9 +114,9 @@ The monitoring jobs are usually blocking IO jobs. Do that network call, wait
 for this API, connect to a DB, HDFS etc. That is why they are running under
 their very own execution context (thread pool). So that they do not block the
 rest of the service (namely the endpoints). The execution context config for
-the monitoring jobs are controlled by a dispatcher named `refresh-dispatcher`,
-an example config is provided in the example application config which is
-introduced earlier.
+the monitoring jobs are controlled by a dispatcher named `refresh-dispatcher`.
+Greenish comes with a default config that is suitable for IO-bound processes,
+you can find it in the default settings mentioned earlier.
 
 It is best to use `thread-pool-executor` dispatcher for blocking jobs, as they
 are tailored for IO jobs. More information can be found:
