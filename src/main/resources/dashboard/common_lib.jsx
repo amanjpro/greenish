@@ -1,15 +1,5 @@
 const fetchInterval = 5000
 
-function timestampToDate(timestamp) {
-  return new Intl.DateTimeFormat('en-GB', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'}).format(timestamp);
-}
-
 function renderState(groups, subClassName, keyPrefix) {
   return (
     groups.map(groupStatus => renderGroup(groupStatus, subClassName, keyPrefix, ""))
@@ -47,7 +37,7 @@ function renderJob(jobStatus, gid, keyPrefix) {
   if(jobStatus["period_health"] != undefined) {
     const job = jobStatus.job;
     const jid = job.job_id;
-    const date = timestampToDate(jobStatus.updated_at);
+    const date = new Date(jobStatus.updated_at).toUTCString();
     return(jobStatus.period_health.map((ph, i) => (
       <tr key={`${keyPrefix}-job-${gid}-${jid}-${i}-row`}
           className={(ph.ok == true)?"great":"warn"}>
