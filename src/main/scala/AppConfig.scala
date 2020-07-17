@@ -77,9 +77,9 @@ object AppConfig {
           val normalAt = jobConfig.getIntWithDefault(
             "normal-at", groupNormalAt)
           val warnAt = jobConfig.getIntWithDefault(
-            "warn-at", groupNormalAt)
+            "warn-at", groupWarnAt)
           val errorAt = jobConfig.getIntWithDefault(
-            "error-at", groupNormalAt)
+            "error-at", groupErrorAt)
 
           Job(
             index,
