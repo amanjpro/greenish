@@ -89,6 +89,10 @@ class JsonSerdeSpec() extends Matchers
       (Daily: CheckFrequency).asJson shouldBe "daily".asJson
       (Monthly: CheckFrequency).asJson shouldBe "monthly".asJson
       (Annually: CheckFrequency).asJson shouldBe "annually".asJson
+      val pattern = "* * * * *"
+      val expected = Json.obj("pattern" -> pattern.asJson)
+      Cron(pattern).asJson shouldBe expected
+      (Cron(pattern): CheckFrequency).asJson shouldBe expected
     }
 
     "correctly parse JSON string" in {
@@ -96,6 +100,12 @@ class JsonSerdeSpec() extends Matchers
       parse(""""daily"""").flatMap(_.as[CheckFrequency]).getOrElse(???) shouldBe Daily
       parse(""""monthly"""").flatMap(_.as[CheckFrequency]).getOrElse(???) shouldBe Monthly
       parse(""""annually"""").flatMap(_.as[CheckFrequency]).getOrElse(???) shouldBe Annually
+      val pattern = "* * * * *"
+      val expected = Cron(pattern)
+      val actualCron = expected.asJson.as[Cron].getOrElse(???)
+      actualCron shouldBe expected
+      val actualCheckFrequency = expected.asJson.as[CheckFrequency].getOrElse(???)
+      actualCheckFrequency shouldBe expected
     }
   }
 

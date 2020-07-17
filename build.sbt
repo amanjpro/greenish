@@ -30,6 +30,7 @@ libraryDependencies ++= Seq(
   "com.typesafe" % "config" % typesafeConfigVersion,
   "io.prometheus" % "simpleclient" % "0.9.0",
   "io.prometheus" % "simpleclient_common" % "0.9.0",
+  "com.cronutils" % "cron-utils" % "9.1.0",
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
   "org.scalatest" %% "scalatest" % scalaTestVersion % Test,
   "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % Test,

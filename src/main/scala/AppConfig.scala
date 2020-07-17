@@ -115,9 +115,16 @@ object AppConfig {
       case "monthly" => Monthly
       case "annually" => Annually
       case _         =>
-        throw new Exception(
-          """|Unsupported frequency, supported frequenices are:
-             |hourly, daily, monthly and annually""".stripMargin)
+        try {
+          Cron(freq)
+        } catch {
+          case e: IllegalArgumentException =>
+            throw new Exception(
+              s"""|${e.getMessage}
+                  |$freq: unsupported frequency, supported frequenices are:
+                  |hourly, daily, monthly, annually and Unix cron syntax"""
+                   .stripMargin)
+        }
     }
   }
 
