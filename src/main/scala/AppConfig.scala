@@ -34,7 +34,7 @@ object AppConfig {
     val defaultErrorAt = config.getInt("default-error-at")
 
     config.getConfigList("groups").asScala.zipWithIndex.map { case (groupConfig, index) =>
-      val name = groupConfig.getString("group-name")
+      val groupName = groupConfig.getString("group-name")
       val groupPeriodCheckOffset =
         groupConfig.getIntWithDefault("group-period-check-offset", defaultPeriodCheckOffset)
       val groupTimePattern = groupConfig.getStringWithDefault(
@@ -56,8 +56,10 @@ object AppConfig {
 
       val checkEntries = groupConfig.getConfigList("job-entries")
         .asScala.zipWithIndex.map { case (jobConfig, index) =>
-          val name = jobConfig.getString("job-name")
-          val prometheusId = jobConfig.getString("prometheus-id")
+          val jobName = jobConfig.getString("job-name")
+          val prometheusId = normalizePrometheusId(
+            jobConfig.getStringWithDefault(
+              "prometheus-id", s"$groupName $jobName"))
           val cmd = jobConfig.getString("check-command")
           val jobPeriodCheckOffset = jobConfig.getIntWithDefault(
             "job-period-check-offset", groupPeriodCheckOffset)
@@ -81,7 +83,7 @@ object AppConfig {
 
           Job(
             index,
-            name,
+            jobName,
             prometheusId,
             cmd,
             timePattern,
@@ -91,8 +93,19 @@ object AppConfig {
             lookback,
             AlertLevels(greatAt, normalAt, warnAt, errorAt))
         }.toSeq
-      Group(index, name, checkEntries)
+      Group(index, groupName, checkEntries)
     }.toSeq
+  }
+
+  private[greenish] def normalizePrometheusId(id: String): String = {
+    val spacelessId = id.replaceAll("\\s+","_").toLowerCase
+    val pattern = "[a-zA-Z_:][a-zA-Z0-9_:]*"
+    if(!spacelessId.matches(pattern)) {
+      throw new Exception(
+        s"""|$id: Invalid prometheus label ID, please provide a valid one.
+            |Prometheus label names should match: "$pattern"""".stripMargin)
+    }
+    spacelessId
   }
 
   private[greenish] def toFrequency(freq: String): CheckFrequency = {
