@@ -245,7 +245,16 @@ $ curl --silent -G localhost:8080/group/1/job/0 | jq .
 }
 ```
 
-### Refresh the state of job and group by id
+### Refresh the state
+
+You can refresh the entire at once:
+
+```
+$ curl --silent -G localhost:8080/state/refresh | jq .
+{
+  "ok": "State refresh is scheduled"
+}
+```
 
 You can point refresh the state of a single group by its id:
 
