@@ -31,7 +31,7 @@ class RoutesSpec()
     stats = system.actorOf(
       Props(new StatsCollector(Set("p1", "p2", "p3"))))
     checker = system.actorOf(
-      Props(new StatusChecker(Seq(group1, group2), stats, Seq.empty,
+      Props(new StatusChecker(Seq(group1, group2), stats,
         () => tstamp)))
     val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
     checker ! Refresh(() => time)
@@ -47,17 +47,17 @@ class RoutesSpec()
 
   val job1 = Job(0, "job1", "p1", s"$lsScript /tmp",
     "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
-    2, AlertLevels(0, 1, 2, 3),
+    2, AlertLevels(0, 1, 2, 3), Seq("a" -> "b"),
   )
 
   val job2 = Job(1, "job2", "p2", s"$lsScript /tmp",
     "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
-    2, AlertLevels(0, 1, 2, 3),
+    2, AlertLevels(0, 1, 2, 3), Seq("a" -> "b"),
   )
 
   val job3 = Job(0, "job3", "p3", s"$lsScript /tmp",
     "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
-    2, AlertLevels(0, 1, 2, 3),
+    2, AlertLevels(0, 1, 2, 3), Seq("a" -> "b"),
   )
 
   val group1 = Group(0, "group1", Seq(job1, job2))
@@ -288,7 +288,7 @@ class RoutesSpec()
     "properly handle GET/state/refresh" in {
       val checker = system.actorOf(Props(
         new StatusChecker(Seq(group1, group2), stats,
-          Seq.empty, () => tstamp)))
+          () => tstamp)))
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val routes = new Routes(checker, stats, 10 * 1000 * 5, () => time)
 
@@ -326,7 +326,7 @@ class RoutesSpec()
     "properly handle GET/group/gid/refresh request when id exists" in {
       val checker = system.actorOf(Props(
         new StatusChecker(Seq(group1, group2), stats,
-          Seq.empty, () => tstamp)))
+          () => tstamp)))
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val routes = new Routes(checker, stats, 10 * 1000 * 5, () => time)
 
@@ -368,7 +368,7 @@ class RoutesSpec()
 
     "properly handle GET/group/gid/job/jid/refresh request when both gid and jid exist" in {
       val checker = system.actorOf(
-        Props(new StatusChecker(Seq(group1, group2), stats, Seq.empty,
+        Props(new StatusChecker(Seq(group1, group2), stats,
         () => tstamp)))
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val routes = new Routes(checker, stats, 1000 * 10 * 5, () => time)
@@ -483,7 +483,7 @@ class RoutesSpec()
 
     "send bad health when hitting GET/health befor successful refresh" in {
       checker = system.actorOf(
-        Props(new StatusChecker(Seq(group1, group2), stats, Seq.empty,
+        Props(new StatusChecker(Seq(group1, group2), stats,
           () => System.currentTimeMillis)))
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       routes = new Routes(checker, stats, 1000 * 10 * 5, () => time)
