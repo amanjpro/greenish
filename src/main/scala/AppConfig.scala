@@ -130,9 +130,5 @@ object AppConfig {
       if(self.hasPath(path))
         self.getInt(path)
       else default
-    def getBooleanWithDefault(path: String, default: Boolean): Boolean =
-      if(self.hasPath(path))
-        self.getBoolean(path)
-      else default
   }
 }
