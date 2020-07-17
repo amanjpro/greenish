@@ -90,6 +90,10 @@ class AppConfigSpec() extends Matchers
       normalizePrometheusId("ABC") shouldBe "abc"
     }
 
+    "replace - characters in prometheus_id to _" in {
+      normalizePrometheusId("a---b") shouldBe "a_b"
+    }
+
     "replace whitesapce characters in prometheus_id to _" in {
       normalizePrometheusId("a b\nc\td\t") shouldBe "a_b_c_d_"
     }

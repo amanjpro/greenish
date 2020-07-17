@@ -98,7 +98,7 @@ object AppConfig {
   }
 
   private[greenish] def normalizePrometheusId(id: String): String = {
-    val spacelessId = id.replaceAll("\\s+","_").toLowerCase
+    val spacelessId = id.replaceAll("(\\s|-)+","_").toLowerCase
     val pattern = "[a-zA-Z_][a-zA-Z0-9_]*"
     if(!spacelessId.matches(pattern)) {
       throw new Exception(
