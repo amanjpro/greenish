@@ -102,6 +102,15 @@ table {
 
 .version-div {
   text-align: right;
-  right:8px;
+  font-size: x-small;
+  margin-right:4px;
+  margin-top:4px;
+  margin-bottom:4px;
+  color: snow;
+}
+
+.time-div {
+  text-align: right;
+  margin-right:4px;
   color: snow;
 }

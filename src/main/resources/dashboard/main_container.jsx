@@ -68,6 +68,7 @@ class MainContainer extends React.Component {
           <h1 key="greenish_dashboard_header" className='greenish-header'>
             Greenish dashboard
           </h1>
+          <div className='time-div'><TimeContainer/></div>
           <div className='version-div'><VersionContainer/></div>
         </div>
         <div>
