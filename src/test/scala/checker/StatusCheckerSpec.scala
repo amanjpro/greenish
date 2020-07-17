@@ -281,6 +281,40 @@ class StatusCheckerSpec()
       actual shouldBe expected
     }
 
+    "work when job's period-check-offset is not 0" in {
+      val job = Job(1, null, null, null,
+        "yyyy-MM-dd-HH", Hourly, 3, ZoneId.of("UTC"),
+        3, null,
+      )
+
+      val actual =
+        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
+
+      val expected = Seq("2020-06-25-10", "2020-06-25-11", "2020-06-25-12")
+      actual shouldBe expected
+    }
+
+    "various cron styles" in {
+      val job = cron => Job(1, null, null, null,
+        "yyyy-MM-dd-HH-mm", cron, 1, ZoneId.of("UTC"),
+        2, null,
+      )
+
+      val cronPeriods = Seq (
+         "* * * * *" -> Seq("2020-06-25-15-04", "2020-06-25-15-05"),
+         "0 * * * *" -> Seq("2020-06-25-14-00", "2020-06-25-15-00"),
+         "0 1 * * MON-TUE" -> Seq("2020-06-22-01-00", "2020-06-23-01-00"),
+         "0 1 1 1 *" -> Seq("2019-01-01-01-00", "2020-01-01-01-00"),
+         "0 1 1 JAN-FEB *" -> Seq("2020-01-01-01-00", "2020-02-01-01-00"),
+        )
+
+      val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
+      cronPeriods.foreach { case (cron, expected) =>
+        val actual = StatusChecker.periods(job(Cron(cron)), time)
+        actual shouldBe expected
+      }
+    }
+
     "work for hourly frequency" in {
       val job = Job(1, null, null, null,
         "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
