@@ -161,6 +161,40 @@ class AppConfigSpec() extends Matchers
       actual shouldBe expected
     }
   }
+
+  "getEnv" must {
+    import com.typesafe.config.ConfigFactory
+    import AppConfig._
+    val config = ConfigFactory.load()
+    val appConfig = config.getConfig("check-groups")
+    val groupConfig = appConfig.getConfigList("groups").iterator.next()
+    val jobConfig = groupConfig.getConfigList("job-entries").iterator.next()
+    val appEnv = appConfig.getEnv("env", Seq.empty)
+
+    "get value if parent is empty, and key exists" in {
+      appEnv shouldBe Seq("VAR1" -> "foo", "VAR2" -> "bar")
+    }
+
+    "properly dedup parent and child lists, if key exists" in {
+      val actualGroup = groupConfig.getEnv("env", appEnv)
+      val expectedGroup = Seq("VAR1" -> "baz", "VAR2" -> "bar",
+        "VAR3" -> "bazooka")
+
+      actualGroup shouldBe expectedGroup
+
+      val actualJob = jobConfig.getEnv("env", expectedGroup)
+      val expectedJob = Seq("VAR1" -> "baz", "VAR2" -> "bazomba",
+        "VAR3" -> "bada", "VAR4" -> "badam")
+
+      actualJob shouldBe expectedJob
+    }
+
+    "return parent env if the key doesn't exists" in {
+      val actual = appConfig.getEnv("naaah", appEnv)
+      val expected = appEnv
+      actual shouldBe expected
+    }
+  }
 }
 
 
