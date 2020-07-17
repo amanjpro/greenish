@@ -285,6 +285,44 @@ class RoutesSpec()
       }
     }
 
+    "properly handle GET/state/refresh" in {
+      val checker = system.actorOf(Props(
+        new StatusChecker(Seq(group1, group2), stats,
+          Seq.empty, () => tstamp)))
+      val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
+      val routes = new Routes(checker, stats, 10 * 1000 * 5, () => time)
+
+      Get("/state/refresh") ~> routes.routes ~> check {
+        status shouldBe StatusCodes.OK
+      }
+
+      eventually {
+        Get("/state") ~> routes.routes ~> check {
+          val actual = parse(responseAs[String])
+            .flatMap(_.as[Seq[GroupStatus]]).getOrElse(null)
+          val expected = Seq(
+            GroupStatus(group1, Array(
+              JobStatus(job1, tstamp, Seq(
+                PeriodHealth("2020-06-25-13", false),
+                PeriodHealth("2020-06-25-14", true),
+                )),
+              JobStatus(job2, tstamp, Seq(
+                PeriodHealth("2020-06-25-13", false),
+                PeriodHealth("2020-06-25-14", true),
+                )),
+            )),
+            GroupStatus(group2, Array(
+              JobStatus(job3, 1000, Seq(
+                PeriodHealth("2020-06-25-13", false),
+                PeriodHealth("2020-06-25-14", true),
+              ))
+            )),
+          )
+          actual shouldBe expected
+        }
+      }
+    }
+
     "properly handle GET/group/gid/refresh request when id exists" in {
       val checker = system.actorOf(Props(
         new StatusChecker(Seq(group1, group2), stats,

@@ -103,6 +103,13 @@ class Routes(statusChecker: ActorRef,
     }
   }
 
+  private[this] val refreshState = get {
+    path("state" / "refresh") {
+      statusChecker ! Refresh(now)
+      complete(jsonPrinter.print(okJson("State refresh is scheduled")))
+    }
+  }
+
   private[this] val refreshGroup = get {
     path("group" / IntNumber / "refresh") { id =>
       val statusFuture = (
@@ -179,7 +186,7 @@ class Routes(statusChecker: ActorRef,
   }
 
   val routes =
-    getJob ~ getGroup ~ refreshGroup ~ refreshJob ~
+    getJob ~ getGroup ~ refreshState ~ refreshGroup ~ refreshJob ~
       maxlag ~ summary ~ missing ~ state ~ dashboard ~ system ~
       prometheus ~ health
 }
