@@ -290,6 +290,19 @@ $ curl --silent -G http://0.0.0.0:8080/health | jq .
 }
 ```
 
+### System info
+
+Print basic information about the service.
+
+```
+$ curl --silent -G localhost:8080/system | jq .
+{
+  "service": "Greenish",
+  "version": "1.4.0-SNAPSHOT",
+  "uptime": 1784338
+}
+```
+
 ## Prometheus
 
 Greenish can also export data to Prometheus. These are the supported metrics:
