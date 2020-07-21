@@ -1,3 +1,5 @@
+import React from 'react';
+
 class VersionContainer extends React.Component {
   constructor(props) {
     super(props);
@@ -51,3 +53,4 @@ class VersionContainer extends React.Component {
     }
   }
 }
+export default VersionContainer;
