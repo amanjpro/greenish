@@ -52,6 +52,76 @@ class CommandRunnerSpec()
       Props(new StatsCollector(Set("p1", "p2", "p3"))))
   }
 
+  "computeOldest" must {
+    import CommandRunner.computeOldest
+    "work for empty period health lists" in {
+      val periods = Seq.empty[PeriodHealth]
+      val actual = computeOldest(periods)
+      val expected = 0
+      actual shouldBe expected
+    }
+
+    "work when the first period is missing" in {
+      val periods = Seq(
+        PeriodHealth("kaka", false),
+        PeriodHealth("kaka", true),
+        PeriodHealth("kaka", true),
+        PeriodHealth("kaka", true),
+        )
+      val actual = computeOldest(periods)
+      val expected = 4
+      actual shouldBe expected
+    }
+
+    "work when a middle period is missing" in {
+      val periods = Seq(
+        PeriodHealth("kaka", true),
+        PeriodHealth("kaka", false),
+        PeriodHealth("kaka", true),
+        PeriodHealth("kaka", true),
+        )
+      val actual = computeOldest(periods)
+      val expected = 3
+      actual shouldBe expected
+    }
+
+    "work when the last period is missing" in {
+      val periods = Seq(
+        PeriodHealth("kaka", true),
+        PeriodHealth("kaka", true),
+        PeriodHealth("kaka", true),
+        PeriodHealth("kaka", false),
+        )
+      val actual = computeOldest(periods)
+      val expected = 1
+      actual shouldBe expected
+    }
+
+    "work when more than a period is missing" in {
+      val periods = Seq(
+        PeriodHealth("kaka", true),
+        PeriodHealth("kaka", false),
+        PeriodHealth("kaka", true),
+        PeriodHealth("kaka", false),
+        )
+      val actual = computeOldest(periods)
+      val expected = 3
+      actual shouldBe expected
+    }
+
+    "work when no period is missing" in {
+      val periods = Seq(
+        PeriodHealth("kaka", true),
+        PeriodHealth("kaka", true),
+        PeriodHealth("kaka", true),
+        PeriodHealth("kaka", true),
+        )
+      val actual = computeOldest(periods)
+      val expected = 0
+      actual shouldBe expected
+    }
+  }
+
   "parseOutput" must {
     "parse output lines correctly" in {
       val lines = LazyList(
@@ -244,6 +314,7 @@ class CommandRunnerSpec()
         checkSamples(prom, "greenish_state_refresh_total", expectedTotal)
         checkSamples(prom, "greenish_state_refresh_failed_total", expectedTotal)
         checkSamples(prom, "greenish_missing_periods_total", allZeros)
+        checkSamples(prom, "greenish_oldest_missing_period", allZeros)
         checkSamples(prom, "greenish_active_refresh_tasks", allZeros)
 
         val actual = getNoneZeroHistogramLabels(prom, "greenish_state_refresh_time_seconds")
@@ -278,6 +349,7 @@ class CommandRunnerSpec()
         checkSamples(prom, "greenish_state_refresh_total", expectedTotal)
         checkSamples(prom, "greenish_state_refresh_failed_total", allZeros)
         checkSamples(prom, "greenish_missing_periods_total", expectedTotal)
+        checkSamples(prom, "greenish_oldest_missing_period", expectedTotal)
         checkSamples(prom, "greenish_active_refresh_tasks", allZeros)
 
         val actual = getNoneZeroHistogramLabels(prom, "greenish_state_refresh_time_seconds")
@@ -312,6 +384,7 @@ class CommandRunnerSpec()
         checkSamples(prom, "greenish_state_refresh_total", expectedTotal)
         checkSamples(prom, "greenish_state_refresh_failed_total", expectedTotal)
         checkSamples(prom, "greenish_missing_periods_total", allZeros)
+        checkSamples(prom, "greenish_oldest_missing_period", allZeros)
         checkSamples(prom, "greenish_active_refresh_tasks", allZeros)
 
         val actual = getNoneZeroHistogramLabels(prom, "greenish_state_refresh_time_seconds")
@@ -346,6 +419,7 @@ class CommandRunnerSpec()
         checkSamples(prom, "greenish_state_refresh_total", expectedTotal)
         checkSamples(prom, "greenish_state_refresh_failed_total", expectedTotal)
         checkSamples(prom, "greenish_missing_periods_total", allZeros)
+        checkSamples(prom, "greenish_oldest_missing_period", allZeros)
         checkSamples(prom, "greenish_active_refresh_tasks", allZeros)
 
         val actual = getNoneZeroHistogramLabels(prom, "greenish_state_refresh_time_seconds")

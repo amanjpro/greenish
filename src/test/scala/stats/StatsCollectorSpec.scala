@@ -119,6 +119,26 @@ class StatsCollectorSpec()
       checkSamples(prom, "greenish_state_refresh_failed_total", expected)
     }
 
+    "properly handle OldestMissingPeriod message" in {
+      val jobs = Set("p1", "p2")
+      val stats = system.actorOf(
+        Props(new StatsCollector(jobs)))
+
+      stats ! OldestMissingPeriod("p1", 3)
+      stats ! GetPrometheus
+
+      val expected = Seq(
+        (Seq("p1"), 3.0),
+        (Seq("p2"), 0.0),
+      )
+
+      val prom = receiveOne(2 seconds)
+        .asInstanceOf[StatsCollector.MetricsEntity]
+        .samples.asScala.toList
+
+      checkSamples(prom, "greenish_oldest_missing_period", expected)
+    }
+
     "properly handle MissingPeriods message" in {
       val jobs = Set("p1", "p2")
       val stats = system.actorOf(

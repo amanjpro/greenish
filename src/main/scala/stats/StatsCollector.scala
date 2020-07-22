@@ -45,6 +45,12 @@ class StatsCollector(jobIDs: Set[String],
     .labelNames("job_id")
     .register(registry)
 
+  private[this] val oldestMissingPeriod = Gauge.build()
+    .name("greenish_oldest_missing_period")
+    .help("The oldest missing period")
+    .labelNames("job_id")
+    .register(registry)
+
   init()
 
   private[this] def init(): Unit = {
@@ -54,6 +60,7 @@ class StatsCollector(jobIDs: Set[String],
       refreshCounter.labels(jobId)
       badRefreshCounter.labels(jobId)
       missingPeriods.labels(jobId)
+      oldestMissingPeriod.labels(jobId)
     }
   }
 
@@ -69,6 +76,8 @@ class StatsCollector(jobIDs: Set[String],
       badRefreshCounter.labels(jobId).inc()
     case MissingPeriods(jobId, count) =>
       missingPeriods.labels(jobId).set(count)
+    case OldestMissingPeriod(jobId, count) =>
+      oldestMissingPeriod.labels(jobId).set(count)
     case GetPrometheus =>
       import StatsCollector.{fromRegistry, toPrometheusTextFormat}
       val metrics = fromRegistry(registry)

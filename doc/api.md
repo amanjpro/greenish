@@ -332,6 +332,12 @@ TYPE: GAUGE
 NAME: greenish_missing_periods_total
 HELP: Current number of missing dataset periods
 LABELS: job_id
+
+TYPE: GAUGE
+NAME: greenish_oldest_missing_period
+HELP: The oldest missing period
+LABELS: job_id
+
 ```
 
 Prometheus metrics can be accessed at `/prometheus` endpoint:
