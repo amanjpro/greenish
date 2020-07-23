@@ -1,3 +1,5 @@
+import React from 'react';
+
 class StateContainer extends React.Component {
   intervalID
   constructor(props) {
@@ -60,3 +62,5 @@ class StateContainer extends React.Component {
     }
   }
 }
+
+export default VersionContainer;

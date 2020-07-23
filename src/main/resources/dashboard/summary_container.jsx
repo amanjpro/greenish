@@ -1,3 +1,5 @@
+import React from 'react';
+
 class SummaryContainer extends React.Component {
   intervalID
   constructor(props) {
@@ -105,3 +107,5 @@ class SummaryContainer extends React.Component {
     }
   }
 }
+
+export default VersionContainer;

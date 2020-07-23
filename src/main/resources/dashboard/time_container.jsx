@@ -1,3 +1,5 @@
+import React from 'react';
+
 class TimeContainer extends React.Component {
   intervalID
   constructor(props) {
@@ -30,3 +32,5 @@ class TimeContainer extends React.Component {
     )
   }
 }
+
+export default VersionContainer;
