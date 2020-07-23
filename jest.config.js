@@ -15,7 +15,7 @@ module.exports = {
   ],
   "moduleNameMapper": {
      "^./(.*)_container.js$": "<rootDir>/target/scala-2.13/resource_managed/main/dashboard/$1_container.js",
-     "^./resources/(.*).js$": "<rootDir>/json-samples/$1.js"
+     "^./resources/(.*).js$": "<rootDir>/src/test/resources/json-samples/$1.js"
   },
   "setupFilesAfterEnv": [
     "<rootDir>/jest.setup.js"
