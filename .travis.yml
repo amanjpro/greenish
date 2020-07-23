@@ -14,12 +14,13 @@ before_install:
   - npm install
 script:
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport
-  - npm test
+  - bash <(curl -s https://codecov.io/bash) -cF scala
+  - npm test -- --coverage
+  - bash <(curl -s https://codecov.io/bash) -cF javascript
   - sbt assembly
   - sbt docker:publishLocal
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
   - docker build -t docker.pkg.github.com/amanjpro/greenish/greenish:$TRAVIS_TAG target/docker/stage
   - echo $GITHUB_RELEASES_TOKEN | docker login https://docker.pkg.github.com -u amanjpro --password-stdin
   - docker push docker.pkg.github.com/amanjpro/greenish/greenish:$TRAVIS_TAG
