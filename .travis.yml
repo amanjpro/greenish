@@ -15,7 +15,7 @@ before_install:
 script:
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport
   - bash <(curl -s https://codecov.io/bash) -cF scala
-  - npm test -- --coverage
+  - npm test -- --coverage --collectCoverageFrom=src/main/resources/dashboard/*.jsx
   - bash <(curl -s https://codecov.io/bash) -cF javascript
   - sbt assembly
   - sbt docker:publishLocal
