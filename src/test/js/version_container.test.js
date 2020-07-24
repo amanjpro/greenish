@@ -32,4 +32,29 @@ describe('VersionContainer', () => {
       done();
     });
   });
+  it('shows error, when a bad json is returned from API', done => {
+    const mockSuccessResponse = {};
+    const mockJsonPromise = Promise.resolve({"nah": "bad"});
+    const mockFetchPromise = Promise.resolve({
+      json: () => mockJsonPromise,
+    });
+    global.fetch = jest.fn().mockImplementation(() => mockFetchPromise);
+
+    const wrapper = shallow(<VersionContainer/>);
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(global.fetch).toHaveBeenCalledWith('/system');
+
+    process.nextTick(() => {
+      expect(wrapper.state()).toEqual({
+        "error": null,
+        "isLoaded": true,
+        "version": undefined,
+      });
+
+      global.fetch.mockClear();
+      delete global.fetch;
+      done();
+    });
+  });
 });
