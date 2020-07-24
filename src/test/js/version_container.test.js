@@ -34,7 +34,7 @@ describe('VersionContainer', () => {
   });
   it('shows error, when a bad json is returned from API', done => {
     const mockSuccessResponse = {};
-    const mockJsonPromise = Promise.resolve({"nah": "bad"});
+    const mockJsonPromise = Promise.reject({"nah": "bad"});
     const mockFetchPromise = Promise.resolve({
       json: () => mockJsonPromise,
     });
@@ -47,9 +47,9 @@ describe('VersionContainer', () => {
 
     process.nextTick(() => {
       expect(wrapper.state()).toEqual({
-        "error": null,
+        "error": {"nah": "bad"},
         "isLoaded": true,
-        "version": undefined,
+        "version": null,
       });
 
       global.fetch.mockClear();
