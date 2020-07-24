@@ -9,14 +9,13 @@ module.exports = {
   },
   roots: [
     "<rootDir>",
-    "<rootDir>/src/test/js",
-    "<rootDir>/target/scala-2.13/resource_managed/main/dashboard"
+     "<rootDir>src/main/resources/dashboard"
   ],
   moduleDirectories: [
     "node_modules",
   ],
   "moduleNameMapper": {
-     "^./(.*)_container.js$": "<rootDir>/target/scala-2.13/resource_managed/main/dashboard/$1_container.js",
+     "^./(.*)_container.js$": "<rootDir>src/main/resources/dashboard/$1_container.jsx",
      "^./resources/(.*).js$": "<rootDir>/src/test/resources/json-samples/$1.js"
   },
   "setupFilesAfterEnv": [
