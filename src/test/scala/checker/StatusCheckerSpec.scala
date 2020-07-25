@@ -83,28 +83,32 @@ class StatusCheckerSpec()
     override protected[this] var state = IndexedSeq.empty[GroupStatus]
   }
 
+  val singletonState = IndexedSeq(GroupStatus(
+    group1, Array(JobStatus(job1, tstamp, Seq(PeriodHealth("1", false))))
+  ))
+
   val singletonChecker = new StatusCheckerApi {
-    override protected[this] var state = IndexedSeq(GroupStatus(
-        group1, Array(JobStatus(job1, tstamp, Seq(PeriodHealth("1", false))))
-      ))
+    override protected[this] var state = singletonState
   }
 
-  val nestedChecker = new StatusCheckerApi {
-    override protected[this] var state = IndexedSeq(
-      GroupStatus(
-        group1, Array(
-          JobStatus(job1, tstamp, Seq(PeriodHealth("1", true), PeriodHealth("1", true))),
-          JobStatus(job1, tstamp, Seq(PeriodHealth("2", false), PeriodHealth("3", false))),
-        )
-      ),
-      GroupStatus(
-        group1, Array(
-          JobStatus(job1, tstamp, Seq(PeriodHealth("1", false), PeriodHealth("1", true))),
-          JobStatus(job1, tstamp, Seq(PeriodHealth("2", false),
-            PeriodHealth("3", false), PeriodHealth("4", false))),
-        )
+  val deeplyNestedState = IndexedSeq(
+    GroupStatus(
+      group1, Array(
+        JobStatus(job1, tstamp, Seq(PeriodHealth("1", true), PeriodHealth("1", true))),
+        JobStatus(job1, tstamp, Seq(PeriodHealth("2", false), PeriodHealth("3", false))),
+      )
+    ),
+    GroupStatus(
+      group1, Array(
+        JobStatus(job1, tstamp, Seq(PeriodHealth("1", false), PeriodHealth("1", true))),
+        JobStatus(job1, tstamp, Seq(PeriodHealth("2", false),
+          PeriodHealth("3", false), PeriodHealth("4", false))),
       )
     )
+  )
+
+  val nestedChecker = new StatusCheckerApi {
+    override protected[this] var state = deeplyNestedState
   }
 
   "maxLag" must {
@@ -129,11 +133,11 @@ class StatusCheckerSpec()
     }
 
     "work when state is not empty" in {
-      singletonChecker.allEntries.length shouldBe 1
+      singletonChecker.allEntries shouldBe singletonState
     }
 
     "work when state is deeply nested" in {
-      nestedChecker.allEntries.length shouldBe 2
+      nestedChecker.allEntries shouldBe deeplyNestedState
     }
   }
 
