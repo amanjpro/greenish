@@ -47,7 +47,9 @@ trait StatusCheckerApi {
           else if(missing <= status.job.alertLevels.normal) Normal
           else if(missing <= status.job.alertLevels.warn) Warn
           else Critical
-        JobStatusSummary(status.job.jobId, status.job.name, missing, alertLevel)
+
+        val oldestMissingPeriod = computeOldest(status.periodHealth)
+        JobStatusSummary(status.job.jobId, status.job.name, missing, oldestMissingPeriod, alertLevel)
       }.toSeq
       GroupStatusSummary(group.group.groupId, group.group.name, status)
     }

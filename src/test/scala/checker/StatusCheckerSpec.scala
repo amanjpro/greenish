@@ -179,7 +179,7 @@ class StatusCheckerSpec()
 
     "work when state is not empty" in {
       val expected = Seq(
-          GroupStatusSummary(0, "group1", Seq(JobStatusSummary(0, "job1", 1, Normal)))
+          GroupStatusSummary(0, "group1", Seq(JobStatusSummary(0, "job1", 1, 1, Normal)))
         )
       singletonChecker.summary shouldBe expected
     }
@@ -188,14 +188,14 @@ class StatusCheckerSpec()
       val expected = Seq(
         GroupStatusSummary(
           0, "group1", Seq(
-            JobStatusSummary(0, "job1", 0, Great),
-            JobStatusSummary(0, "job1", 2, Warn),
+            JobStatusSummary(0, "job1", 0, 0, Great),
+            JobStatusSummary(0, "job1", 2, 2, Warn),
           )
         ),
         GroupStatusSummary(
           0, "group1", Seq(
-            JobStatusSummary(0, "job1", 1, Normal),
-            JobStatusSummary(0, "job1", 3, Critical),
+            JobStatusSummary(0, "job1", 1, 2, Normal),
+            JobStatusSummary(0, "job1", 3, 3, Critical),
           )
         )
       )

@@ -7,6 +7,7 @@ case class JobStatusSummary(
   jobId: Int,
   name: String,
   missing: Int,
+  oldestMissingPeriod: Int,
   alertLevel: AlertLevel,
 )
 object JobStatusSummary {
