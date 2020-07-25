@@ -302,7 +302,7 @@ class StatusCheckerSpec()
       actual shouldBe expected
     }
 
-    "various cron styles" in {
+    "work various cron styles" in {
       val job = cron => Job(1, null, null, null,
         "yyyy-MM-dd-HH-mm", cron, 1, ZoneId.of("UTC"),
         2, null, Seq.empty
