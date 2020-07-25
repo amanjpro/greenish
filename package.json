@@ -2,7 +2,18 @@
   "name": "greenish",
   "version": "1.4.0-SNAPSHOT",
   "devDependencies": {
+    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
     "babel-cli": "^6.0.0",
-    "babel-preset-react-app": "^3.0.0"
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-preset-react-app": "^3.0.0",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.2",
+    "jest": "^26.1.0",
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0"
+  },
+  "scripts": {
+    "test": "jest"
   }
 }

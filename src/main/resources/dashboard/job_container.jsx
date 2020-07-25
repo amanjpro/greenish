@@ -1,3 +1,5 @@
+import React from 'react';
+
 class JobContainer extends React.Component {
   intervalID
   constructor(props) {
@@ -71,3 +73,5 @@ class JobContainer extends React.Component {
     }
   }
 }
+
+export default VersionContainer;

@@ -2,21 +2,25 @@ language: scala
 
 jdk: openjdk8
 
-node_js:
-  - 14
-
 scala:
   - 2.13.2
 
 before_install:
+  - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+  - export NVM_DIR="$HOME/.nvm"
+  - nvm install node
+  - nvm use node
+  - nvm alias default node
   - npm install
 script:
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport
+  - bash <(curl -s https://codecov.io/bash) -cF scala
+  - npm test -- --coverage --collectCoverageFrom=src/main/resources/dashboard/*.jsx
+  - bash <(curl -s https://codecov.io/bash) -cF javascript
   - sbt assembly
   - sbt docker:publishLocal
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
   - docker build -t docker.pkg.github.com/amanjpro/greenish/greenish:$TRAVIS_TAG target/docker/stage
   - echo $GITHUB_RELEASES_TOKEN | docker login https://docker.pkg.github.com -u amanjpro --password-stdin
   - docker push docker.pkg.github.com/amanjpro/greenish/greenish:$TRAVIS_TAG

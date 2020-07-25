@@ -1,3 +1,5 @@
+import React from 'react';
+
 const e = React.createElement;
 
 class MainContainer extends React.Component {
@@ -81,3 +83,5 @@ class MainContainer extends React.Component {
 
 const domContainer = document.querySelector('#main_container');
 ReactDOM.render(e(MainContainer), domContainer);
+
+export default VersionContainer;

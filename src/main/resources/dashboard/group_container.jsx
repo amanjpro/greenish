@@ -1,3 +1,5 @@
+import React from 'react';
+
 class GroupContainer extends React.Component {
   intervalID
   constructor(props) {
@@ -68,3 +70,5 @@ class GroupContainer extends React.Component {
     }
   }
 }
+
+export default VersionContainer;
