@@ -58,7 +58,7 @@ class CommandRunner(statsActor: ActorRef) extends Actor with ActorLogging {
         period => PeriodHealth(period, mapped(period)) }
       context.sender ! RunResult(periodHealths, group, job, clockCounter)
       statsActor ! MissingPeriods(prometheusId, periodHealths.count(!_.ok))
-      val oldestMissingPeriod = CommandRunner.computeOldest(periodHealths)
+      val oldestMissingPeriod = computeOldest(periodHealths)
       statsActor ! OldestMissingPeriod(prometheusId, oldestMissingPeriod)
     }
   }
@@ -66,11 +66,6 @@ class CommandRunner(statsActor: ActorRef) extends Actor with ActorLogging {
 
 object CommandRunner {
   private[this] val Matcher = "^greenish-period\t(.*)\t(1|0)$".r
-  protected[checker] def computeOldest(periodHealths: Seq[PeriodHealth]): Int = {
-    val missingIndex = periodHealths.indexWhere(!_.ok)
-    if(missingIndex == -1) 0
-    else periodHealths.length - missingIndex
-  }
 
   protected[checker] def parseOutput(lines: LazyList[String],
     periods: Set[String]): Seq[(String, Boolean)] =
