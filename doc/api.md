@@ -298,6 +298,7 @@ Print basic information about the service.
 $ curl --silent -G localhost:8080/system | jq .
 {
   "service": "Greenish",
+  "namespace": "Staging",
   "version": "1.4.0-SNAPSHOT",
   "uptime": 1784338
 }
