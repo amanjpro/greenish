@@ -307,13 +307,25 @@ class JsonSerdeSpec() extends Matchers
   }
 
   "sysinfo" must {
-    "produce correct JSON" in {
-      val json = sysinfo()
+    "produce correct JSON when namespace is missing" in {
+      val json = sysinfo(None)
       val cursor = json.hcursor
       cursor.downField("version").as[Option[String]].isRight shouldBe true
+      cursor.downField("namespace").as[Option[String]] shouldBe Right(None)
       cursor.downField("service").as[String] shouldBe Right("Greenish")
       cursor.downField("uptime").as[Long].isRight shouldBe true
-      cursor.keys.get.size shouldBe 3
+      cursor.keys.get.size shouldBe 4
+    }
+
+    "produce correct JSON when namespace is not missing" in {
+      val json = sysinfo(Some("my dashboard"))
+      println(json)
+      val cursor = json.hcursor
+      cursor.downField("version").as[Option[String]].isRight shouldBe true
+      cursor.downField("namespace").as[Option[String]] shouldBe Right(Some("my dashboard"))
+      cursor.downField("service").as[String] shouldBe Right("Greenish")
+      cursor.downField("uptime").as[Long].isRight shouldBe true
+      cursor.keys.get.size shouldBe 4
     }
   }
 }

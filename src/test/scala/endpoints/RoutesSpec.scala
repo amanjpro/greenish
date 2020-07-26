@@ -35,7 +35,7 @@ class RoutesSpec()
         () => tstamp)))
     val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
     checker ! Refresh(() => time)
-    routes = new Routes(checker, stats, 10, () => time)
+    routes = new Routes(None, checker, stats, 10, () => time)
   }
   override def afterAll: Unit = {
     dir1.delete
@@ -290,7 +290,7 @@ class RoutesSpec()
         new StatusChecker(Seq(group1, group2), stats,
           () => tstamp)))
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
-      val routes = new Routes(checker, stats, 10 * 1000 * 5, () => time)
+      val routes = new Routes(None, checker, stats, 10 * 1000 * 5, () => time)
 
       Get("/state/refresh") ~> routes.routes ~> check {
         status shouldBe StatusCodes.OK
@@ -328,7 +328,7 @@ class RoutesSpec()
         new StatusChecker(Seq(group1, group2), stats,
           () => tstamp)))
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
-      val routes = new Routes(checker, stats, 10 * 1000 * 5, () => time)
+      val routes = new Routes(None, checker, stats, 10 * 1000 * 5, () => time)
 
       Get("/group/0/refresh") ~> routes.routes ~> check {
         status shouldBe StatusCodes.OK
@@ -371,7 +371,7 @@ class RoutesSpec()
         Props(new StatusChecker(Seq(group1, group2), stats,
         () => tstamp)))
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
-      val routes = new Routes(checker, stats, 1000 * 10 * 5, () => time)
+      val routes = new Routes(None, checker, stats, 1000 * 10 * 5, () => time)
 
       Get("/group/0/job/0/refresh") ~> routes.routes ~> check {
         status shouldBe StatusCodes.OK
@@ -435,7 +435,14 @@ class RoutesSpec()
       }
     }
 
-    "properly handle GET/system request" in {
+    "properly handle GET/system request when namespae is empty" in {
+      Get("/system") ~> routes.routes ~> check {
+        status shouldBe StatusCodes.OK
+      }
+    }
+
+    "properly handle GET/system request when namespae is not empty" in {
+      routes = new Routes(Some("yay"), checker, stats, 1000 * 1 * 2)
       Get("/system") ~> routes.routes ~> check {
         status shouldBe StatusCodes.OK
       }
@@ -459,7 +466,7 @@ class RoutesSpec()
       val nowFun = () => ZonedDateTime.ofInstant(Instant.now(),
         ZoneId.systemDefault())
       checker ! Refresh(nowFun)
-      routes = new Routes(checker, stats, 1000 * 1 * 2)
+      routes = new Routes(None, checker, stats, 1000 * 1 * 2)
 
       eventually {
         Get("/health") ~> routes.routes ~> check {
@@ -486,7 +493,7 @@ class RoutesSpec()
         Props(new StatusChecker(Seq(group1, group2), stats,
           () => System.currentTimeMillis)))
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
-      routes = new Routes(checker, stats, 1000 * 10 * 5, () => time)
+      routes = new Routes(None, checker, stats, 1000 * 10 * 5, () => time)
 
       Get("/health") ~> routes.routes ~> check {
         val actual = parse(responseAs[String])

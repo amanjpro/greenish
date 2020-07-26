@@ -61,6 +61,7 @@ class AppConfigSpec() extends Matchers
               ),
             )),
         ),
+        Some("Test dashboard"),
         30,
         "127.0.0.1",
         8080,

@@ -14,10 +14,11 @@ package object models {
     "error" -> str.asJson
   )
 
-  def sysinfo(): Json = {
+  def sysinfo(maybeNamespace: Option[String]): Json = {
     val maybeVersion = Option(getClass.getPackage.getImplementationVersion())
     Json.obj (
       "service" -> "Greenish".asJson,
+      "namespace" -> maybeNamespace.asJson,
       "version" -> maybeVersion.asJson,
       "uptime" -> ManagementFactory.getRuntimeMXBean().getUptime().asJson,
     )

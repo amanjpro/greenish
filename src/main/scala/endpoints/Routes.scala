@@ -16,7 +16,8 @@ import me.amanj.greenish.checker._
 import akka.http.scaladsl.model.HttpResponse
 import scala.util.Success
 
-class Routes(statusChecker: ActorRef,
+class Routes(namespace: Option[String],
+    statusChecker: ActorRef,
     statsActor: ActorRef,
     goodRefreshRecency: Long,
     now: () => ZonedDateTime = () => ZonedDateTime.now) {
@@ -155,7 +156,7 @@ class Routes(statusChecker: ActorRef,
 
   private[this] val system = get {
     path("system") {
-      val json = jsonPrinter.print(sysinfo())
+      val json = jsonPrinter.print(sysinfo(namespace))
       complete(json)
     }
   }
