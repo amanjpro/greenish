@@ -40,7 +40,7 @@ object App {
 
     val bindingFuture = Http()
       .bindAndHandle(
-        new Routes(statusChecker,
+        new Routes(appConfig.namespace, statusChecker,
           statsActor,
           // At least there should be one good run in the last 5 refresh sets
           appConfig.refreshInSeconds * 1000 * 5).routes,
