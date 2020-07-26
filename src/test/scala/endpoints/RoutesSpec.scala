@@ -215,11 +215,11 @@ class RoutesSpec()
             .flatMap(_.as[Seq[GroupStatusSummary]]).getOrElse(null)
           val expected = Seq(
             GroupStatusSummary(0, group1.name, Seq(
-              JobStatusSummary(0, job1.name, 1, Normal),
-              JobStatusSummary(1, job2.name, 1, Normal),
+              JobStatusSummary(0, job1.name, 1, 2, Normal),
+              JobStatusSummary(1, job2.name, 1, 2, Normal),
               )),
             GroupStatusSummary(1, group2.name, Seq(
-              JobStatusSummary(0, job3.name, 1, Normal),
+              JobStatusSummary(0, job3.name, 1, 2, Normal),
               )),
             )
           actual shouldBe expected

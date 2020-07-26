@@ -31,12 +31,14 @@ $ curl --silent -G http://0.0.0.0:8080/summary | jq .
         "job_id": 0,
         "name": "Job1",
         "missing": 4,
+        "oldest_mising_period": 10,
         "alert_level": "warn"
       },
       {
         "job_id": 1,
         "name": "Job2",
         "missing": 2,
+        "oldest_mising_period": 3,
         "alert_level": "normal"
       }
     ]
@@ -49,12 +51,14 @@ $ curl --silent -G http://0.0.0.0:8080/summary | jq .
         "job_id": 0,
         "name": "Job3",
         "missing": 6,
+        "oldest_mising_period": 6,
         "alert_level": "critical"
       },
       {
         "job_id": 1,
         "name": "Job4",
         "missing": 0,
+        "oldest_mising_period": 0,
         "alert_level": "great"
       }
     ]
