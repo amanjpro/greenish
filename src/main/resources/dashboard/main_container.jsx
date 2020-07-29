@@ -1,12 +1,13 @@
 const e = React.createElement;
+const Link = ReactRouterDOM.Link;
 
 class MainContainer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      page: 'main',
-      gid: null,
-      jid: null
+      page: props.page,
+      gid: props.group,
+      jid: props.job
     }
     this.handler = this.handler.bind(this);
     this.renderMain = this.renderMain.bind(this);
@@ -17,7 +18,12 @@ class MainContainer extends React.Component {
       return (
         <div className='detail-div'>
           <h2 key="state_header">All data sets&nbsp;
-            <sub className="link" onClick={() => this.setState({page:"main"})}>See main dashboard</sub>
+            <sub>
+              <Link to={loc => `${loc.pathname}?page=main`}
+                  onClick={() => this.setState({page:"main"})} className="link">
+                See main dashboard
+              </Link>
+            </sub>
           </h2>
           <StateContainer endpoint='state'/>
         </div>
@@ -44,7 +50,12 @@ class MainContainer extends React.Component {
           </div>
           <div className="detail-div">
             <h2 key="state_header">Detailed missing periods&nbsp;
-              <sub className="link" onClick={() => this.setState({page:"state"})}>See all periods</sub>
+              <sub>
+                <Link to={loc => `${loc.pathname}?page=state`}
+                    onClick={() => this.setState({page:"state"})} className="link">
+                  See all periods
+                </Link>
+              </sub>
             </h2>
             <StateContainer endpoint='missing'/>
           </div>
@@ -54,6 +65,7 @@ class MainContainer extends React.Component {
   }
 
   handler(page, gid, jid) {
+
     this.setState({
       page: page,
       gid: gid,
@@ -80,4 +92,22 @@ class MainContainer extends React.Component {
 }
 
 const domContainer = document.querySelector('#main_container');
-ReactDOM.render(e(MainContainer), domContainer);
+const BrowserRouter = ReactRouterDOM.BrowserRouter;
+const Route = ReactRouterDOM.Route;
+const useLocation = ReactRouterDOM.useLocation;
+
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
+
+function ShowPage() {
+  let query = useQuery();
+  let page = query.get("page");
+  let gid = query.get("gid");
+  let jid = query.get("jid");
+  return (<MainContainer page={page} group={gid} job={jid}/>);
+}
+ReactDOM.render(
+  <BrowserRouter><Route><ShowPage/></Route></BrowserRouter>,
+  domContainer
+);

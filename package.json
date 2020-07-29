@@ -4,5 +4,9 @@
   "devDependencies": {
     "babel-cli": "^6.0.0",
     "babel-preset-react-app": "^3.0.0"
+  },
+  "dependencies": {
+    "react-router-hash-link": "^2.0.0",
+    "react-router-dom": "^5.0.0"
   }
 }
