@@ -1,4 +1,5 @@
 const e = React.createElement;
+const Link = ReactRouterDOM.Link;
 
 class MainContainer extends React.Component {
   constructor(props) {
@@ -17,7 +18,12 @@ class MainContainer extends React.Component {
       return (
         <div className='detail-div'>
           <h2 key="state_header">All data sets&nbsp;
-            <sub className="link" onClick={() => this.setState({page:"main"})}>See main dashboard</sub>
+            <sub>
+              <Link to={loc => `${loc.pathname}?page=main`}
+                  onClick={() => this.setState({page:"main"})} className="link">
+                See main dashboard
+              </Link>
+            </sub>
           </h2>
           <StateContainer endpoint='state'/>
         </div>
@@ -44,7 +50,12 @@ class MainContainer extends React.Component {
           </div>
           <div className="detail-div">
             <h2 key="state_header">Detailed missing periods&nbsp;
-              <sub className="link" onClick={() => this.setState({page:"state"})}>See all periods</sub>
+              <sub>
+                <Link to={loc => `${loc.pathname}?page=state`}
+                    onClick={() => this.setState({page:"state"})} className="link">
+                  See all periods
+                </Link>
+              </sub>
             </h2>
             <StateContainer endpoint='missing'/>
           </div>
@@ -54,6 +65,7 @@ class MainContainer extends React.Component {
   }
 
   handler(page, gid, jid) {
+
     this.setState({
       page: page,
       gid: gid,
@@ -80,25 +92,9 @@ class MainContainer extends React.Component {
 }
 
 const domContainer = document.querySelector('#main_container');
-// const BrowserRouter = require("react-router-dom").BrowserRouter;
-// const Route = require("react-router-dom").Route;
-// const Link = require("react-router-dom").Link;
-//ReactDOM.render(e(MainContainer), domContainer);
-const BrowserRouter = window.ReactRouterDOM.BrowserRouter;
-const Route = window.ReactRouterDOM.Route;
-const Switch = window.ReactRouterDOM.Switch;
-const useParams = window.ReactRouterDOM.useParams;
-const useLocation = window.ReactRouterDOM.useLocation;
-
-function Group() {
-  let { gid } = useParams();
-  console.log(gid);
-  <div><MainContainer page="group" group={gid}/></div>
-}
-function Job() {
-  let { gid, jid } = useParams();
-  <MainContainer page="job" group={gid} job={jid}/>
-}
+const BrowserRouter = ReactRouterDOM.BrowserRouter;
+const Route = ReactRouterDOM.Route;
+const useLocation = ReactRouterDOM.useLocation;
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -112,23 +108,6 @@ function ShowPage() {
   return (<MainContainer page={page} group={gid} job={jid}/>);
 }
 ReactDOM.render(
-  // , domContainer
-  <BrowserRouter>
-    <Route><ShowPage/></Route>
-  </BrowserRouter>, domContainer
-  //   <Switch>
-  //       <Group/>
-  //     </Route>
-  //     <Route path="/dashboard/#group/:gid/job/:jid">
-  //       <Job/>
-  //     </Route>
-  //     <Route exact path="/dashboard/#state">
-  //       <MainContainer page="state"/>
-  //     </Route>
-  //     <Route>
-  //       // <Job/>
-  //       <MainContainer page="main"/>
-  //     </Route>
-  //   </Switch>
-  // </BrowserRouter>, domContainer
+  <BrowserRouter><Route><ShowPage/></Route></BrowserRouter>,
+  domContainer
 );

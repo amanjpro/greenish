@@ -1,3 +1,5 @@
+const Link = ReactRouterDOM.Link;
+
 class JobContainer extends React.Component {
   intervalID
   constructor(props) {
@@ -63,7 +65,13 @@ class JobContainer extends React.Component {
         <div key='job-div-view' className='detail-box'>
           <h2 key={`job-view-${gid}-${jid}-header`}>
             {job.job.name}&nbsp;
-            <sub className="link" onClick={this.handleBack}>See main dashboard</sub>
+            <sub>
+              <Link to={loc => `${loc.pathname}?page=main`}
+                  onClick={this.handleBack}
+                  className="link">
+                See main dashboard
+              </Link>
+            </sub>
           </h2>
           {encloseInTable(jobs, 'job-view', this.state.gid)}
         </div>

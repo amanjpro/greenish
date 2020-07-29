@@ -1,3 +1,5 @@
+const Link = ReactRouterDOM.Link;
+
 class GroupContainer extends React.Component {
   intervalID
   constructor(props) {
@@ -58,7 +60,12 @@ class GroupContainer extends React.Component {
       )
     } else {
       const sub = (
-        <sub className="link" onClick={this.handleBack}>&nbsp;See main dashboard</sub>
+        <sub>
+          <Link to={loc => `${loc.pathname}?page=main`}
+              className="link" onClick={this.handleBack}>
+            &nbsp;See main dashboard
+          </Link>
+        </sub>
       )
       return (
         <div key='group-div-view'>

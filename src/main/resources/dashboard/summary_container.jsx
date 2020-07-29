@@ -1,3 +1,5 @@
+const Link = ReactRouterDOM.Link;
+
 class SummaryContainer extends React.Component {
   intervalID
   constructor(props) {
@@ -68,9 +70,11 @@ class SummaryContainer extends React.Component {
               const gid = group.group_id;
               return (
                 <div key={`group-${gid}`} className='grid-item summary-box'>
-                  <h2 key={`group-${gid}-header`} className='link'
-                        onClick={() => {this.handleGroupClick(gid)}}>
-                    {group.name}
+                  <h2 key={`group-${gid}-header`}>
+                    <Link to={loc => `${loc.pathname}?page=group&gid=${gid}`}
+                        onClick={() => {this.handleGroupClick(gid)}} className="link">
+                      {group.name}
+                    </Link>
                   </h2>
                   <table key={`group-${gid}-table`}>
                     <tbody key={`group-${gid}-tbody`}>
@@ -83,10 +87,11 @@ class SummaryContainer extends React.Component {
                           const jid = job.job_id;
                           return(
                             <tr key={`job-${gid}-${jid}-row`}>
-                              <td key={`job-${gid}-${jid}-name`}
-                                  className='link'
-                                  onClick={() => {this.handleJobClick(gid, jid)}}>
-                                {job.name}
+                              <td key={`job-${gid}-${jid}-name`}>
+                                <Link to={loc => `${loc.pathname}?page=job&gid=${gid}&jid=${jid}`}
+                                    onClick={() => {this.handleJobClick(gid, jid)}} className="link">
+                                  {job.name}
+                                </Link>
                               </td>
                               <td className={job.alert_level}
                                 key={`job-${gid}-${jid}-missing`}>{job.missing}</td>
