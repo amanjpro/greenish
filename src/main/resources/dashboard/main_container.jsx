@@ -4,9 +4,9 @@ class MainContainer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      page: 'main',
-      gid: null,
-      jid: null
+      page: props.page,
+      gid: props.group,
+      jid: props.job
     }
     this.handler = this.handler.bind(this);
     this.renderMain = this.renderMain.bind(this);
@@ -80,4 +80,55 @@ class MainContainer extends React.Component {
 }
 
 const domContainer = document.querySelector('#main_container');
-ReactDOM.render(e(MainContainer), domContainer);
+// const BrowserRouter = require("react-router-dom").BrowserRouter;
+// const Route = require("react-router-dom").Route;
+// const Link = require("react-router-dom").Link;
+//ReactDOM.render(e(MainContainer), domContainer);
+const BrowserRouter = window.ReactRouterDOM.BrowserRouter;
+const Route = window.ReactRouterDOM.Route;
+const Switch = window.ReactRouterDOM.Switch;
+const useParams = window.ReactRouterDOM.useParams;
+const useLocation = window.ReactRouterDOM.useLocation;
+
+function Group() {
+  let { gid } = useParams();
+  console.log(gid);
+  <div><MainContainer page="group" group={gid}/></div>
+}
+function Job() {
+  let { gid, jid } = useParams();
+  <MainContainer page="job" group={gid} job={jid}/>
+}
+
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
+
+function ShowPage() {
+  let query = useQuery();
+  let page = query.get("page");
+  let gid = query.get("gid");
+  let jid = query.get("jid");
+  return (<MainContainer page={page} group={gid} job={jid}/>);
+}
+ReactDOM.render(
+  // , domContainer
+  <BrowserRouter>
+    <Route><ShowPage/></Route>
+  </BrowserRouter>, domContainer
+  //   <Switch>
+  //       <Group/>
+  //     </Route>
+  //     <Route path="/dashboard/#group/:gid/job/:jid">
+  //       <Job/>
+  //     </Route>
+  //     <Route exact path="/dashboard/#state">
+  //       <MainContainer page="state"/>
+  //     </Route>
+  //     <Route>
+  //       // <Job/>
+  //       <MainContainer page="main"/>
+  //     </Route>
+  //   </Switch>
+  // </BrowserRouter>, domContainer
+);
