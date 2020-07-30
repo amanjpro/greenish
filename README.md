@@ -124,6 +124,45 @@ are tailored for IO jobs. More information can be found:
 - [ThreadPoolExecutor Javadoc](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ThreadPoolExecutor.html)
 - [Akka documentaiton](https://doc.akka.io/docs/akka-http/current/handling-blocking-operations-in-akka-http-routes.html#solution-dedicated-dispatcher-for-blocking-operations)
 
+## Logging
+
+Greenish uses Akka's simple logging mechanism. In the spirit of [12 factor
+App](https://12factor.net/logs) all logs are written to STDOUT, and the
+configuration can be done via the `application.conf` file. The following
+is a summary of some of the most useful options for customizing logging:
+
+```
+akka {
+  # Log the complete configuration at INFO level when Greenish is started.
+  # This is useful when you are uncertain of what configuration is used.
+  log-config-on-start = on
+  # Options are: OFF, DEBUG, INFO, ERROR, WARN
+  loglevel = "DEBUG"
+  # To turn off logging completely
+  stdout-loglevel = "OFF"
+
+  # Not necessarily useful in prod, but can be useful during development
+  # You probably want to skip the following in produciton
+  log-dead-letters = 10
+  log-dead-letters-during-shutdown = on
+  actor {
+    debug {
+      # enable function of LoggingReceive, which is to log any received message at
+      # DEBUG level
+      receive = on
+      # enable DEBUG logging of all AutoReceiveMessages (Kill, PoisonPill etc.)
+      autoreceive = on
+      # enable DEBUG logging of actor lifecycle changes
+      lifecycle = on
+      # enable DEBUG logging of unhandled messages
+      unhandled = on
+      # enable DEBUG logging of all LoggingFSMs for events, transitions and timers
+      fsm = on
+    }
+  }
+}
+```
+
 ## Pre-built package
 
 You can download pre-built packages (both fat (i.e. assembly) jar and docker)
