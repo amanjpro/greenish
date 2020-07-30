@@ -7,7 +7,6 @@ class GroupContainer extends React.Component {
     this.state = {
       error: null,
       isLoaded: false,
-      gid: props.group,
       group: null
     };
     this.handleBack = this.handleBack.bind(this);
@@ -22,7 +21,7 @@ class GroupContainer extends React.Component {
   }
 
   fetchData = () => {
-    fetch(`/group/${this.state.gid}`)
+    fetch(`/group/${this.props.group}`)
       .then(res => res.json())
       .then(
         (group) => {
@@ -49,7 +48,7 @@ class GroupContainer extends React.Component {
   }
 
   render() {
-    const { error, isLoaded, gid, group } = this.state;
+    const { error, isLoaded, group } = this.state;
     if (error) {
       return (
         <div>Error: {error.message}</div>

@@ -7,8 +7,6 @@ class JobContainer extends React.Component {
     this.state = {
       error: null,
       isLoaded: false,
-      gid: props.group,
-      jid: props.job,
       job: null
     };
     this.handleBack = this.handleBack.bind(this);
@@ -23,7 +21,7 @@ class JobContainer extends React.Component {
   }
 
   fetchData = () => {
-    fetch(`/group/${this.state.gid}/job/${this.state.jid}`)
+    fetch(`/group/${this.props.group}/job/${this.props.job}`)
       .then(res => res.json())
       .then(
         (job) => {
@@ -50,7 +48,7 @@ class JobContainer extends React.Component {
   }
 
   render() {
-    const { error, isLoaded, gid, jid, job } = this.state;
+    const { error, isLoaded, job } = this.state;
     if (error) {
       return (
         <div>Error: {error.message}</div>
@@ -60,10 +58,10 @@ class JobContainer extends React.Component {
         <div>Loading...</div>
       )
     } else {
-      const jobs = renderJob(job, this.state.gid, 'job-view')
+      const jobs = renderJob(job, this.props.group, 'job-view')
       return (
         <div key='job-div-view' className='detail-box'>
-          <h2 key={`job-view-${gid}-${jid}-header`}>
+          <h2 key={`job-view-${this.props.group}-${this.props.job}-header`}>
             {job.job.name}&nbsp;
             <sub>
               <Link to={loc => `${loc.pathname}?page=main`}
@@ -73,7 +71,7 @@ class JobContainer extends React.Component {
               </Link>
             </sub>
           </h2>
-          {encloseInTable(jobs, 'job-view', this.state.gid)}
+          {encloseInTable(jobs, 'job-view', this.props.group)}
         </div>
       )
     }

@@ -6,7 +6,6 @@ class StateContainer extends React.Component {
       error: null,
       isLoaded: false,
       groups: [],
-      endpoint: props.endpoint,
     };
   }
 
@@ -19,7 +18,7 @@ class StateContainer extends React.Component {
   }
 
   fetchData = () => {
-    fetch(`/${this.state.endpoint}`)
+    fetch(`/${this.props.endpoint}`)
       .then(res => res.json())
       .then(
         (groups) => {
@@ -42,7 +41,7 @@ class StateContainer extends React.Component {
   }
 
   render() {
-    const { error, isLoaded, groups, endpoint} = this.state;
+    const { error, isLoaded, groups } = this.state;
     if (error) {
       return (
         <div>Error: {error.message}</div>
@@ -53,8 +52,8 @@ class StateContainer extends React.Component {
       )
     } else {
       return (
-        <div key={`${endpoint}-div-grid`} className='grid-container-detail'>
-          {renderState(groups, endpoint, 'grid-item')}
+        <div key={`${this.props.endpoint}-div-grid`} className='grid-container-detail'>
+          {renderState(groups, this.props.endpoint, 'grid-item')}
         </div>
       )
     }
