@@ -66,6 +66,7 @@ trait StatusCheckerApi {
 
 class StatusChecker(groups: Seq[Group],
     statsActor: ActorRef,
+    refreshValidityInSeconds: Long,
     clockCounter: () => Long = () => System.currentTimeMillis())
       extends Actor with ActorLogging with StatusCheckerApi {
   override protected[this] var state = StatusChecker.initState(groups)
@@ -90,8 +91,11 @@ class StatusChecker(groups: Seq[Group],
     val periods = StatusChecker.periods(job, now)
 
     val currentClockCounter = clockCounter()
+    val expireAt = currentClockCounter + 1000 *
+      refreshValidityInSeconds
     self ! BatchRun(job.cmd, periods, job.env,
-      group.groupId, job.jobId, job.prometheusId, currentClockCounter)
+      group.groupId, job.jobId, job.prometheusId,
+      currentClockCounter, expireAt)
   }
 
   private[this] def refresh(now: ZonedDateTime, group: Group): Unit = {

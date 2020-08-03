@@ -10,20 +10,23 @@ import akka.actor.{Actor, ActorRef, ActorLogging}
 class CommandRunner(statsActor: ActorRef) extends Actor with ActorLogging {
   override def receive: Receive = {
     case BatchRun(cmd, periods, env, group, job,
-        prometheusId, clockCounter) =>
+        prometheusId, clockCounter, expireAt) =>
       statsActor ! IncRefresh(prometheusId)
-      val startTime = System.currentTimeMillis.toDouble
-      try {
-        run(cmd, periods, env, group, job, prometheusId, clockCounter)
-      } catch {
-        case NonFatal(exp) =>
-          log.error(exp.getMessage())
-          statsActor ! IncBadRefresh(prometheusId)
-      } finally {
-        statsActor ! DecRefresh(prometheusId)
-        val endTime = System.currentTimeMillis.toDouble
-        statsActor ! RefreshTime(prometheusId,
-          (endTime - startTime) / 1000)
+      val startTimeLong = System.currentTimeMillis
+      if(startTimeLong  <= expireAt) {
+        val startTime = startTimeLong.toDouble
+        try {
+          run(cmd, periods, env, group, job, prometheusId, clockCounter)
+        } catch {
+          case NonFatal(exp) =>
+            log.error(exp.getMessage())
+            statsActor ! IncBadRefresh(prometheusId)
+        } finally {
+          statsActor ! DecRefresh(prometheusId)
+          val endTime = System.currentTimeMillis.toDouble
+          statsActor ! RefreshTime(prometheusId,
+            (endTime - startTime) / 1000)
+        }
       }
   }
 

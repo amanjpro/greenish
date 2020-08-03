@@ -31,7 +31,8 @@ object App {
       Props(new stats.StatsCollector(getPrometheusIds(appConfig))))
 
     val statusChecker = system.actorOf(
-      Props(new StatusChecker(appConfig.groups, statsActor)))
+      Props(new StatusChecker(appConfig.groups, statsActor,
+        appConfig.refreshInSeconds * 3)))
 
     system.scheduler.scheduleWithFixedDelay(
       0 seconds,
