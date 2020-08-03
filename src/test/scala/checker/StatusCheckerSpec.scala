@@ -36,6 +36,7 @@ class StatusCheckerSpec()
     dir4.mkdirs
   }
 
+  val farFuture = System.currentTimeMillis * 2
   val tstamp = 2000L
   val dir1 = new File("/tmp/job1/2020-06-25-14")
   val dir2 = new File("/tmp/job3/2020-06-25-14")
@@ -448,7 +449,7 @@ class StatusCheckerSpec()
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          () => tstamp)))
+          farFuture, () => tstamp)))
 
       val expected = List(
         GroupStatus(
@@ -499,7 +500,7 @@ class StatusCheckerSpec()
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          () => tstamp)))
+          farFuture, () => tstamp)))
 
       val expected = List(
         GroupStatus(
@@ -545,7 +546,7 @@ class StatusCheckerSpec()
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          () => tstamp)))
+          farFuture, () => tstamp)))
 
       val expected = List(
         GroupStatus(
@@ -590,7 +591,7 @@ class StatusCheckerSpec()
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          () => tstamp)))
+          farFuture, () => tstamp)))
 
       val expected = List(
         GroupStatus(
@@ -636,7 +637,7 @@ class StatusCheckerSpec()
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          () => tstamp)))
+          farFuture, () => tstamp)))
 
       val expected = List(
         GroupStatus(
@@ -679,7 +680,7 @@ class StatusCheckerSpec()
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          () => tstamp)))
+          farFuture, () => tstamp)))
 
       val expected = List(
         GroupStatus(
