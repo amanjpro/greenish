@@ -329,6 +329,11 @@ HELP: Total number of job state refresh instances
 LABELS: job_id
 
 TYPE: COUNTER
+NAME: greenish_state_refresh_expired_total
+HELP: Total number of expired job state refresh instances
+LABELS: job_id
+
+TYPE: COUNTER
 NAME: greenish_state_refresh_failed_total
 HELP: Total number of failed job state refresh instances
 LABELS: job_id
