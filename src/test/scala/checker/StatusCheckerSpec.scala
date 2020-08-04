@@ -493,9 +493,99 @@ class StatusCheckerSpec()
         msg shouldBe expected
       }
     }
+
+    "not do anything if refresh job is expired" in {
+      val now = ZonedDateTime.now
+      val actor = system.actorOf(Props(
+        new StatusChecker(groups, stats,
+          // expire in the past
+          (-1 * (System.currentTimeMillis + 10000)) / 1000,
+          () => tstamp)))
+
+      val expected = List(
+        GroupStatus(
+          group1,
+          Array(
+            JobStatus(
+              job1,
+              -1,
+              Vector.empty),
+            JobStatus(
+              job2,
+              -1,
+              Vector.empty))),
+        GroupStatus(
+          group2,
+          Array(
+            JobStatus(
+              job3,
+              -1,
+              Vector.empty,
+              ),
+            JobStatus(
+              job4,
+              -1,
+              Vector.empty,
+              ))))
+
+      actor ! Refresh(() => now)
+
+      // Sleep 2 seconds, so the async call finishes
+      Thread.sleep(2000)
+
+      actor ! AllEntries
+      val msg = receiveOne(5 second)
+      msg shouldBe expected
+    }
   }
 
   "RefreshGroup" must {
+    "not do anything if refresh job is expired" in {
+      val now = ZonedDateTime.now
+      val actor = system.actorOf(Props(
+        new StatusChecker(groups, stats,
+          // expire in the past
+          (-1 * (System.currentTimeMillis + 10000)) / 1000,
+          () => tstamp)))
+
+      val expected = List(
+        GroupStatus(
+          group1,
+          Array(
+            JobStatus(
+              job1,
+              -1,
+              Vector.empty),
+            JobStatus(
+              job2,
+              -1,
+              Vector.empty))),
+        GroupStatus(
+          group2,
+          Array(
+            JobStatus(
+              job3,
+              -1,
+              Vector.empty,
+              ),
+            JobStatus(
+              job4,
+              -1,
+              Vector.empty,
+              ))))
+
+      actor ! RefreshGroup(() => now, 0)
+
+      expectMsg(true)
+
+      // Sleep 2 seconds, so the async call finishes
+      Thread.sleep(2000)
+
+      actor ! AllEntries
+      val msg = receiveOne(5 second)
+      msg shouldBe expected
+    }
+
     "work and reply with true when group id exists" in {
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
@@ -587,6 +677,53 @@ class StatusCheckerSpec()
   }
 
   "RefreshJob" must {
+
+    "not do anything if refresh job is expired" in {
+      val now = ZonedDateTime.now
+      val actor = system.actorOf(Props(
+        new StatusChecker(groups, stats,
+          // expire in the past
+          (-1 * (System.currentTimeMillis + 10000)) / 1000,
+          () => tstamp)))
+
+      val expected = List(
+        GroupStatus(
+          group1,
+          Array(
+            JobStatus(
+              job1,
+              -1,
+              Vector.empty),
+            JobStatus(
+              job2,
+              -1,
+              Vector.empty))),
+        GroupStatus(
+          group2,
+          Array(
+            JobStatus(
+              job3,
+              -1,
+              Vector.empty,
+              ),
+            JobStatus(
+              job4,
+              -1,
+              Vector.empty,
+              ))))
+
+      actor ! RefreshJob(() => now, 0, 0)
+
+      expectMsg(true)
+
+      // Sleep 2 seconds, so the async call finishes
+      Thread.sleep(2000)
+
+      actor ! AllEntries
+      val msg = receiveOne(5 second)
+      msg shouldBe expected
+    }
+
     "work and reply with true when group and job ids exist" in {
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(

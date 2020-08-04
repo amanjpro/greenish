@@ -160,6 +160,12 @@ class CommandRunnerSpec()
 
     import StatsCollectorSpec.{checkSamples, getNoneZeroHistogramLabels}
 
+    "not run anything if the refresh command is too old" in {
+      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      actor ! BatchRun(lsPart, Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, System.currentTimeMillis)
+      expectNoMessage(4 seconds)
+    }
+
     "send back nothing, when command does not exit" in {
       val actor = system.actorOf(Props(new CommandRunner(stats)))
       actor ! BatchRun("a;kjdw", Seq.empty, Seq.empty, 0, 0, "p1", 0, farFuture)
