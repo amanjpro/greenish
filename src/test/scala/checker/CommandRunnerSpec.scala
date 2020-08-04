@@ -162,7 +162,7 @@ class CommandRunnerSpec()
 
     "not run anything if the refresh command is too old" in {
       val actor = system.actorOf(Props(new CommandRunner(stats)))
-      actor ! BatchRun(lsPart, Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, System.currentTimeMillis)
+      actor ! BatchRun(lsPart, Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, 0)
       expectNoMessage(4 seconds)
     }
 
@@ -228,7 +228,7 @@ class CommandRunnerSpec()
     "correctly send stats when command run is expired" in {
       val actor = system.actorOf(Props(new CommandRunner(stats)))
       actor ! BatchRun(
-        s"exit 1", Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, System.currentTimeMillis)
+        s"exit 1", Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, 0)
 
       eventually {
         stats ! GetPrometheus
