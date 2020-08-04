@@ -33,9 +33,15 @@ class StatsCollector(jobIDs: Set[String],
     .labelNames("job_id")
     .register(registry)
 
-   private[this] val badRefreshCounter = Counter.build()
+  private[this] val badRefreshCounter = Counter.build()
     .name("greenish_state_refresh_failed_total")
     .help("Total number of failed job state refresh instances")
+    .labelNames("job_id")
+    .register(registry)
+
+  private[this] val expiredRefreshCounter = Counter.build()
+    .name("greenish_state_refresh_expired_total")
+    .help("Total number of expired job state refresh instances")
     .labelNames("job_id")
     .register(registry)
 
@@ -58,6 +64,7 @@ class StatsCollector(jobIDs: Set[String],
       refreshGauge.labels(jobId)
       refreshTime.labels(jobId)
       refreshCounter.labels(jobId)
+      expiredRefreshCounter.labels(jobId)
       badRefreshCounter.labels(jobId)
       missingPeriods.labels(jobId)
       oldestMissingPeriod.labels(jobId)
@@ -78,6 +85,9 @@ class StatsCollector(jobIDs: Set[String],
       missingPeriods.labels(jobId).set(count)
     case OldestMissingPeriod(jobId, count) =>
       oldestMissingPeriod.labels(jobId).set(count)
+    case IncExpiredRefresh(jobId) =>
+      refreshCounter.labels(jobId).inc()
+      expiredRefreshCounter.labels(jobId).inc()
     case GetPrometheus =>
       import StatsCollector.{fromRegistry, toPrometheusTextFormat}
       val metrics = fromRegistry(registry)

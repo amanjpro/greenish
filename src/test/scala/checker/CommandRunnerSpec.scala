@@ -225,6 +225,42 @@ class CommandRunnerSpec()
       expectMsg(expected2)
     }
 
+    "correctly send stats when command run is expired" in {
+      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      actor ! BatchRun(
+        s"exit 1", Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, System.currentTimeMillis)
+
+      eventually {
+        stats ! GetPrometheus
+
+        val expectedTotal = Seq(
+          (Seq("p1"), 1.0),
+          (Seq("p2"), 0.0),
+          (Seq("p3"), 0.0),
+        )
+
+        val allZeros = Seq(
+          (Seq("p1"), 0.0),
+          (Seq("p2"), 0.0),
+          (Seq("p3"), 0.0),
+        )
+
+        val prom = receiveOne(2 seconds)
+          .asInstanceOf[StatsCollector.MetricsEntity]
+          .samples.asScala.toList
+
+        checkSamples(prom, "greenish_state_refresh_total", expectedTotal)
+        checkSamples(prom, "greenish_state_refresh_expired_total", expectedTotal)
+        checkSamples(prom, "greenish_state_refresh_failed_total", allZeros)
+        checkSamples(prom, "greenish_missing_periods_total", allZeros)
+        checkSamples(prom, "greenish_oldest_missing_period", allZeros)
+        checkSamples(prom, "greenish_active_refresh_tasks", allZeros)
+
+        val actual = getNoneZeroHistogramLabels(prom, "greenish_state_refresh_time_seconds")
+        actual shouldBe Set.empty
+      }
+    }
+
     "correctly send stats when command run fails" in {
       val actor = system.actorOf(Props(new CommandRunner(stats)))
       actor ! BatchRun(
@@ -250,6 +286,7 @@ class CommandRunnerSpec()
           .samples.asScala.toList
 
         checkSamples(prom, "greenish_state_refresh_total", expectedTotal)
+        checkSamples(prom, "greenish_state_refresh_expired_total", allZeros)
         checkSamples(prom, "greenish_state_refresh_failed_total", expectedTotal)
         checkSamples(prom, "greenish_missing_periods_total", allZeros)
         checkSamples(prom, "greenish_oldest_missing_period", allZeros)
@@ -285,6 +322,7 @@ class CommandRunnerSpec()
           .samples.asScala.toList
 
         checkSamples(prom, "greenish_state_refresh_total", expectedTotal)
+        checkSamples(prom, "greenish_state_refresh_expired_total", allZeros)
         checkSamples(prom, "greenish_state_refresh_failed_total", allZeros)
         checkSamples(prom, "greenish_missing_periods_total", expectedTotal)
         checkSamples(prom, "greenish_oldest_missing_period", expectedTotal)
@@ -320,6 +358,7 @@ class CommandRunnerSpec()
           .samples.asScala.toList
 
         checkSamples(prom, "greenish_state_refresh_total", expectedTotal)
+        checkSamples(prom, "greenish_state_refresh_expired_total", allZeros)
         checkSamples(prom, "greenish_state_refresh_failed_total", expectedTotal)
         checkSamples(prom, "greenish_missing_periods_total", allZeros)
         checkSamples(prom, "greenish_oldest_missing_period", allZeros)
