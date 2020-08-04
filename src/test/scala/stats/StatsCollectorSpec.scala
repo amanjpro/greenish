@@ -51,6 +51,27 @@ class StatsCollectorSpec()
       }
     }
 
+    "properly handle IncExpiredRefresh message" in {
+      val jobs = Set("p1", "p2")
+      val stats = system.actorOf(
+        Props(new StatsCollector(jobs)))
+
+      stats ! IncExpiredRefresh("p2")
+      stats ! GetPrometheus
+
+      val expected = Seq(
+        (Seq("p1"), 0.0),
+        (Seq("p2"), 1.0),
+      )
+
+      val prom = receiveOne(2 seconds)
+        .asInstanceOf[StatsCollector.MetricsEntity]
+        .samples.asScala.toList
+
+      checkSamples(prom, "greenish_state_refresh_total", expected)
+      checkSamples(prom, "greenish_state_refresh_expired_total", expected)
+    }
+
     "properly handle IncRefresh message" in {
       val jobs = Set("p1", "p2")
       val stats = system.actorOf(

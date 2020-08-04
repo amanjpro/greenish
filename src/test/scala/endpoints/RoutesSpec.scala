@@ -24,6 +24,7 @@ class RoutesSpec()
     with Eventually{
 
   val dir1 = new File("/tmp/2020-06-25-14")
+  val farFuture = System.currentTimeMillis * 2
   val tstamp = 1000L
   implicit val patience: PatienceConfig = PatienceConfig(15 seconds, 1 second)
   override def beforeAll: Unit = {
@@ -32,7 +33,7 @@ class RoutesSpec()
       Props(new StatsCollector(Set("p1", "p2", "p3"))))
     checker = system.actorOf(
       Props(new StatusChecker(Seq(group1, group2), stats,
-        () => tstamp)))
+        farFuture, () => tstamp)))
     val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
     checker ! Refresh(() => time)
     routes = new Routes(None, checker, stats, 10, () => time)
@@ -288,7 +289,7 @@ class RoutesSpec()
     "properly handle GET/state/refresh" in {
       val checker = system.actorOf(Props(
         new StatusChecker(Seq(group1, group2), stats,
-          () => tstamp)))
+          farFuture, () => tstamp)))
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val routes = new Routes(None, checker, stats, 10 * 1000 * 5, () => time)
 
@@ -326,7 +327,7 @@ class RoutesSpec()
     "properly handle GET/group/gid/refresh request when id exists" in {
       val checker = system.actorOf(Props(
         new StatusChecker(Seq(group1, group2), stats,
-          () => tstamp)))
+          farFuture, () => tstamp)))
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val routes = new Routes(None, checker, stats, 10 * 1000 * 5, () => time)
 
@@ -369,7 +370,7 @@ class RoutesSpec()
     "properly handle GET/group/gid/job/jid/refresh request when both gid and jid exist" in {
       val checker = system.actorOf(
         Props(new StatusChecker(Seq(group1, group2), stats,
-        () => tstamp)))
+        farFuture, () => tstamp)))
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val routes = new Routes(None, checker, stats, 1000 * 10 * 5, () => time)
 
@@ -462,7 +463,8 @@ class RoutesSpec()
 
     "send good health when hitting GET/health after successful refresh, then if no further refresh happens, goes to unhealthy again" in {
       val checker = system.actorOf(
-        Props(new StatusChecker(Seq(group1, group2), stats)))
+        Props(new StatusChecker(Seq(group1, group2), stats,
+          farFuture)))
       val nowFun = () => ZonedDateTime.ofInstant(Instant.now(),
         ZoneId.systemDefault())
       checker ! Refresh(nowFun)
@@ -491,7 +493,7 @@ class RoutesSpec()
     "send bad health when hitting GET/health befor successful refresh" in {
       checker = system.actorOf(
         Props(new StatusChecker(Seq(group1, group2), stats,
-          () => System.currentTimeMillis)))
+          farFuture, () => System.currentTimeMillis)))
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       routes = new Routes(None, checker, stats, 1000 * 10 * 5, () => time)
 

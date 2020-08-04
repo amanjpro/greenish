@@ -16,6 +16,7 @@ case class GetGroupStatus(groupId: Int) extends Message
 case class BatchRun(cmd: String, periods: Seq[String],
   env: Seq[(String, String)],
   groupId: Int, jobId: Int,
-  prometheusId: String, clockCounter: Long) extends Message
+  prometheusId: String, clockCounter: Long,
+  expireAt: Long) extends Message
 case class RunResult(periodHealth: Seq[PeriodHealth],
   groupId: Int, jobId: Int, clockCounter: Long) extends Message

@@ -12,6 +12,7 @@ import scala.language.postfixOps
 import me.amanj.greenish.models._
 import me.amanj.greenish.stats._
 import java.io.File
+import scala.jdk.CollectionConverters._
 
 class StatusCheckerSpec()
     extends TestKit(ActorSystem("StatusCheckerSpec"))
@@ -36,6 +37,7 @@ class StatusCheckerSpec()
     dir4.mkdirs
   }
 
+  val farFuture = System.currentTimeMillis * 2
   val tstamp = 2000L
   val dir1 = new File("/tmp/job1/2020-06-25-14")
   val dir2 = new File("/tmp/job3/2020-06-25-14")
@@ -43,7 +45,7 @@ class StatusCheckerSpec()
   val dir4 = new File("/tmp/job4/2020-06-25-14")
 
   val stats = system.actorOf(
-    Props(new StatsCollector(Set("p1", "p2", "p3"))))
+    Props(new StatsCollector(Set("p1", "p2", "p3", "p4"))))
 
   implicit val patience: PatienceConfig = PatienceConfig(15 seconds, 1 second)
 
@@ -448,7 +450,7 @@ class StatusCheckerSpec()
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          () => tstamp)))
+          farFuture, () => tstamp)))
 
       val expected = List(
         GroupStatus(
@@ -492,14 +494,137 @@ class StatusCheckerSpec()
         msg shouldBe expected
       }
     }
+
+    "not do anything if refresh job is expired" in {
+      val now = ZonedDateTime.now
+      val stats = system.actorOf(
+        Props(new StatsCollector(Set("p1", "p2", "p3", "p4"))))
+
+      val actor = system.actorOf(Props(
+        new StatusChecker(groups, stats,
+          // expire in the past
+          (-1 * (System.currentTimeMillis + 10000)) / 1000,
+          () => tstamp)))
+
+      val expected = List(
+        GroupStatus(
+          group1,
+          Array(
+            JobStatus(
+              job1,
+              -1,
+              Vector.empty),
+            JobStatus(
+              job2,
+              -1,
+              Vector.empty))),
+        GroupStatus(
+          group2,
+          Array(
+            JobStatus(
+              job3,
+              -1,
+              Vector.empty,
+              ),
+            JobStatus(
+              job4,
+              -1,
+              Vector.empty,
+              ))))
+
+      actor ! Refresh(() => now)
+
+      eventually {
+        stats ! GetPrometheus
+
+        val expectedTotal = Seq(
+          (Seq("p1"), 1.0),
+          (Seq("p2"), 1.0),
+          (Seq("p3"), 1.0),
+          (Seq("p4"), 1.0),
+        )
+
+        val prom = receiveOne(2 seconds)
+          .asInstanceOf[StatsCollector.MetricsEntity]
+          .samples.asScala.toList
+
+        StatsCollectorSpec.checkSamples(prom, "greenish_state_refresh_expired_total", expectedTotal)
+      }
+
+      actor ! AllEntries
+      val actual = receiveOne(5 second)
+      actual shouldBe expected
+    }
   }
 
   "RefreshGroup" must {
+    "not do anything if refresh job is expired" in {
+      val now = ZonedDateTime.now
+      val stats = system.actorOf(
+        Props(new StatsCollector(Set("p1", "p2", "p3", "p4"))))
+      val actor = system.actorOf(Props(
+        new StatusChecker(groups, stats,
+          // expire in the past
+          (-1 * (System.currentTimeMillis + 10000)) / 1000,
+          () => tstamp)))
+
+      val expected = List(
+        GroupStatus(
+          group1,
+          Array(
+            JobStatus(
+              job1,
+              -1,
+              Vector.empty),
+            JobStatus(
+              job2,
+              -1,
+              Vector.empty))),
+        GroupStatus(
+          group2,
+          Array(
+            JobStatus(
+              job3,
+              -1,
+              Vector.empty,
+              ),
+            JobStatus(
+              job4,
+              -1,
+              Vector.empty,
+              ))))
+
+      actor ! RefreshGroup(() => now, 0)
+
+      expectMsg(true)
+
+      eventually {
+        stats ! GetPrometheus
+
+        val expectedTotal = Seq(
+          (Seq("p1"), 1.0),
+          (Seq("p2"), 1.0),
+          (Seq("p3"), 0.0),
+          (Seq("p4"), 0.0),
+        )
+
+        val prom = receiveOne(2 seconds)
+          .asInstanceOf[StatsCollector.MetricsEntity]
+          .samples.asScala.toList
+
+        StatsCollectorSpec.checkSamples(prom, "greenish_state_refresh_expired_total", expectedTotal)
+      }
+
+      actor ! AllEntries
+      val actual = receiveOne(5 second)
+      actual shouldBe expected
+    }
+
     "work and reply with true when group id exists" in {
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          () => tstamp)))
+          farFuture, () => tstamp)))
 
       val expected = List(
         GroupStatus(
@@ -545,7 +670,7 @@ class StatusCheckerSpec()
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          () => tstamp)))
+          farFuture, () => tstamp)))
 
       val expected = List(
         GroupStatus(
@@ -586,11 +711,74 @@ class StatusCheckerSpec()
   }
 
   "RefreshJob" must {
+
+    "not do anything if refresh job is expired" in {
+      val stats = system.actorOf(
+        Props(new StatsCollector(Set("p1", "p2", "p3", "p4"))))
+      val now = ZonedDateTime.now
+      val actor = system.actorOf(Props(
+        new StatusChecker(groups, stats,
+          // expire in the past
+          (-1 * (System.currentTimeMillis + 10000)) / 1000,
+          () => tstamp)))
+
+      val expected = List(
+        GroupStatus(
+          group1,
+          Array(
+            JobStatus(
+              job1,
+              -1,
+              Vector.empty),
+            JobStatus(
+              job2,
+              -1,
+              Vector.empty))),
+        GroupStatus(
+          group2,
+          Array(
+            JobStatus(
+              job3,
+              -1,
+              Vector.empty,
+              ),
+            JobStatus(
+              job4,
+              -1,
+              Vector.empty,
+              ))))
+
+      actor ! RefreshJob(() => now, 0, 0)
+
+      expectMsg(true)
+
+      eventually {
+        stats ! GetPrometheus
+
+        val expectedTotal = Seq(
+          (Seq("p1"), 1.0),
+          (Seq("p2"), 0.0),
+          (Seq("p3"), 0.0),
+          (Seq("p4"), 0.0),
+        )
+
+        val prom = receiveOne(2 seconds)
+          .asInstanceOf[StatsCollector.MetricsEntity]
+          .samples.asScala.toList
+
+        StatsCollectorSpec.checkSamples(prom, "greenish_state_refresh_expired_total", expectedTotal)
+      }
+
+      actor ! AllEntries
+      val actual = receiveOne(5 second)
+      actual shouldBe expected
+    }
+
     "work and reply with true when group and job ids exist" in {
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          () => tstamp)))
+          farFuture, () => tstamp)))
 
       val expected = List(
         GroupStatus(
@@ -636,7 +824,7 @@ class StatusCheckerSpec()
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          () => tstamp)))
+          farFuture, () => tstamp)))
 
       val expected = List(
         GroupStatus(
@@ -679,7 +867,7 @@ class StatusCheckerSpec()
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          () => tstamp)))
+          farFuture, () => tstamp)))
 
       val expected = List(
         GroupStatus(

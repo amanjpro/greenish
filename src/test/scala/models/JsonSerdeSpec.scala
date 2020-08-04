@@ -320,7 +320,6 @@ class JsonSerdeSpec() extends Matchers
 
     "produce correct JSON when namespace is not missing" in {
       val json = sysinfo(Some("my dashboard"))
-      println(json)
       val cursor = json.hcursor
       cursor.downField("version").as[Option[String]].isRight shouldBe true
       cursor.downField("namespace").as[Option[String]] shouldBe Right(Some("my dashboard"))
