@@ -12,6 +12,7 @@ import scala.language.postfixOps
 import me.amanj.greenish.models._
 import me.amanj.greenish.stats._
 import java.io.File
+import scala.jdk.CollectionConverters._
 
 class StatusCheckerSpec()
     extends TestKit(ActorSystem("StatusCheckerSpec"))
@@ -44,7 +45,7 @@ class StatusCheckerSpec()
   val dir4 = new File("/tmp/job4/2020-06-25-14")
 
   val stats = system.actorOf(
-    Props(new StatsCollector(Set("p1", "p2", "p3"))))
+    Props(new StatsCollector(Set("p1", "p2", "p3", "p4"))))
 
   implicit val patience: PatienceConfig = PatienceConfig(15 seconds, 1 second)
 
@@ -496,6 +497,9 @@ class StatusCheckerSpec()
 
     "not do anything if refresh job is expired" in {
       val now = ZonedDateTime.now
+      val stats = system.actorOf(
+        Props(new StatsCollector(Set("p1", "p2", "p3", "p4"))))
+
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
           // expire in the past
@@ -530,18 +534,34 @@ class StatusCheckerSpec()
 
       actor ! Refresh(() => now)
 
-      // Sleep 2 seconds, so the async call finishes
-      Thread.sleep(2000)
+      eventually {
+        stats ! GetPrometheus
+
+        val expectedTotal = Seq(
+          (Seq("p1"), 1.0),
+          (Seq("p2"), 1.0),
+          (Seq("p3"), 1.0),
+          (Seq("p4"), 1.0),
+        )
+
+        val prom = receiveOne(2 seconds)
+          .asInstanceOf[StatsCollector.MetricsEntity]
+          .samples.asScala.toList
+
+        StatsCollectorSpec.checkSamples(prom, "greenish_state_refresh_expired_total", expectedTotal)
+      }
 
       actor ! AllEntries
-      val msg = receiveOne(5 second)
-      msg shouldBe expected
+      val actual = receiveOne(5 second)
+      actual shouldBe expected
     }
   }
 
   "RefreshGroup" must {
     "not do anything if refresh job is expired" in {
       val now = ZonedDateTime.now
+      val stats = system.actorOf(
+        Props(new StatsCollector(Set("p1", "p2", "p3", "p4"))))
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
           // expire in the past
@@ -578,12 +598,26 @@ class StatusCheckerSpec()
 
       expectMsg(true)
 
-      // Sleep 2 seconds, so the async call finishes
-      Thread.sleep(2000)
+      eventually {
+        stats ! GetPrometheus
+
+        val expectedTotal = Seq(
+          (Seq("p1"), 1.0),
+          (Seq("p2"), 1.0),
+          (Seq("p3"), 0.0),
+          (Seq("p4"), 0.0),
+        )
+
+        val prom = receiveOne(2 seconds)
+          .asInstanceOf[StatsCollector.MetricsEntity]
+          .samples.asScala.toList
+
+        StatsCollectorSpec.checkSamples(prom, "greenish_state_refresh_expired_total", expectedTotal)
+      }
 
       actor ! AllEntries
-      val msg = receiveOne(5 second)
-      msg shouldBe expected
+      val actual = receiveOne(5 second)
+      actual shouldBe expected
     }
 
     "work and reply with true when group id exists" in {
@@ -679,6 +713,8 @@ class StatusCheckerSpec()
   "RefreshJob" must {
 
     "not do anything if refresh job is expired" in {
+      val stats = system.actorOf(
+        Props(new StatsCollector(Set("p1", "p2", "p3", "p4"))))
       val now = ZonedDateTime.now
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
@@ -716,12 +752,26 @@ class StatusCheckerSpec()
 
       expectMsg(true)
 
-      // Sleep 2 seconds, so the async call finishes
-      Thread.sleep(2000)
+      eventually {
+        stats ! GetPrometheus
+
+        val expectedTotal = Seq(
+          (Seq("p1"), 1.0),
+          (Seq("p2"), 0.0),
+          (Seq("p3"), 0.0),
+          (Seq("p4"), 0.0),
+        )
+
+        val prom = receiveOne(2 seconds)
+          .asInstanceOf[StatsCollector.MetricsEntity]
+          .samples.asScala.toList
+
+        StatsCollectorSpec.checkSamples(prom, "greenish_state_refresh_expired_total", expectedTotal)
+      }
 
       actor ! AllEntries
-      val msg = receiveOne(5 second)
-      msg shouldBe expected
+      val actual = receiveOne(5 second)
+      actual shouldBe expected
     }
 
     "work and reply with true when group and job ids exist" in {
