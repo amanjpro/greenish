@@ -278,6 +278,20 @@ class StatusCheckerSpec()
   }
 
   "periods" must {
+
+    "respect start-at property" in {
+      val job = Job(1, null, null, null,
+        "yyyy-MM-dd-HH", Hourly, 0, ZoneId.of("UTC"),
+        3, 1593093920, null, Seq.empty
+      )
+
+      val actual =
+        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
+
+      val expected = Seq("2020-06-25-14", "2020-06-25-15")
+      actual shouldBe expected
+    }
+
     "work when job's period-check-offset is 0" in {
       val job = Job(1, null, null, null,
         "yyyy-MM-dd-HH", Hourly, 0, ZoneId.of("UTC"),
