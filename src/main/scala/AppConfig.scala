@@ -83,7 +83,7 @@ object AppConfig {
             "warn-at", groupWarnAt)
           val errorAt = jobConfig.getIntWithDefault(
             "error-at", groupErrorAt)
-          val startAt = groupConfig.getLongWithDefault(
+          val startAt = jobConfig.getLongWithDefault(
             "start-at", groupStartAt)
           val jobEnv = jobConfig.getEnv("env", groupEnv)
 

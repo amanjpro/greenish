@@ -285,7 +285,7 @@ class StatusCheckerSpec()
       )
 
       val actual =
-        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"), 0)
+        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
 
       val expected = Seq("2020-06-25-13", "2020-06-25-14", "2020-06-25-15")
       actual shouldBe expected
@@ -298,7 +298,7 @@ class StatusCheckerSpec()
       )
 
       val actual =
-        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"), 0)
+        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
 
       val expected = Seq("2020-06-25-10", "2020-06-25-11", "2020-06-25-12")
       actual shouldBe expected
@@ -320,7 +320,7 @@ class StatusCheckerSpec()
 
       val time = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       cronPeriods.foreach { case (cron, expected) =>
-        val actual = StatusChecker.periods(job(Cron(cron)), time, 0)
+        val actual = StatusChecker.periods(job(Cron(cron)), time)
         actual shouldBe expected
       }
     }
@@ -332,7 +332,7 @@ class StatusCheckerSpec()
       )
 
       val actual =
-        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"), 0)
+        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
 
       val expected = Seq("2020-06-25-12", "2020-06-25-13", "2020-06-25-14")
       actual shouldBe expected
@@ -345,7 +345,7 @@ class StatusCheckerSpec()
       )
 
       val actual =
-        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[Africa/Cairo]"), 0)
+        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[Africa/Cairo]"))
 
       val expected = Seq("2020-06-25-10", "2020-06-25-11", "2020-06-25-12")
       actual shouldBe expected
@@ -358,7 +358,7 @@ class StatusCheckerSpec()
       )
 
       val actual =
-        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"), 0)
+        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
 
       val expected = Seq("2020-06-22", "2020-06-23", "2020-06-24")
       actual shouldBe expected
@@ -371,7 +371,7 @@ class StatusCheckerSpec()
       )
 
       val actual =
-        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"), 0)
+        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
 
       val expected = Seq("2020-04-01", "2020-05-01", "2020-06-01")
       actual shouldBe expected
@@ -384,7 +384,7 @@ class StatusCheckerSpec()
       )
 
       val actual =
-        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"), 0)
+        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
 
       val expected = Seq("2017-01-01", "2018-01-01", "2019-01-01")
       actual shouldBe expected
