@@ -3,6 +3,8 @@ package me.amanj.greenish.checker
 import me.amanj.greenish.stats._
 import me.amanj.greenish.models._
 import java.time.ZonedDateTime
+import java.io.{File, PrintWriter}
+import java.nio.file.{Files, StandardCopyOption}
 import scala.sys.process.Process
 import scala.util.control.NonFatal
 import akka.actor.{Actor, ActorRef, ActorLogging}
@@ -42,6 +44,7 @@ class CommandRunner(statsActor: ActorRef) extends Actor with ActorLogging {
     clockCounter: Long): Unit = {
     val exec = Seq("bash", "-c", CommandRunner.toBashCommand(cmd, periods))
     val output = Process(exec, None, env:_*).lazyLines
+    CommandRunner.write(debugFile(group, job), output)
     val capturedOutput = CommandRunner.parseOutput(output, periods.toSet)
     val distinctReturnedPeriods = capturedOutput.map(_._1).distinct
     if(capturedOutput.length < periods.size) {
@@ -71,6 +74,17 @@ class CommandRunner(statsActor: ActorRef) extends Actor with ActorLogging {
 
 object CommandRunner {
   private[this] val Matcher = "^greenish-period\t(.*)\t(1|0)$".r
+
+  protected[checker] def write(file: String,
+    lines: LazyList[String]): Unit = {
+    val tmp = new File(s"$file.tmp")
+    val pw = new PrintWriter(tmp)
+    lines.foreach(pw.println)
+    pw.close
+    // FIXME: There is a slight chance of race, but do we care?
+    Files.move(tmp.toPath, new File(file).toPath,
+      StandardCopyOption.ATOMIC_MOVE)
+  }
 
   protected[checker] def parseOutput(lines: LazyList[String],
     periods: Set[String]): Seq[(String, Boolean)] =
