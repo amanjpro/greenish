@@ -160,7 +160,7 @@ object StatusChecker {
 
   private[checker] def periods(entry: Job, now: ZonedDateTime): Seq[String] = {
     @tailrec def loop(time: ZonedDateTime, count: Int, acc: Seq[String]): Seq[String] = {
-      if(count == 0) acc.reverse
+      if(time.toEpochSecond < entry.startAt || count == 0) acc.reverse
       else
         loop(entry.frequency.prev(time), count - 1,
           acc :+ time.format(entry.timeFormat))

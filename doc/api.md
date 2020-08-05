@@ -86,6 +86,7 @@ $ curl --silent -G http://0.0.0.0:8080/missing | jq .
             "zone_id": "UTC"
           },
           "lookback": 24,
+          "start_at": 1593093930,
           "alert_levels": {
             "great": 0,
             "normal": 1,
@@ -108,6 +109,7 @@ $ curl --silent -G http://0.0.0.0:8080/missing | jq .
             "zone_id": "UTC"
           },
           "lookback": 24,
+          "start_at": 1593093930,
           "alert_levels": {
             "great": 0,
             "normal": 1,
@@ -148,6 +150,7 @@ $ curl --silent -G http://0.0.0.0:8080/state | jq .
             "zone_id": "UTC"
           },
           "lookback": 24,
+          "start_at": 1593093930,
           "alert_levels": {
             "great": 0,
             "normal": 1,
@@ -170,6 +173,7 @@ $ curl --silent -G http://0.0.0.0:8080/state | jq .
             "zone_id": "UTC"
           },
           "lookback": 24,
+          "start_at": 1593093930,
           "alert_levels": {
             "great": 0,
             "normal": 1,
@@ -228,6 +232,7 @@ $ curl --silent -G localhost:8080/group/1/job/0 | jq .
       "zone_id": "UTC"
     },
     "lookback": 3,
+    "start_at": 1593093930,
     "alert_levels": {
       "great": 0,
       "normal": 1,

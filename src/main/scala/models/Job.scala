@@ -16,6 +16,7 @@ case class Job(
   periodCheckOffset: Int,
   timezone: ZoneId,
   lookback: Int,
+  startAt: Long,
   alertLevels: AlertLevels,
   env: Seq[(String, String)]
 ) {

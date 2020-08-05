@@ -30,6 +30,7 @@ object AppConfig {
     val defaultNormalAt = config.getInt("default-normal-at")
     val defaultWarnAt = config.getInt("default-warn-at")
     val defaultErrorAt = config.getInt("default-error-at")
+    val defaultStartAt = config.getLong("default-start-at")
     val globalEnv = config.getEnv("env", Seq.empty)
 
     config.getConfigList("groups").asScala.zipWithIndex.map { case (groupConfig, index) =>
@@ -52,6 +53,8 @@ object AppConfig {
         "group-warn-at", defaultWarnAt)
       val groupErrorAt = groupConfig.getIntWithDefault(
         "group-error-at", defaultErrorAt)
+      val groupStartAt = groupConfig.getLongWithDefault(
+        "group-start-at", defaultStartAt)
       val groupEnv = groupConfig.getEnv("env", globalEnv)
 
       val checkEntries = groupConfig.getConfigList("job-entries")
@@ -80,6 +83,8 @@ object AppConfig {
             "warn-at", groupWarnAt)
           val errorAt = jobConfig.getIntWithDefault(
             "error-at", groupErrorAt)
+          val startAt = jobConfig.getLongWithDefault(
+            "start-at", groupStartAt)
           val jobEnv = jobConfig.getEnv("env", groupEnv)
 
           Job(
@@ -92,6 +97,7 @@ object AppConfig {
             jobPeriodCheckOffset,
             timezone,
             lookback,
+            startAt,
             AlertLevels(greatAt, normalAt, warnAt, errorAt),
             jobEnv,
           )
@@ -140,6 +146,11 @@ object AppConfig {
     def getIntWithDefault(path: String, default: Int): Int =
       if(self.hasPath(path))
         self.getInt(path)
+      else default
+
+  def getLongWithDefault(path: String, default: Long): Long =
+      if(self.hasPath(path))
+        self.getLong(path)
       else default
 
     def getEnv(path: String, parent: Seq[(String, String)]): Seq[(String, String)] =

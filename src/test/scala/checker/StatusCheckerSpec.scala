@@ -54,25 +54,25 @@ class StatusCheckerSpec()
 
   val job1 = Job(0, "job1", "p1", s"$lsScript /tmp/job1",
       "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
-      2, AlertLevels(0, 1, 2, 3),
+      2, 0, AlertLevels(0, 1, 2, 3),
       Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
     )
 
   val job2 = Job(1, "job2", "p2", s"$lsScript /tmp/job2",
       "yyyy-MM-dd-HH", Hourly, 2, ZoneId.of("UTC"),
-      1, AlertLevels(1, 2, 3, 4),
+      1, 0, AlertLevels(1, 2, 3, 4),
       Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
     )
 
   val job3 = Job(0, "job3", "p3", s"$lsScript /tmp/job3",
       "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
-      3, AlertLevels(0, 1, 2, 3),
+      3, 0, AlertLevels(0, 1, 2, 3),
       Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
     )
 
   val job4 = Job(1, "job4", "p4", s"$lsEnvScript job4",
       "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
-      4, AlertLevels(0, 1, 2, 3),
+      4, 0, AlertLevels(0, 1, 2, 3),
       Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
     )
 
@@ -278,10 +278,24 @@ class StatusCheckerSpec()
   }
 
   "periods" must {
+
+    "respect start-at property" in {
+      val job = Job(1, null, null, null,
+        "yyyy-MM-dd-HH", Hourly, 0, ZoneId.of("UTC"),
+        3, 1593093920, null, Seq.empty
+      )
+
+      val actual =
+        StatusChecker.periods(job, ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]"))
+
+      val expected = Seq("2020-06-25-14", "2020-06-25-15")
+      actual shouldBe expected
+    }
+
     "work when job's period-check-offset is 0" in {
       val job = Job(1, null, null, null,
         "yyyy-MM-dd-HH", Hourly, 0, ZoneId.of("UTC"),
-        3, null, Seq.empty
+        3, 0, null, Seq.empty
       )
 
       val actual =
@@ -294,7 +308,7 @@ class StatusCheckerSpec()
     "work when job's period-check-offset is not 0" in {
       val job = Job(1, null, null, null,
         "yyyy-MM-dd-HH", Hourly, 3, ZoneId.of("UTC"),
-        3, null, Seq.empty
+        3, 0, null, Seq.empty
       )
 
       val actual =
@@ -307,7 +321,7 @@ class StatusCheckerSpec()
     "work various cron styles" in {
       val job = cron => Job(1, null, null, null,
         "yyyy-MM-dd-HH-mm", cron, 1, ZoneId.of("UTC"),
-        2, null, Seq.empty
+        2, 0, null, Seq.empty
       )
 
       val cronPeriods = Seq (
@@ -328,7 +342,7 @@ class StatusCheckerSpec()
     "work for hourly frequency" in {
       val job = Job(1, null, null, null,
         "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
-        3, null, Seq.empty
+        3, 0, null, Seq.empty
       )
 
       val actual =
@@ -341,7 +355,7 @@ class StatusCheckerSpec()
     "respect job timezone" in {
       val job = Job(1, null, null, null,
         "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
-        3, null, Seq.empty
+        3, 0, null, Seq.empty
       )
 
       val actual =
@@ -354,7 +368,7 @@ class StatusCheckerSpec()
     "work for daily frequency" in {
       val job = Job(1, null, null, null,
         "yyyy-MM-dd", Daily, 1, ZoneId.of("UTC"),
-        3, null, Seq.empty
+        3, 0, null, Seq.empty
       )
 
       val actual =
@@ -367,7 +381,7 @@ class StatusCheckerSpec()
     "work for monthly frequency" in {
       val job = Job(1, null, null, null,
         "yyyy-MM-01", Monthly, 0, ZoneId.of("UTC"),
-        3, null, Seq.empty
+        3, 0, null, Seq.empty
       )
 
       val actual =
@@ -380,7 +394,7 @@ class StatusCheckerSpec()
     "work for yearly frequency" in {
       val job = Job(1, null, null, null,
         "yyyy-01-01", Annually, 1, ZoneId.of("UTC"),
-        3, null, Seq.empty
+        3, 0, null, Seq.empty
       )
 
       val actual =
@@ -395,7 +409,7 @@ class StatusCheckerSpec()
     "work with UTC when offset is zero" in {
       val job = Job(0, null, null, null,
         "yyyy-01-01", Hourly, 0, ZoneId.of("UTC"),
-        3, null, Seq.empty
+        3, 0, null, Seq.empty
       )
 
       val actual =
@@ -408,7 +422,7 @@ class StatusCheckerSpec()
     "work with UTC when offset is not zero" in {
       val job = Job(1, null, null, null,
         "yyyy-01-01", Annually, 1, ZoneId.of("UTC"),
-        3, null, Seq.empty
+        3, 0, null, Seq.empty
       )
 
       val actual =
@@ -421,7 +435,7 @@ class StatusCheckerSpec()
     "work with non-UTC when offset is zero" in {
       val job = Job(0, null, null, null,
         "yyyy-01-01", Hourly, 0, ZoneId.of("UTC"),
-        3, null, Seq.empty
+        3, 0, null, Seq.empty
       )
 
       val actual =
@@ -434,7 +448,7 @@ class StatusCheckerSpec()
     "work with non-UTC when offset is not zero" in {
       val job = Job(1, null, null, null,
         "yyyy-01-01", Annually, 1, ZoneId.of("UTC"),
-        3, null, Seq.empty
+        3, 0, null, Seq.empty
       )
 
       val actual =
