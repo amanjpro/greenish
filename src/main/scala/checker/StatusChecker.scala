@@ -88,7 +88,7 @@ class StatusChecker(groups: Seq[Group],
   }
 
   private[this] def refresh(now: ZonedDateTime, group: Group, job: Job): Unit = {
-    val periods = StatusChecker.periods(job, now)
+    val periods = StatusChecker.periods(job, now, job.startAt)
 
     val currentClockCounter = clockCounter()
     val expireAt = currentClockCounter + 1000 *
@@ -158,9 +158,9 @@ object StatusChecker {
     }.toIndexedSeq
   }
 
-  private[checker] def periods(entry: Job, now: ZonedDateTime): Seq[String] = {
+  private[checker] def periods(entry: Job, now: ZonedDateTime, startAt: Long): Seq[String] = {
     @tailrec def loop(time: ZonedDateTime, count: Int, acc: Seq[String]): Seq[String] = {
-      if(count == 0) acc.reverse
+      if(time.toEpochSecond < startAt || count == 0) acc.reverse
       else
         loop(entry.frequency.prev(time), count - 1,
           acc :+ time.format(entry.timeFormat))
