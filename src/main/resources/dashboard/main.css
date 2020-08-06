@@ -96,6 +96,10 @@ table {
   margin-right: 8px;
 }
 
+.stdout-div {
+  margin-bottom: 20px;
+}
+
 .greenish-header {
   margin: 8px;
   color: snow;

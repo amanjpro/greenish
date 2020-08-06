@@ -1,10 +1,11 @@
 package me.amanj.greenish.endpoints
 
 import java.time.ZonedDateTime
+import java.io.File
 import akka.actor.ActorRef
 import akka.util.Timeout
 import akka.pattern.ask
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{StatusCodes, ContentTypes}
 import akka.http.scaladsl.server.Directive
 import akka.http.scaladsl.server.Directives._
 import scala.concurrent.duration.Duration
@@ -104,6 +105,14 @@ class Routes(namespace: Option[String],
     }
   }
 
+  private[this] val getJobOutput = get {
+    path("group" / IntNumber / "job" / IntNumber / "stdout") {
+      (gid, jid) =>
+        getFromFile(new File(debugFile(gid, jid)),
+          ContentTypes.`text/plain(UTF-8)`)
+    }
+  }
+
   private[this] val refreshState = get {
     path("state" / "refresh") {
       statusChecker ! Refresh(now)
@@ -187,9 +196,9 @@ class Routes(namespace: Option[String],
   }
 
   val routes =
-    getJob ~ getGroup ~ refreshState ~ refreshGroup ~ refreshJob ~
-      maxlag ~ summary ~ missing ~ state ~ dashboard ~ system ~
-      prometheus ~ health
+    getJob ~ getJobOutput ~ getGroup ~ refreshState ~ refreshGroup ~
+      refreshJob ~ maxlag ~ summary ~ missing ~ state ~ dashboard ~
+      system ~ prometheus ~ health
 }
 
 object Routes {

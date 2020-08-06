@@ -14,6 +14,7 @@ import me.amanj.greenish.stats.{StatsCollector, StatsCollectorSpec, GetPrometheu
 import scala.jdk.CollectionConverters._
 
 import scala.language.postfixOps
+import scala.io.Source
 
 class CommandRunnerSpec()
     extends TestKit(ActorSystem("CommandRunnerSpec"))
@@ -24,6 +25,7 @@ class CommandRunnerSpec()
     with BeforeAndAfterEach
     with BeforeAndAfterAll {
 
+  val src = s"/tmp/greenish-test-${System.currentTimeMillis}"
   val farFuture = System.currentTimeMillis * 2
   val dir = new File("/tmp/2020-06-07-01")
   val dirWithSpaces = new File("/tmp/2020-06-07 01")
@@ -45,6 +47,10 @@ class CommandRunnerSpec()
     dir.delete
     dirWithSpaces.delete
     TestKit.shutdownActorSystem(system)
+  }
+
+  override def afterEach(): Unit = {
+    new File(src).delete
   }
 
   override def beforeEach(): Unit = {
@@ -164,6 +170,19 @@ class CommandRunnerSpec()
       val actor = system.actorOf(Props(new CommandRunner(stats)))
       actor ! BatchRun(lsPart, Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, 0)
       expectNoMessage(4 seconds)
+    }
+
+    "write debugging lines to disk verbatim" in {
+      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      actor ! BatchRun(s"$ls /tmp", Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, farFuture)
+
+      val _ = receiveOne(2 seconds)
+
+      val expected =  List("LETS PRINT THINGS", "DEBUG HERE TOO",
+        "greenish-period\t2020-06-07-01\t1", "DEBUG HERE TOO",
+        "greenish-period\t2020-06-07-02\t0", "DEBUG HERE")
+      val actual = Source.fromFile(debugFile(0, 1)).getLines.toList
+      actual shouldBe expected
     }
 
     "send back nothing, when command does not exit" in {
@@ -440,6 +459,17 @@ class CommandRunnerSpec()
 
         checkSamples(prom, "greenish_active_refresh_tasks", expected)
       }
+    }
+  }
+
+  "write" must {
+    "write lines to disk" in {
+      val data = LazyList("first", "second")
+      CommandRunner.write(src, data)
+      val expected = data.toList
+
+      val actual = Source.fromFile(src).getLines.toList
+      actual shouldBe expected
     }
   }
 }

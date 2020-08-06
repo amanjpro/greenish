@@ -259,6 +259,16 @@ $ curl --silent -G localhost:8080/group/1/job/0 | jq .
 }
 ```
 
+Finally, you can alos get the output of a check (monitoring script) for a job:
+
+```
+$ curl --silent -G localhost:8080/group/0/job/0/stdout
+```
+
+This is useful when debugging the monitoring script, or if there are further
+information in the stdout that is not expressed in the UI/API.
+
+
 ### Refresh the state
 
 You can refresh the entire at once:
