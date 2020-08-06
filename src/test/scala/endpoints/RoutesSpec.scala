@@ -50,17 +50,17 @@ class RoutesSpec()
   val lsScript = getClass.getResource("/test-ls").getFile
   val lsEnvScript = getClass.getResource("/test-ls-env").getFile
 
-  val job1 = Job(0, "job1", "p1", s"$lsScript /tmp",
+  val job1 = Job(0, "job1", None, "p1", s"$lsScript /tmp",
     "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
     2, 0, AlertLevels(0, 1, 2, 3), Seq("a" -> "b"),
   )
 
-  val job2 = Job(1, "job2", "p2", s"$lsScript /tmp",
+  val job2 = Job(1, "job2", None, "p2", s"$lsScript /tmp",
     "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
     2, 0, AlertLevels(0, 1, 2, 3), Seq("a" -> "b"),
   )
 
-  val job3 = Job(0, "job3", "p3", s"$lsScript /tmp",
+  val job3 = Job(0, "job3", None, "p3", s"$lsScript /tmp",
     "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
     2, 0, AlertLevels(0, 1, 2, 3), Seq("a" -> "b"),
   )

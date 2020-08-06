@@ -110,7 +110,7 @@ class JsonSerdeSpec() extends Matchers
   }
 
   "Group" must {
-    val job = Job(1, "j", "p", "c", "yyyy-MM-dd",
+    val job = Job(1, "j", None, "p", "c", "yyyy-MM-dd",
       Hourly, 1, ZoneId.of("UTC"), 2, 0, AlertLevels(3, 4, 5, 6),
       Seq("a" -> "b"))
     val group = Group(0, "g", Seq(job))
@@ -136,7 +136,7 @@ class JsonSerdeSpec() extends Matchers
   }
 
   "GroupStatus" must {
-    val job = Job(1, "j", "p", "c", "yyyy-MM-dd",
+    val job = Job(1, "j", None, "p", "c", "yyyy-MM-dd",
       Hourly, 1, ZoneId.of("UTC"), 2, 0, AlertLevels(3, 4, 5, 6),
       Seq("a" -> "b"))
     val group = Group(0, "g", Seq(job))
@@ -187,7 +187,7 @@ class JsonSerdeSpec() extends Matchers
 
   "Job" must {
     val alertLevels = AlertLevels(3, 4, 5, 6)
-    val job = Job(1, "j", "p", "c", "yyyy-MM-dd",
+    val job = Job(1, "j", None, "p", "c", "yyyy-MM-dd",
       Hourly, 1, ZoneId.of("UTC"), 2, 0, alertLevels,
       Seq("a" -> "b"))
 
@@ -198,6 +198,7 @@ class JsonSerdeSpec() extends Matchers
       val expected = Json.obj(
         "job_id" -> 1.asJson,
         "name" -> "j".asJson,
+        "owner" -> Json.Null,
         "prometheus_id" -> "p".asJson,
         "cmd" -> "c".asJson,
         "time_pattern" -> "yyyy-MM-dd".asJson,
@@ -222,7 +223,7 @@ class JsonSerdeSpec() extends Matchers
   }
 
   "JobStatus" must {
-    val job = Job(1, "j", "p", "c", "yyyy-MM-dd",
+    val job = Job(1, "j", None, "p", "c", "yyyy-MM-dd",
       Hourly, 1, ZoneId.of("UTC"), 2, 0, AlertLevels(3, 4, 5, 6),
       Seq("a" -> "b")
       )
