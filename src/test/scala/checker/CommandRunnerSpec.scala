@@ -174,12 +174,13 @@ class CommandRunnerSpec()
 
     "write debugging lines to disk verbatim" in {
       val actor = system.actorOf(Props(new CommandRunner(stats)))
-      actor ! BatchRun(lsPart, Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, farFuture)
-      val expected =  List("LETS PRINT THINGS",
-        "DEBUG HERE TOO",
-        "greenish-period	2020-08-05-22	0",
-        "DEBUG HERE TOO",
-        "greenish-period	2020-08-05-23	0", "DEBUG HERE")
+      actor ! BatchRun(s"$ls /tmp", Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, farFuture)
+
+      val _ = receiveOne(2 seconds)
+
+      val expected =  List("LETS PRINT THINGS", "DEBUG HERE TOO",
+        "greenish-period\t2020-06-07-01\t1", "DEBUG HERE TOO",
+        "greenish-period\t2020-06-07-02\t0", "DEBUG HERE")
       val actual = Source.fromFile(debugFile(0, 1)).getLines.toList
       actual shouldBe expected
     }
