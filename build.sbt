@@ -5,6 +5,7 @@ organization := "me.amanj"
 name := "greenish"
 
 scalaVersion := "2.13.2"
+parallelExecution in ThisBuild := false
 
 scalacOptions ++= Seq(
   "-encoding", "utf8",
