@@ -71,6 +71,10 @@ class JobContainer extends React.Component {
               </Link>
             </sub>
           </h2>
+          <div className="stdout-div">
+            <a href={`/group/${this.props.group}/job/${this.props.job}/stdout`}
+              className="link">stdout</a>
+          </div>
           {encloseInTable(jobs, 'job-view', this.props.group)}
         </div>
       )
