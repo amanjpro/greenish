@@ -46,8 +46,11 @@ class CommandRunnerSpec()
   override def afterAll: Unit = {
     dir.delete
     dirWithSpaces.delete
-    new File(src).delete
     TestKit.shutdownActorSystem(system)
+  }
+
+  override def afterEach(): Unit = {
+    new File(src).delete
   }
 
   override def beforeEach(): Unit = {

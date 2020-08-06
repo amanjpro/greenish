@@ -14,12 +14,11 @@ package object checker {
     def /(c: String): String = s"$p${File.separator}$c"
   }
 
-  private[this] val outputDir =
+  private[checker] val outputDir =
     new File("" / "tmp" / "greenish" / "stdout")
   outputDir.mkdirs
 
-  protected[checker] def debugFile(groupId: Int,
-    jobId: Int): String = {
+  def debugFile(groupId: Int, jobId: Int): String = {
     val fileName =
       outputDir.toString / s"group-$groupId-job-$jobId-stdout.txt"
     fileName

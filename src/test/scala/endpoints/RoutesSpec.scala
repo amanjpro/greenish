@@ -3,7 +3,7 @@ package me.amanj.greenish.endpoints
 import akka.actor.{ActorRef, Props}
 import akka.http.scaladsl.model.{StatusCodes, ContentTypes}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import org.scalatest.BeforeAndAfterAll
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.concurrent.Eventually
@@ -14,15 +14,17 @@ import me.amanj.greenish.models._
 import me.amanj.greenish.stats._
 import me.amanj.greenish.checker._
 import io.circe.parser._
-import java.io.File
+import java.io.{File, PrintWriter}
 
 class RoutesSpec()
     extends AnyWordSpecLike
     with Matchers
     with ScalatestRouteTest
     with BeforeAndAfterAll
+    with BeforeAndAfterEach
     with Eventually{
 
+  val src = debugFile(0, 0)
   val dir1 = new File("/tmp/2020-06-25-14")
   val farFuture = System.currentTimeMillis * 2
   val tstamp = 1000L
@@ -42,7 +44,9 @@ class RoutesSpec()
     dir1.delete
     cleanUp()
   }
-
+  override def afterEach(): Unit = {
+    new File(src).delete
+  }
   val lsScript = getClass.getResource("/test-ls").getFile
   val lsEnvScript = getClass.getResource("/test-ls-env").getFile
 
@@ -145,6 +149,20 @@ class RoutesSpec()
   }
 
   "Routes" must {
+    "return debugging output for a job" in {
+      val data = LazyList("first", "second")
+      val pw = new PrintWriter(src)
+      data.foreach(pw.println)
+      pw.close
+
+      val expected = s"${data.toList.mkString("\n")}\n"
+
+      Get("/group/0/job/0/stdout") ~> routes.routes ~> check {
+        val actual = responseAs[String]
+        actual shouldBe expected
+      }
+    }
+
     "properly handle GET/maxlag request" in {
       eventually {
         Get("/maxlag") ~> routes.routes ~> check {
