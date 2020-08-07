@@ -27,10 +27,12 @@ class StatusCheckerSpec()
     dir2.delete
     dir3.delete
     dir4.delete
+    outputDir.delete
     TestKit.shutdownActorSystem(system)
   }
 
   override def beforeAll: Unit = {
+    outputDir.mkdirs
     dir1.mkdirs
     dir2.mkdirs
     dir3.mkdirs

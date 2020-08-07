@@ -42,9 +42,11 @@ class RoutesSpec()
   }
   override def afterAll: Unit = {
     dir1.delete
+    outputDir.delete
     cleanUp()
   }
   override def afterEach(): Unit = {
+    outputDir.mkdirs
     new File(src).delete
   }
   val lsScript = getClass.getResource("/test-ls").getFile

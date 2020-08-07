@@ -14,7 +14,7 @@ package object checker {
     def /(c: String): String = s"$p${File.separator}$c"
   }
 
-  private[checker] val outputDir =
+  val outputDir =
     new File("" / "tmp" / "greenish" / "stdout")
   outputDir.mkdirs
 

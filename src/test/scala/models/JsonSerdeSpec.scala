@@ -191,7 +191,7 @@ class JsonSerdeSpec() extends Matchers
       Hourly, 1, ZoneId.of("UTC"), 2, 0, alertLevels,
       Seq("a" -> "b"))
 
-    "produce correct JSON" in {
+    "produce correct JSON when there is no owner" in {
       val alertLevels = AlertLevels(3, 4, 5, 6)
       val actual = job.asJson
 
@@ -199,6 +199,29 @@ class JsonSerdeSpec() extends Matchers
         "job_id" -> 1.asJson,
         "name" -> "j".asJson,
         "owner" -> Json.Null,
+        "prometheus_id" -> "p".asJson,
+        "cmd" -> "c".asJson,
+        "time_pattern" -> "yyyy-MM-dd".asJson,
+        "frequency" -> "hourly".asJson,
+        "period_check_offset" -> 1.asJson,
+        "timezone" -> Json.obj ("zone_id" -> "UTC".asJson),
+        "lookback" -> 2.asJson,
+        "start_at" -> 0.asJson,
+        "alert_levels" -> alertLevels.asJson,
+        "env" -> Seq("a" -> "b").asJson,
+      )
+
+      actual shouldBe expected
+    }
+
+    "produce correct JSON when owner exists" in {
+      val alertLevels = AlertLevels(3, 4, 5, 6)
+      val actual = job.copy(owner=Some("me")).asJson
+
+      val expected = Json.obj(
+        "job_id" -> 1.asJson,
+        "name" -> "j".asJson,
+        "owner" -> "me".asJson,
         "prometheus_id" -> "p".asJson,
         "cmd" -> "c".asJson,
         "time_pattern" -> "yyyy-MM-dd".asJson,
