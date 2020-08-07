@@ -7,12 +7,12 @@ import java.time.ZoneId
 class GroupStatusSpec() extends Matchers
   with AnyWordSpecLike {
 
-  val job1 = Job(1, "job1", "p1", "foo",
+  val job1 = Job(1, "job1", None, "p1", "foo",
       "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
       4, 0, AlertLevels(0, 1, 2, 3), Seq("a" -> "b")
     )
 
-  val job2 = Job(2, "job2", "p2", "bar",
+  val job2 = Job(2, "job2", None, "p2", "bar",
       "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
       4, 0, AlertLevels(0, 1, 2, 3), Seq("a" -> "b")
     )

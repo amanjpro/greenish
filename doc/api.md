@@ -143,6 +143,7 @@ $ curl --silent -G http://0.0.0.0:8080/state | jq .
         {
           "job_id": 0,
           "name": "Job1",
+          "owner": "Reporting Team"
           "cmd": "/tmp/first_script",
           "time_pattern": "yyyy-MM-dd-HH",
           "frequency": "hourly",

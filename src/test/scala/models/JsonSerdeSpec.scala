@@ -110,7 +110,7 @@ class JsonSerdeSpec() extends Matchers
   }
 
   "Group" must {
-    val job = Job(1, "j", "p", "c", "yyyy-MM-dd",
+    val job = Job(1, "j", None, "p", "c", "yyyy-MM-dd",
       Hourly, 1, ZoneId.of("UTC"), 2, 0, AlertLevels(3, 4, 5, 6),
       Seq("a" -> "b"))
     val group = Group(0, "g", Seq(job))
@@ -136,7 +136,7 @@ class JsonSerdeSpec() extends Matchers
   }
 
   "GroupStatus" must {
-    val job = Job(1, "j", "p", "c", "yyyy-MM-dd",
+    val job = Job(1, "j", None, "p", "c", "yyyy-MM-dd",
       Hourly, 1, ZoneId.of("UTC"), 2, 0, AlertLevels(3, 4, 5, 6),
       Seq("a" -> "b"))
     val group = Group(0, "g", Seq(job))
@@ -187,17 +187,41 @@ class JsonSerdeSpec() extends Matchers
 
   "Job" must {
     val alertLevels = AlertLevels(3, 4, 5, 6)
-    val job = Job(1, "j", "p", "c", "yyyy-MM-dd",
+    val job = Job(1, "j", None, "p", "c", "yyyy-MM-dd",
       Hourly, 1, ZoneId.of("UTC"), 2, 0, alertLevels,
       Seq("a" -> "b"))
 
-    "produce correct JSON" in {
+    "produce correct JSON when there is no owner" in {
       val alertLevels = AlertLevels(3, 4, 5, 6)
       val actual = job.asJson
 
       val expected = Json.obj(
         "job_id" -> 1.asJson,
         "name" -> "j".asJson,
+        "owner" -> Json.Null,
+        "prometheus_id" -> "p".asJson,
+        "cmd" -> "c".asJson,
+        "time_pattern" -> "yyyy-MM-dd".asJson,
+        "frequency" -> "hourly".asJson,
+        "period_check_offset" -> 1.asJson,
+        "timezone" -> Json.obj ("zone_id" -> "UTC".asJson),
+        "lookback" -> 2.asJson,
+        "start_at" -> 0.asJson,
+        "alert_levels" -> alertLevels.asJson,
+        "env" -> Seq("a" -> "b").asJson,
+      )
+
+      actual shouldBe expected
+    }
+
+    "produce correct JSON when owner exists" in {
+      val alertLevels = AlertLevels(3, 4, 5, 6)
+      val actual = job.copy(owner=Some("me")).asJson
+
+      val expected = Json.obj(
+        "job_id" -> 1.asJson,
+        "name" -> "j".asJson,
+        "owner" -> "me".asJson,
         "prometheus_id" -> "p".asJson,
         "cmd" -> "c".asJson,
         "time_pattern" -> "yyyy-MM-dd".asJson,
@@ -222,7 +246,7 @@ class JsonSerdeSpec() extends Matchers
   }
 
   "JobStatus" must {
-    val job = Job(1, "j", "p", "c", "yyyy-MM-dd",
+    val job = Job(1, "j", None, "p", "c", "yyyy-MM-dd",
       Hourly, 1, ZoneId.of("UTC"), 2, 0, AlertLevels(3, 4, 5, 6),
       Seq("a" -> "b")
       )

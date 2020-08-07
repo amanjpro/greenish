@@ -21,6 +21,7 @@ object AppConfig {
   }
 
   private[this] def readEntries(config: Config): Seq[Group] = {
+    val defaultOwner = config.getOptionStringWithDefault("default-owner", None)
     val defaultPeriodCheckOffset = config.getInt("default-period-check-offset")
     val defaultTimePattern = config.getString("default-period-pattern")
     val defaultFrequency = config.getString("default-job-run-frequency")
@@ -35,6 +36,7 @@ object AppConfig {
 
     config.getConfigList("groups").asScala.zipWithIndex.map { case (groupConfig, index) =>
       val groupName = groupConfig.getString("group-name")
+      val groupOwner = groupConfig.getOptionStringWithDefault("group-owner", defaultOwner)
       val groupPeriodCheckOffset =
         groupConfig.getIntWithDefault("group-period-check-offset", defaultPeriodCheckOffset)
       val groupTimePattern = groupConfig.getStringWithDefault(
@@ -60,6 +62,7 @@ object AppConfig {
       val checkEntries = groupConfig.getConfigList("job-entries")
         .asScala.zipWithIndex.map { case (jobConfig, index) =>
           val jobName = jobConfig.getString("job-name")
+          val jobOwner = jobConfig.getOptionStringWithDefault("job-owner", groupOwner)
           val prometheusId = normalizePrometheusId(
             jobConfig.getStringWithDefault(
               "prometheus-id", s"$groupName $jobName"))
@@ -90,6 +93,7 @@ object AppConfig {
           Job(
             index,
             jobName,
+            jobOwner,
             prometheusId,
             cmd,
             timePattern,
@@ -148,10 +152,17 @@ object AppConfig {
         self.getInt(path)
       else default
 
-  def getLongWithDefault(path: String, default: Long): Long =
+    def getLongWithDefault(path: String, default: Long): Long =
       if(self.hasPath(path))
         self.getLong(path)
       else default
+
+    def getOptionStringWithDefault(path: String,
+        default: Option[String]): Option[String] =
+      if(self.hasPath(path))
+        Some(self.getString(path))
+      else default
+
 
     def getEnv(path: String, parent: Seq[(String, String)]): Seq[(String, String)] =
       if(self.hasPath(path)) {

@@ -40,12 +40,14 @@ class CommandRunnerSpec()
 
   override def beforeAll: Unit = {
     dirWithSpaces.mkdirs
+    outputDir.mkdirs
     dir.mkdirs
   }
 
   override def afterAll: Unit = {
     dir.delete
     dirWithSpaces.delete
+    outputDir.delete
     TestKit.shutdownActorSystem(system)
   }
 
