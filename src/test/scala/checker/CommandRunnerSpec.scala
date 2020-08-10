@@ -37,6 +37,7 @@ class CommandRunnerSpec()
   implicit val patience: PatienceConfig = PatienceConfig(15 seconds, 1 second)
 
   var stats: ActorRef = _
+  val outputDir = new File("/tmp/greenish/stdout")
 
   override def beforeAll: Unit = {
     dirWithSpaces.mkdirs
@@ -169,13 +170,13 @@ class CommandRunnerSpec()
     import StatsCollectorSpec.{checkSamples, getNoneZeroHistogramLabels}
 
     "not run anything if the refresh command is too old" in {
-      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      val actor = system.actorOf(Props(new CommandRunner(stats, outputDir)))
       actor ! BatchRun(lsPart, Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, 0)
       expectNoMessage(4 seconds)
     }
 
     "write debugging lines to disk verbatim" in {
-      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      val actor = system.actorOf(Props(new CommandRunner(stats, outputDir)))
       actor ! BatchRun(s"$ls /tmp", Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, farFuture)
 
       val _ = receiveOne(2 seconds)
@@ -183,36 +184,36 @@ class CommandRunnerSpec()
       val expected =  List("LETS PRINT THINGS", "DEBUG HERE TOO",
         "greenish-period\t2020-06-07-01\t1", "DEBUG HERE TOO",
         "greenish-period\t2020-06-07-02\t0", "DEBUG HERE")
-      val actual = Source.fromFile(debugFile(0, 1)).getLines.toList
+      val actual = Source.fromFile(debugFile(outputDir, 0, 1)).getLines.toList
       actual shouldBe expected
     }
 
     "send back nothing, when command does not exit" in {
-      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      val actor = system.actorOf(Props(new CommandRunner(stats, outputDir)))
       actor ! BatchRun("a;kjdw", Seq.empty, Seq.empty, 0, 0, "p1", 0, farFuture)
       expectNoMessage(4 seconds)
     }
 
     "send back nothing, when command does not exit with 0" in {
-      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      val actor = system.actorOf(Props(new CommandRunner(stats, outputDir)))
       actor ! BatchRun("exit 1;", Seq.empty, Seq.empty, 0, 0, "p1", 0, farFuture)
       expectNoMessage(4 seconds)
     }
 
     "send back nothing, when command exits with 0, but not all periods are printed" in {
-      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      val actor = system.actorOf(Props(new CommandRunner(stats, outputDir)))
       actor ! BatchRun(lsPart, Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, farFuture)
       expectNoMessage(4 seconds)
     }
 
     "send back nothing, when command exits with 0, but some periods are printed more than once" in {
-      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      val actor = system.actorOf(Props(new CommandRunner(stats, outputDir)))
       actor ! BatchRun(lsDup, Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, farFuture)
       expectNoMessage(4 seconds)
     }
 
     "send back health for all periods, when command does exit with 0 with all periods printed exactly once" in {
-      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      val actor = system.actorOf(Props(new CommandRunner(stats, outputDir)))
       actor ! BatchRun(s"$ls /tmp", Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, farFuture)
       val expected = RunResult(Seq(
         PeriodHealth("2020-06-07-01", true),
@@ -221,7 +222,7 @@ class CommandRunnerSpec()
     }
 
     "Support spaces in the period pattern" in {
-      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      val actor = system.actorOf(Props(new CommandRunner(stats, outputDir)))
       actor ! BatchRun(s"$ls /tmp", Seq("2020-06-07 01", "2020-06-07 02"), Seq.empty, 0, 1, "p1", 2, farFuture)
       val expected = RunResult(Seq(
         PeriodHealth("2020-06-07 01", true),
@@ -230,7 +231,7 @@ class CommandRunnerSpec()
     }
 
     "use provided environment variables" in {
-      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      val actor = system.actorOf(Props(new CommandRunner(stats, outputDir)))
       actor ! BatchRun(s"$lsEnv .", Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, farFuture)
       val expected1 = RunResult(Seq(
         PeriodHealth("2020-06-07-01", false),
@@ -247,7 +248,7 @@ class CommandRunnerSpec()
     }
 
     "correctly send stats when command run is expired" in {
-      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      val actor = system.actorOf(Props(new CommandRunner(stats, outputDir)))
       actor ! BatchRun(
         s"exit 1", Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, 0)
 
@@ -283,7 +284,7 @@ class CommandRunnerSpec()
     }
 
     "correctly send stats when command run fails" in {
-      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      val actor = system.actorOf(Props(new CommandRunner(stats, outputDir)))
       actor ! BatchRun(
         s"exit 1", Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p1", 2, farFuture)
 
@@ -319,7 +320,7 @@ class CommandRunnerSpec()
     }
 
     "correctly send stats when command run succeeds" in {
-      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      val actor = system.actorOf(Props(new CommandRunner(stats, outputDir)))
       actor ! BatchRun(
         s"$ls /tmp", Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p2", 2, farFuture)
 
@@ -355,7 +356,7 @@ class CommandRunnerSpec()
     }
 
     "correctly send stats when command run misses some periods" in {
-      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      val actor = system.actorOf(Props(new CommandRunner(stats, outputDir)))
       actor ! BatchRun(
         lsPart, Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p2", 2, farFuture)
 
@@ -391,7 +392,7 @@ class CommandRunnerSpec()
     }
 
     "correctly send stats when command run prints duplicate periods" in {
-      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      val actor = system.actorOf(Props(new CommandRunner(stats, outputDir)))
       actor ! BatchRun(
         lsDup, Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p2", 2, farFuture)
 
@@ -426,7 +427,7 @@ class CommandRunnerSpec()
     }
 
     "correctly compute active refresh stats" in {
-      val actor = system.actorOf(Props(new CommandRunner(stats)))
+      val actor = system.actorOf(Props(new CommandRunner(stats, outputDir)))
       actor ! BatchRun(
         lsSleep, Seq("2020-06-07-01", "2020-06-07-02"), Seq.empty, 0, 1, "p3", 2, farFuture)
 

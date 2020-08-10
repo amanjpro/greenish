@@ -22,6 +22,8 @@ class StatusCheckerSpec()
     with BeforeAndAfterAll
     with Eventually {
 
+  val outputDir = new File("/tmp/greenish/stdout")
+
   override def afterAll: Unit = {
     dir1.delete
     dir2.delete
@@ -466,7 +468,7 @@ class StatusCheckerSpec()
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          farFuture, () => tstamp)))
+          farFuture, outputDir, () => tstamp)))
 
       val expected = List(
         GroupStatus(
@@ -519,7 +521,7 @@ class StatusCheckerSpec()
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
           // expire in the past
-          (-1 * (System.currentTimeMillis + 10000)) / 1000,
+          (-1 * (System.currentTimeMillis + 10000)) / 1000, outputDir,
           () => tstamp)))
 
       val expected = List(
@@ -581,7 +583,7 @@ class StatusCheckerSpec()
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
           // expire in the past
-          (-1 * (System.currentTimeMillis + 10000)) / 1000,
+          (-1 * (System.currentTimeMillis + 10000)) / 1000, outputDir,
           () => tstamp)))
 
       val expected = List(
@@ -640,7 +642,7 @@ class StatusCheckerSpec()
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          farFuture, () => tstamp)))
+          farFuture, outputDir, () => tstamp)))
 
       val expected = List(
         GroupStatus(
@@ -686,7 +688,7 @@ class StatusCheckerSpec()
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          farFuture, () => tstamp)))
+          farFuture, outputDir, () => tstamp)))
 
       val expected = List(
         GroupStatus(
@@ -735,7 +737,7 @@ class StatusCheckerSpec()
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
           // expire in the past
-          (-1 * (System.currentTimeMillis + 10000)) / 1000,
+          (-1 * (System.currentTimeMillis + 10000)) / 1000, outputDir,
           () => tstamp)))
 
       val expected = List(
@@ -794,7 +796,7 @@ class StatusCheckerSpec()
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          farFuture, () => tstamp)))
+          farFuture, outputDir, () => tstamp)))
 
       val expected = List(
         GroupStatus(
@@ -840,7 +842,7 @@ class StatusCheckerSpec()
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          farFuture, () => tstamp)))
+          farFuture, outputDir, () => tstamp)))
 
       val expected = List(
         GroupStatus(
@@ -883,7 +885,7 @@ class StatusCheckerSpec()
       val now = ZonedDateTime.parse("2020-06-25T15:05:30+01:00[UTC]")
       val actor = system.actorOf(Props(
         new StatusChecker(groups, stats,
-          farFuture, () => tstamp)))
+          farFuture, outputDir, () => tstamp)))
 
       val expected = List(
         GroupStatus(

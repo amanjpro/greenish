@@ -4,6 +4,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import models._
 import java.time.ZoneId
+import java.io.File
 
 class AppSpec() extends Matchers
   with AnyWordSpecLike {
@@ -41,6 +42,7 @@ class AppSpec() extends Matchers
             )),
         ),
         None,
+        new File("/tmp/greenish/stdout"),
         30,
         "127.0.0.1",
         8080,
@@ -86,6 +88,7 @@ class AppSpec() extends Matchers
             )),
         ),
         None,
+        new File("/tmp/greenish/stdout"),
         30,
         "127.0.0.1",
         8080,
