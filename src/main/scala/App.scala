@@ -32,7 +32,7 @@ object App {
 
     val statusChecker = system.actorOf(
       Props(new StatusChecker(appConfig.groups, statsActor,
-        appConfig.refreshInSeconds * 3)))
+        appConfig.refreshInSeconds * 3, appConfig.scratchDir)))
 
     system.scheduler.scheduleWithFixedDelay(
       0 seconds,
@@ -41,7 +41,7 @@ object App {
 
     val bindingFuture = Http()
       .bindAndHandle(
-        new Routes(appConfig.namespace, statusChecker,
+        new Routes(appConfig.namespace, appConfig.scratchDir, statusChecker,
           statsActor,
           // At least there should be one good run in the last 5 refresh sets
           appConfig.refreshInSeconds * 1000 * 5).routes,

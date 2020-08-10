@@ -3,6 +3,7 @@ package me.amanj.greenish.checker
 import me.amanj.greenish.stats.StatsCollector
 import me.amanj.greenish.models._
 import java.time.ZonedDateTime
+import java.io.File
 import akka.actor.{Actor, Props, ActorRef, ActorLogging}
 import scala.sys.process.Process
 import scala.concurrent.{Future}
@@ -67,6 +68,7 @@ trait StatusCheckerApi {
 class StatusChecker(groups: Seq[Group],
     statsActor: ActorRef,
     refreshValidityInSeconds: Long,
+    scratchDir: File,
     clockCounter: () => Long = () => System.currentTimeMillis())
       extends Actor with ActorLogging with StatusCheckerApi {
   override protected[this] var state = StatusChecker.initState(groups)
@@ -78,7 +80,7 @@ class StatusChecker(groups: Seq[Group],
   private[this] val router = {
     val routees = (0 until parallelism) map { _ =>
       val runner = context.actorOf(
-        Props(new CommandRunner(statsActor))
+        Props(new CommandRunner(statsActor, scratchDir))
           .withDispatcher("akka.refresh-dispatcher"))
       context watch runner
       ActorRefRoutee(runner)

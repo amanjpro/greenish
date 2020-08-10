@@ -18,6 +18,7 @@ import akka.http.scaladsl.model.HttpResponse
 import scala.util.Success
 
 class Routes(namespace: Option[String],
+    scratchDir: File,
     statusChecker: ActorRef,
     statsActor: ActorRef,
     goodRefreshRecency: Long,
@@ -108,7 +109,7 @@ class Routes(namespace: Option[String],
   private[this] val getJobOutput = get {
     path("group" / IntNumber / "job" / IntNumber / "stdout") {
       (gid, jid) =>
-        getFromFile(new File(debugFile(gid, jid)),
+        getFromFile(new File(debugFile(scratchDir, gid, jid)),
           ContentTypes.`text/plain(UTF-8)`)
     }
   }
