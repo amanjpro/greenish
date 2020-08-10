@@ -9,7 +9,8 @@ import scala.sys.process.Process
 import scala.util.control.NonFatal
 import akka.actor.{Actor, ActorRef, ActorLogging}
 
-class CommandRunner(statsActor: ActorRef) extends Actor with ActorLogging {
+class CommandRunner(statsActor: ActorRef,
+    scratchDir: File) extends Actor with ActorLogging {
   override def receive: Receive = {
     case BatchRun(cmd, periods, env, group, job,
         prometheusId, clockCounter, expireAt) =>
@@ -44,7 +45,7 @@ class CommandRunner(statsActor: ActorRef) extends Actor with ActorLogging {
     clockCounter: Long): Unit = {
     val exec = Seq("bash", "-c", CommandRunner.toBashCommand(cmd, periods))
     val output = Process(exec, None, env:_*).lazyLines
-    CommandRunner.write(debugFile(group, job), output)
+    CommandRunner.write(debugFile(scratchDir, group, job), output)
     val capturedOutput = CommandRunner.parseOutput(output, periods.toSet)
     val distinctReturnedPeriods = capturedOutput.map(_._1).distinct
     if(capturedOutput.length < periods.size) {

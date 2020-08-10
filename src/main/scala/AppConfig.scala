@@ -2,11 +2,13 @@ package me.amanj.greenish
 
 import com.typesafe.config.{Config, ConfigFactory}
 import java.time.ZoneId
+import java.io.File
 import scala.util.Try
 import models._
 import scala.jdk.CollectionConverters._
 
-case class AppConfig(groups: Seq[Group], namespace: Option[String], refreshInSeconds: Int,
+case class AppConfig(groups: Seq[Group], namespace: Option[String],
+  scratchDir: File, refreshInSeconds: Int,
   address: String, port: Int,
   )
 object AppConfig {
@@ -16,8 +18,11 @@ object AppConfig {
     val refreshRate = appConfig.getInt("refresh-in-seconds")
     val port = appConfig.getInt("port")
     val namespace = Try(appConfig.getString("namespace")).toOption
+    val scratchDir = new File(appConfig.getString("scratch-dir"))
+    scratchDir.mkdirs
     val address = appConfig.getString("binding-address")
-    new AppConfig(readEntries(appConfig), namespace, refreshRate, address, port)
+    new AppConfig(readEntries(appConfig), namespace, scratchDir,
+      refreshRate, address, port)
   }
 
   private[this] def readEntries(config: Config): Seq[Group] = {

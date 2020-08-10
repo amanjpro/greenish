@@ -14,13 +14,9 @@ package object checker {
     def /(c: String): String = s"$p${File.separator}$c"
   }
 
-  val outputDir =
-    new File("" / "tmp" / "greenish" / "stdout")
-  outputDir.mkdirs
-
-  def debugFile(groupId: Int, jobId: Int): String = {
+  def debugFile(scratchDir: File, groupId: Int, jobId: Int): String = {
     val fileName =
-      outputDir.toString / s"group-$groupId-job-$jobId-stdout.txt"
+      scratchDir.toString / s"group-$groupId-job-$jobId-stdout.txt"
     fileName
   }
 }
