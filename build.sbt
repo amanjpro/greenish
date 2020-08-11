@@ -36,6 +36,9 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % scalaTestVersion % Test,
   "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % Test,
   "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
+
+  // Alert mangement dependencies
+  "com.github.dikhan" % "pagerduty-client" % "3.0.9",
 )
 
 dockerBaseImage := "openjdk:jre"
