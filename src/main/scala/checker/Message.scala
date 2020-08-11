@@ -1,7 +1,7 @@
 package me.amanj.greenish.checker
 
 import java.time.ZonedDateTime
-import me.amanj.greenish.models.{JobStatus, PeriodHealth}
+import me.amanj.greenish.models.{JobStatus, PeriodHealth, AlertLevel}
 
 sealed trait Message
 case class Refresh(now: () => ZonedDateTime) extends Message
@@ -20,3 +20,5 @@ case class BatchRun(cmd: String, periods: Seq[String],
   expireAt: Long) extends Message
 case class RunResult(periodHealth: Seq[PeriodHealth],
   groupId: Int, jobId: Int, clockCounter: Long) extends Message
+case class MaybeAlert(groupId: Int, groupName: String,
+  jobId: Int, jobName: String, alertLevel: AlertLevel) extends Message
