@@ -43,11 +43,11 @@ class NamespaceContainer extends React.Component {
   render() {
     const { error, isLoaded, namespace} = this.state;
     if (error) {
-      return (<span> - Error: {error.message}</span>)
+      return (<span className="namespace-span">Error: {error.message}</span>)
     } else if (!isLoaded) {
-      return (<span> - Loading...</span>)
+      return (<span className="namespace-span">Loading...</span>)
     } else {
-      return (namespace != null?<span> - {namespace}</span>:null)
+      return (namespace != null?<span className="namespace-span">{namespace}</span>:null)
     }
   }
 }

@@ -94,6 +94,22 @@ table {
 .header-div {
   width: 100%;
   margin-right: 8px;
+  height: 100px;
+}
+
+.header-left {
+  float: left;
+}
+
+.header-right {
+  float: right;
+  margin-top: 65px;
+}
+
+.namespace-span {
+  margin-left: 16px;
+  line-height: 100px;
+  vertical-align: top;
 }
 
 .owner-div {

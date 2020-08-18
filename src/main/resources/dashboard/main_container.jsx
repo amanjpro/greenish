@@ -77,11 +77,16 @@ class MainContainer extends React.Component {
     return (
       <div>
         <div className='header-div'>
-          <h1 key="greenish_dashboard_header" className='greenish-header'>
-            Greenish dashboard<NamespaceContainer/>
-          </h1>
-          <div className='time-div'><TimeContainer/></div>
-          <div className='version-div'><VersionContainer/></div>
+          <div className='header-left'>
+            <h1 key="greenish_dashboard_header" className='greenish-header'>
+              <img src="greenish-logo.svg" width="100" height="100"/>
+              <NamespaceContainer/>
+            </h1>
+          </div>
+          <div className='header-right'>
+            <div className='time-div'><TimeContainer/></div>
+            <div className='version-div'><VersionContainer/></div>
+          </div>
         </div>
         <div>
           {this.renderMain(this.state.page, this.state.gid, this.state.jid)}
