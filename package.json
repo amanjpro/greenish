@@ -1,6 +1,6 @@
 {
   "name": "greenish",
-  "version": "1.7.0-SNAPSHOT",
+  "version": "1.6.2",
   "devDependencies": {
     "babel-cli": "^6.0.0",
     "babel-preset-react-app": "^3.0.0"
