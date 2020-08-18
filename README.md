@@ -1,4 +1,4 @@
-# Greenish
+<img src="doc/images/greenish-with-background.svg" width="200" height="200"/>
 
 [![Build Status](https://travis-ci.org/amanjpro/greenish.svg?branch=master)](https://travis-ci.org/amanjpro/greenish)
 [![codecov](https://codecov.io/gh/amanjpro/greenish/branch/master/graph/badge.svg)](https://codecov.io/gh/amanjpro/greenish) [![Join the chat at https://gitter.im/greenish-monitoring/greenish](https://badges.gitter.im/greenish-monitoring/greenish.svg)](https://gitter.im/greenish-monitoring/greenish?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -16,9 +16,6 @@ default values for most of the settings, the defaults can be found
 Greenish does not have a standard monitoring scripting language/plugin.
 Monitoring tasks can be in any executable form, details are in [Monitoring
 Jobs](#monitoring-jobs).
-
-*A Logo* is currently being designed. If you have an idea for a logo, please
-share :)
 
 ## Greenish dashboard
 
@@ -217,3 +214,8 @@ $ docker run --volume PATH_TO_CONFIG_FILE:/app/config.yml --rm -p 8080:8080 gree
 ## Contributing
 
 Contributions are most welcome. Please, fork it, use it, open issues and submit PRs!
+
+## Acknowledgment
+
+- Thanks to [Nasrin Zaza](https://www.linkedin.com/in/nasrin-zaza/) for the
+  amazing logo
