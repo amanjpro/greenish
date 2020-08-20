@@ -19,6 +19,7 @@ case class Job(
   lookback: Int,
   startAt: Long,
   alertLevels: AlertLevels,
+  info: Option[String],
   env: Seq[(String, String)]
 ) {
   val timeFormat = DateTimeFormatter.ofPattern(timePattern)
