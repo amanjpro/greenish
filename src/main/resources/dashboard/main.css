@@ -79,6 +79,15 @@ table {
   cursor: pointer
 }
 
+a {
+  color: steelblue;
+  text-decoration: none;
+}
+
+a:hover {
+  cursor: pointer
+}
+
 .detail-box {
   background: whitesmoke;
   padding: 10px;
@@ -113,6 +122,10 @@ table {
 }
 
 .owner-div {
+  margin-bottom: 8px;
+}
+
+.info-div {
   margin-bottom: 8px;
 }
 

@@ -37,6 +37,7 @@ object AppConfig {
     val defaultWarnAt = config.getInt("default-warn-at")
     val defaultErrorAt = config.getInt("default-error-at")
     val defaultStartAt = config.getLong("default-start-at")
+    val defaultInfo = config.getOptionStringWithDefault("default-info", None)
     val globalEnv = config.getEnv("env", Seq.empty)
 
     config.getConfigList("groups").asScala.zipWithIndex.map { case (groupConfig, index) =>
@@ -62,6 +63,7 @@ object AppConfig {
         "group-error-at", defaultErrorAt)
       val groupStartAt = groupConfig.getLongWithDefault(
         "group-start-at", defaultStartAt)
+      val groupInfo = groupConfig.getOptionStringWithDefault("group-info", defaultInfo)
       val groupEnv = groupConfig.getEnv("env", globalEnv)
 
       val checkEntries = groupConfig.getConfigList("job-entries")
@@ -93,6 +95,7 @@ object AppConfig {
             "error-at", groupErrorAt)
           val startAt = jobConfig.getLongWithDefault(
             "start-at", groupStartAt)
+          val jobInfo = jobConfig.getOptionStringWithDefault("job-info", groupInfo)
           val jobEnv = jobConfig.getEnv("env", groupEnv)
 
           Job(
@@ -108,6 +111,7 @@ object AppConfig {
             lookback,
             startAt,
             AlertLevels(greatAt, normalAt, warnAt, errorAt),
+            jobInfo.map(_.stripMargin),
             jobEnv,
           )
         }.toSeq
