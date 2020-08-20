@@ -72,6 +72,7 @@ class JobContainer extends React.Component {
             </sub>
           </h2>
           {"owner" in job.job?<div className="owner-div" dangerouslySetInnerHTML={{ __html:`Owned by: ${job.job.owner}`}}/>:<div/>}
+          {"info" in job.job?<div className="info-div" dangerouslySetInnerHTML={{ __html:`${job.job.info}`}}/>:<div/>}
           <div className="stdout-div">
             <a href={`/group/${this.props.group}/job/${this.props.job}/stdout`}
               className="link">stdout</a>
