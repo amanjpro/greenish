@@ -109,6 +109,41 @@ class JsonSerdeSpec() extends Matchers
     }
   }
 
+  "EnvVar" must {
+    "produce correct JSON it is PlainEnvVar" in {
+      val actual = EnvVar("username", "Homa").asJson
+      val expected = Json.obj (
+        "type" -> "plain".asJson,
+        "name" -> "username".asJson,
+        "value" -> "Homa".asJson,
+      )
+      actual shouldBe expected
+    }
+
+    "correctly parse JSON string for PlainEnvVar" in {
+      val expected = EnvVar("username", "Homa")
+      val actual = expected.asJson.as[EnvVar].getOrElse(???)
+      actual shouldBe expected
+    }
+
+    "produce correct JSO it is SecureEnvVar" in {
+      val actual = EnvVar("username", "secure(Homa)").asJson
+      val expected = Json.obj (
+        "type" -> "secure".asJson,
+        "name" -> "username".asJson,
+        "value" -> SecureEnvVar.HIDDEN_PASSWORD.asJson,
+      )
+      actual shouldBe expected
+    }
+
+    "correctly parse JSON string for SecureEnvVar" in {
+      val origin = EnvVar("username", "secure(Homa)")
+      val expected = EnvVar("username", s"secure(${SecureEnvVar.HIDDEN_PASSWORD})")
+      val actual = origin.asJson.as[EnvVar].getOrElse(???)
+      actual shouldBe expected
+    }
+  }
+
   "Group" must {
     val job = Job(1, "j", None, "p", "c", "yyyy-MM-dd",
       Hourly, 1, ZoneId.of("UTC"), 2, 0, AlertLevels(3, 4, 5, 6),

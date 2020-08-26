@@ -37,8 +37,8 @@ object Job {
       for {
         zoneId <- c.downField("zone_id").as[String]
       } yield ZoneId.of(zoneId)
-  }
+    }
 
-  implicit val checkEntryDecoder: Decoder[Job] = deriveConfiguredDecoder
-  implicit val checkEntryEncoder: Encoder[Job] = deriveConfiguredEncoder
+  implicit val jobDecoder: Decoder[Job] = deriveConfiguredDecoder
+  implicit val jobEncoder: Encoder[Job] = deriveConfiguredEncoder
 }
