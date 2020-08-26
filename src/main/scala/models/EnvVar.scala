@@ -7,6 +7,7 @@ sealed trait EnvVar {
   type T <: AnyRef
   def name: String
   def value: T
+  def tupled: (String, String)
 }
 object EnvVar {
   private[this] val pattern = """secure\((.*)\)""".r
@@ -33,11 +34,12 @@ object EnvVar {
   }
 }
 
-case class SecureEnvVar private(name: String, value: Seq[Char]) extends EnvVar {
+private[models] case class SecureEnvVar(name: String, value: Seq[Char]) extends EnvVar {
   type T = Seq[Char]
+  def tupled: (String, String) = (name, value.mkString(""))
 }
 
-object SecureEnvVar {
+private[models] object SecureEnvVar {
   val HIDDEN_PASSWORD = "****"
   implicit val secureEnvVarEncoder: Encoder[SecureEnvVar] =
     new Encoder[SecureEnvVar] {
@@ -60,10 +62,11 @@ object SecureEnvVar {
     }
 }
 
-case class PlainEnvVar private(name: String, value: String) extends EnvVar {
+private[models] case class PlainEnvVar(name: String, value: String) extends EnvVar {
   type T = String
+  def tupled: (String, String) = (name, value)
 }
-object PlainEnvVar {
+private[models] object PlainEnvVar {
   implicit val plainEnvVarEncoder: Encoder[PlainEnvVar] =
     new Encoder[PlainEnvVar] {
       final def apply(v: PlainEnvVar): Json = Json.obj(

@@ -27,5 +27,22 @@ class EnvVarSpec() extends Matchers with AnyWordSpecLike {
     }
   }
 
+  "EnvVar.tupled" must {
+    "work for secure variables" in {
+      val (name, value) = ("username", "secure(Homa)")
+      val origin = EnvVar(name, value)
+      val expected = (name, "Homa")
+      val actual = origin.tupled
+      actual shouldBe expected
+    }
+
+    "work for plain variables" in {
+      val (name, value) = ("username", "Homa")
+      val origin = EnvVar(name, value)
+      val expected = (name, value)
+      val actual = origin.tupled
+      actual shouldBe expected
+    }
+  }
 }
 
