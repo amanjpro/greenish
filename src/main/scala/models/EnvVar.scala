@@ -20,7 +20,6 @@ object EnvVar {
 
   implicit val envVarDecoer: Decoder[EnvVar] = new Decoder[EnvVar] {
     final def apply(obj: HCursor): Decoder.Result[EnvVar] = {
-      println(obj.downField("type"))
       obj.downField("type").as[String].flatMap {
         case "secure" => obj.as[SecureEnvVar]
         case "plain" => obj.as[PlainEnvVar]

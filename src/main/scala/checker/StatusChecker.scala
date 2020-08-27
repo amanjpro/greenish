@@ -95,7 +95,7 @@ class StatusChecker(groups: Seq[Group],
     val currentClockCounter = clockCounter()
     val expireAt = currentClockCounter + 1000 *
       refreshValidityInSeconds
-    self ! BatchRun(job.cmd, periods, job.env,
+    self ! BatchRun(job.cmd, periods, job.env.map(_.tupled),
       group.groupId, job.jobId, job.prometheusId,
       currentClockCounter, expireAt)
   }

@@ -20,7 +20,7 @@ case class Job(
   startAt: Long,
   alertLevels: AlertLevels,
   info: Option[String],
-  env: Seq[(String, String)]
+  env: Seq[EnvVar]
 ) {
   val timeFormat = DateTimeFormatter.ofPattern(timePattern)
 }
