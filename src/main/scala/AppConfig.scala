@@ -19,7 +19,7 @@ object AppConfig {
     val port = appConfig.getInt("port")
     val namespace = Try(appConfig.getString("namespace")).toOption
     val scratchDir = new File(appConfig.getString("scratch-dir"))
-    scratchDir.mkdirs
+    scratchDir.delete
     val address = appConfig.getString("binding-address")
     new AppConfig(readEntries(appConfig), namespace, scratchDir,
       refreshRate, address, port)
