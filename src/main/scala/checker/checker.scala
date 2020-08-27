@@ -15,6 +15,7 @@ package object checker {
   }
 
   def debugFile(scratchDir: File, groupId: Int, jobId: Int): String = {
+    scratchDir.mkdirs
     val fileName =
       scratchDir.toString / s"group-$groupId-job-$jobId-stdout.txt"
     fileName
