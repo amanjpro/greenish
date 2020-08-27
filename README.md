@@ -33,7 +33,7 @@ Greenish API is documented [here](doc/api.md)
 
 Greenish is still new. As of now, [Samsung
 Ads](https://www.samsung.com/us/business/samsungads/) uses Greenish to monitor
-a _very sensitive and business critical set of datasets_.
+a _business critical set of datasets_.
 
 ## Greenish vs. Others
 
