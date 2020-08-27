@@ -60,28 +60,28 @@ class StatusCheckerSpec()
       "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
       2, 0, AlertLevels(0, 1, 2, 3),
       None,
-      Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
+      Seq(EnvVar("GREENISH_VALUE_FOR_TEST", "secure(/tmp)")),
     )
 
   val job2 = Job(1, "job2", None, "p2", s"$lsScript /tmp/job2",
       "yyyy-MM-dd-HH", Hourly, 2, ZoneId.of("UTC"),
       1, 0, AlertLevels(1, 2, 3, 4),
       None,
-      Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
+      Seq(EnvVar("GREENISH_VALUE_FOR_TEST", "/tmp")),
     )
 
   val job3 = Job(0, "job3", None, "p3", s"$lsScript /tmp/job3",
       "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
       3, 0, AlertLevels(0, 1, 2, 3),
       None,
-      Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
+      Seq(EnvVar("GREENISH_VALUE_FOR_TEST", "/tmp")),
     )
 
   val job4 = Job(1, "job4", None, "p4", s"$lsEnvScript job4",
       "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
       4, 0, AlertLevels(0, 1, 2, 3),
       None,
-      Seq("GREENISH_VALUE_FOR_TEST" -> "/tmp"),
+      Seq(EnvVar("GREENISH_VALUE_FOR_TEST", "/tmp")),
     )
 
   val group1 = Group(0, "group1", Seq(job1, job2))

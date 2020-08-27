@@ -20,29 +20,32 @@ class AppConfigSpec() extends Matchers
               ZoneId.of("UTC"), 24, 2,
               AlertLevels(0, 1, 2, 3),
               Some("Job info"),
-              Seq("VAR1" -> "baz", "VAR2" -> "bazomba",
-                "VAR3" -> "bada", "VAR4" -> "badam"),
+              Seq(EnvVar("VAR1", "baz"), EnvVar("VAR2", "bazomba"),
+                EnvVar("VAR3", "bada"), EnvVar("VAR4", "badam")),
               ),
             Job(1, "Job2", Some("Reporting"), "job_2", "/tmp/second_script job2",
               "yyyy-MM-dd-HH", Daily, 2,
               ZoneId.of("UTC"), 24, 1,
               AlertLevels(0, 1, 2, 3),
               Some("Group info"),
-              Seq("VAR1" -> "baz", "VAR2" -> "bar", "VAR3" -> "bazooka"),
+              Seq(EnvVar("VAR1", "baz"), EnvVar("VAR2", "secure(bar)"),
+                EnvVar("VAR3", "bazooka")),
               ),
             Job(2, "Job5", Some("Reporting"), "group1_job5", "/tmp/second_script job5",
               "yyyy-MM-dd-HH", Hourly, 2,
               ZoneId.of("US/Alaska"), 24, 1,
               AlertLevels(0, 1, 2, 3),
               Some("Group info"),
-              Seq("VAR1" -> "baz", "VAR2" -> "bar", "VAR3" -> "bazooka"),
+              Seq(EnvVar("VAR1", "baz"), EnvVar("VAR2", "secure(bar)"),
+                EnvVar("VAR3", "bazooka")),
               ),
             Job(3, "Job7", Some("Reporting"), "group1_job7", "/tmp/second_script job7",
               "yyyy-MM-dd-HH", Cron("0 * * * *"), 2,
               ZoneId.of("US/Alaska"), 24, 1,
               AlertLevels(0, 1, 2, 3),
               Some("Group info"),
-              Seq("VAR1" -> "baz", "VAR2" -> "bar", "VAR3" -> "bazooka"),
+              Seq(EnvVar("VAR1", "baz"), EnvVar("VAR2", "secure(bar)"),
+                EnvVar("VAR3", "bazooka")),
               ),
           )),
           Group(1, "Group2", Seq(
@@ -53,7 +56,7 @@ class AppConfigSpec() extends Matchers
               Some("""|<a href="link">
                       |Link
                       |</a>""".stripMargin),
-              Seq("VAR1" -> "foo", "VAR2" -> "bar"),
+              Seq(EnvVar("VAR1", "foo"), EnvVar("VAR2", "secure(bar)")),
               ),
             Job(1, "Job4", Some("SRE"), "job_4", "/tmp/fourth_script",
               "yyyy-01-01", Annually, 1,
@@ -62,7 +65,7 @@ class AppConfigSpec() extends Matchers
               Some("""|<a href="link">
                       |Link
                       |</a>""".stripMargin),
-              Seq("VAR1" -> "foo", "VAR2" -> "bar"),
+              Seq(EnvVar("VAR1", "foo"), EnvVar("VAR2", "secure(bar)")),
               ),
             Job(2, "Job6", Some("SRE"), "group2_job6", "/tmp/second_script job6",
               "yyyy-MM-dd-HH-mm", Daily, 1,
@@ -71,7 +74,8 @@ class AppConfigSpec() extends Matchers
               Some("""|<a href="link">
                       |Link
                       |</a>""".stripMargin),
-              Seq("VAR1" -> "baz", "VAR2" -> "bar", "VAR3" -> "bazooka"),
+              Seq(EnvVar("VAR1", "baz"), EnvVar("VAR2", "secure(bar)"),
+                EnvVar("VAR3", "bazooka")),
               ),
             )),
         ),
@@ -192,12 +196,12 @@ class AppConfigSpec() extends Matchers
     val appEnv = appConfig.getEnv("env", Seq.empty)
 
     "get value if parent is empty, and key exists" in {
-      appEnv shouldBe Seq("VAR1" -> "foo", "VAR2" -> "bar")
+      appEnv shouldBe Seq("VAR1" -> "foo", "VAR2" -> "secure(bar)")
     }
 
     "properly dedup parent and child lists, if key exists" in {
       val actualGroup = groupConfig.getEnv("env", appEnv)
-      val expectedGroup = Seq("VAR1" -> "baz", "VAR2" -> "bar",
+      val expectedGroup = Seq("VAR1" -> "baz", "VAR2" -> "secure(bar)",
         "VAR3" -> "bazooka")
 
       actualGroup shouldBe expectedGroup

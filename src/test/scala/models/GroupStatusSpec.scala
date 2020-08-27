@@ -9,12 +9,12 @@ class GroupStatusSpec() extends Matchers
 
   val job1 = Job(1, "job1", None, "p1", "foo",
       "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
-      4, 0, AlertLevels(0, 1, 2, 3), None, Seq("a" -> "b")
+      4, 0, AlertLevels(0, 1, 2, 3), None, Seq(EnvVar("a", "b"))
     )
 
   val job2 = Job(2, "job2", None, "p2", "bar",
       "yyyy-MM-dd-HH", Hourly, 1, ZoneId.of("UTC"),
-      4, 0, AlertLevels(0, 1, 2, 3), None, Seq("a" -> "b")
+      4, 0, AlertLevels(0, 1, 2, 3), None, Seq(EnvVar("a", "secure(b)"))
     )
 
   val group1 = Group(0, "group1", Seq(job1))

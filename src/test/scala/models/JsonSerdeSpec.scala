@@ -109,10 +109,45 @@ class JsonSerdeSpec() extends Matchers
     }
   }
 
+  "EnvVar" must {
+    "produce correct JSON it is PlainEnvVar" in {
+      val actual = EnvVar("username", "Homa").asJson
+      val expected = Json.obj (
+        "type" -> "plain".asJson,
+        "name" -> "username".asJson,
+        "value" -> "Homa".asJson,
+      )
+      actual shouldBe expected
+    }
+
+    "correctly parse JSON string for PlainEnvVar" in {
+      val expected = EnvVar("username", "Homa")
+      val actual = expected.asJson.as[EnvVar].getOrElse(???)
+      actual shouldBe expected
+    }
+
+    "produce correct JSO it is SecureEnvVar" in {
+      val actual = EnvVar("username", "secure(Homa)").asJson
+      val expected = Json.obj (
+        "type" -> "secure".asJson,
+        "name" -> "username".asJson,
+        "value" -> SecureEnvVar.HIDDEN_PASSWORD.asJson,
+      )
+      actual shouldBe expected
+    }
+
+    "correctly parse JSON string for SecureEnvVar" in {
+      val origin = EnvVar("username", "secure(Homa)")
+      val expected = EnvVar("username", s"secure(${SecureEnvVar.HIDDEN_PASSWORD})")
+      val actual = origin.asJson.as[EnvVar].getOrElse(???)
+      actual shouldBe expected
+    }
+  }
+
   "Group" must {
     val job = Job(1, "j", None, "p", "c", "yyyy-MM-dd",
       Hourly, 1, ZoneId.of("UTC"), 2, 0, AlertLevels(3, 4, 5, 6),
-      None, Seq("a" -> "b"))
+      None, Seq(EnvVar("a", "b")))
     val group = Group(0, "g", Seq(job))
 
     "produce correct JSON" in {
@@ -138,7 +173,7 @@ class JsonSerdeSpec() extends Matchers
   "GroupStatus" must {
     val job = Job(1, "j", None, "p", "c", "yyyy-MM-dd",
       Hourly, 1, ZoneId.of("UTC"), 2, 0, AlertLevels(3, 4, 5, 6),
-      None, Seq("a" -> "b"))
+      None, Seq(EnvVar("a", "b")))
     val group = Group(0, "g", Seq(job))
     val periods = Seq(PeriodHealth("1", true), PeriodHealth("2", false))
     val jobStatus = JobStatus(job, 100, periods)
@@ -189,7 +224,7 @@ class JsonSerdeSpec() extends Matchers
     val alertLevels = AlertLevels(3, 4, 5, 6)
     val job = Job(1, "j", None, "p", "c", "yyyy-MM-dd",
       Hourly, 1, ZoneId.of("UTC"), 2, 0, alertLevels,
-      None, Seq("a" -> "b"))
+      None, Seq(EnvVar("a", "b")))
 
     "produce correct JSON when there is no owner and no info" in {
       val alertLevels = AlertLevels(3, 4, 5, 6)
@@ -209,7 +244,7 @@ class JsonSerdeSpec() extends Matchers
         "start_at" -> 0.asJson,
         "alert_levels" -> alertLevels.asJson,
         "info" -> Json.Null,
-        "env" -> Seq("a" -> "b").asJson,
+        "env" -> Seq(EnvVar("a", "b")).asJson,
       )
 
       actual shouldBe expected
@@ -233,7 +268,7 @@ class JsonSerdeSpec() extends Matchers
         "start_at" -> 0.asJson,
         "alert_levels" -> alertLevels.asJson,
         "info" -> "you".asJson,
-        "env" -> Seq("a" -> "b").asJson,
+        "env" -> Seq(EnvVar("a", "b")).asJson,
       )
 
       actual shouldBe expected
@@ -250,7 +285,7 @@ class JsonSerdeSpec() extends Matchers
   "JobStatus" must {
     val job = Job(1, "j", None, "p", "c", "yyyy-MM-dd",
       Hourly, 1, ZoneId.of("UTC"), 2, 0, AlertLevels(3, 4, 5, 6),
-      None, Seq("a" -> "b")
+      None, Seq(EnvVar("a", "b"))
       )
     val periods = Seq(PeriodHealth("1", true), PeriodHealth("2", false))
     val jobStatus = JobStatus(job, 100, periods)

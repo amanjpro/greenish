@@ -96,7 +96,9 @@ object AppConfig {
           val startAt = jobConfig.getLongWithDefault(
             "start-at", groupStartAt)
           val jobInfo = jobConfig.getOptionStringWithDefault("job-info", groupInfo)
-          val jobEnv = jobConfig.getEnv("env", groupEnv)
+          val jobEnv = jobConfig.getEnv("env", groupEnv).map {
+            case (name, value) => EnvVar(name, value)
+          }
 
           Job(
             index,
