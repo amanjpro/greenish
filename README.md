@@ -20,8 +20,8 @@ similar to [YAML]):
 
 
 Greenish runs [monitoring jobs] to collect information about which
-datasets are available are missing. Those are individual scripts that
-can be written in any language.
+datasets are available and which are missing. Those are individual
+scripts that can be written in any language.
 
 [monitoring jobs]: (#monitoring-jobs)
 
